@@ -236,12 +236,22 @@ export async function signInAdmin(emailInput: string, passwordInput: string) {
   try {
     const { email, password } = signInAdminSchema.parse({ email: emailInput, password: passwordInput })
     const supabase = await createClient()
+
+    // Sign out any existing session first (e.g. a participant session)
+    await supabase.auth.signOut()
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) return { success: false, error: error.message }
     if (!data.user) return { success: false, error: 'User not found' }
 
     const adminClient = createAdminClient()
     const { data: userData } = await adminClient.from('users').select('auth_role, team_id').eq('id', data.user.id).single()
+
+    if (userData?.auth_role !== 'ADMIN') {
+      // Not an admin — sign them back out immediately
+      await supabase.auth.signOut()
+      return { success: false, error: 'Access denied. This account does not have admin privileges.' }
+    }
 
     return { 
       success: true, 

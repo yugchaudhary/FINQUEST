@@ -27,6 +27,7 @@ export default function AdminLoginPage() {
       if (result?.error) {
         setError(result.error);
       } else {
+        router.refresh();
         router.push('/admin');
       }
     } catch (err) {

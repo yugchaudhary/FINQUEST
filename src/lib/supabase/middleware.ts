@@ -33,13 +33,22 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  if (!user && (pathname.startsWith('/dashboard') || (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')))) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+  // Unauthenticated: redirect to appropriate login page
+  if (!user) {
+    if (pathname.startsWith('/dashboard')) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+    if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/admin/login'
+      return NextResponse.redirect(url)
+    }
   }
 
-  if (user && pathname.startsWith('/admin')) {
+  // Authenticated: check admin role (skip /admin/login so they can re-auth)
+  if (user && pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
     const { data: userData } = await supabase
       .from('users')
       .select('auth_role')
@@ -48,7 +57,7 @@ export async function updateSession(request: NextRequest) {
 
     if (userData?.auth_role !== 'ADMIN') {
       const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
+      url.pathname = '/admin/login'
       return NextResponse.redirect(url)
     }
   }
