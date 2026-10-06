@@ -55,14 +55,14 @@ export default function LandingPage() {
             <span className="font-display font-bold text-xl tracking-tight">FINQUEST</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/login">
-              <Button variant="ghost" className="text-gray-300 hover:text-white">
-                Log In
+            <Link href="/admin/login">
+              <Button variant="ghost" className="text-gray-400 hover:text-white hover:bg-white/5">
+                Admin
               </Button>
             </Link>
             <Link href="/login">
               <Button className="bg-purple-600 hover:bg-purple-700 text-white border-0">
-                Enter Event
+                Participant Login
               </Button>
             </Link>
           </div>
@@ -115,7 +115,7 @@ export default function LandingPage() {
               </Link>
               <Link href="/login">
                 <Button size="lg" variant="outline" className="h-14 px-8 text-lg">
-                  SIGN IN
+                  PARTICIPANT LOGIN
                 </Button>
               </Link>
             </motion.div>
