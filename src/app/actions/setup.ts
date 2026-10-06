@@ -18,9 +18,20 @@ export async function importRegistrations(formData: FormData) {
     const sheetName = workbook.SheetNames[0]
     const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]) as any[]
 
-    const validRegistrations = data.map(row => ({
-      registration_number: (row.registration_number || row.RegistrationNumber || row['Registration Number'] || row.id || row.ID || row.Id || row.RegNo || row.reg_no)?.toString().trim()
-    })).filter(r => r.registration_number)
+    const validRegistrations = data.map(row => {
+      // Find the first key that looks like a registration number
+      const keys = Object.keys(row);
+      const regKey = keys.find(k => {
+        const normalized = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+        return normalized.includes('registration') || normalized.includes('regno') || normalized === 'id';
+      });
+      
+      const value = regKey ? row[regKey] : (row.registration_number || row.RegistrationNumber || row['Registration Number'] || row.id || row.ID || row.Id || row.RegNo || row.reg_no);
+      
+      return {
+        registration_number: value?.toString().trim()
+      };
+    }).filter(r => r.registration_number)
 
     const validated = z.array(registrationSchema).parse(validRegistrations)
     return { success: true, data: validated }

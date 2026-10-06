@@ -14,7 +14,8 @@ export default function SetupPage() {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [existingRegs, setExistingRegs] = useState<any[]>([]);
-  
+  const [error, setError] = useState<string | null>(null);
+
   const loadExisting = async () => {
     const data = await getAllowedRegistrations();
     setExistingRegs(data);
@@ -25,20 +26,42 @@ export default function SetupPage() {
   }, []);
 
   const handleFileSelect = async (selectedFile: File) => {
+    setError(null);
     const formData = new FormData();
     formData.append('file', selectedFile);
     
-    const response = await importRegistrations(formData);
-    if (response?.data) setPreviewData(response.data);
+    try {
+      const response = await importRegistrations(formData);
+      if (response?.success && response?.data) {
+        setPreviewData(response.data);
+        if (response.data.length === 0) {
+          setError('No valid registration numbers found in the file. Make sure the column is named "Registration Number".');
+        }
+      } else {
+        setError(response?.error || 'Failed to parse file');
+      }
+    } catch (e: any) {
+      setError(e.message || 'Error uploading file');
+    }
   };
 
   const handleConfirmImport = async () => {
     setIsImporting(true);
-    await confirmRegistrationImport(previewData);
-    setIsImporting(false);
-    setIsConfirmModalOpen(false);
-    setPreviewData([]);
-    loadExisting();
+    setError(null);
+    try {
+      const result = await confirmRegistrationImport(previewData);
+      if (result?.success) {
+        setIsConfirmModalOpen(false);
+        setPreviewData([]);
+        loadExisting();
+      } else {
+        setError(result?.error || 'Failed to import to database');
+      }
+    } catch (e: any) {
+      setError(e.message || 'Error saving to database');
+    } finally {
+      setIsImporting(false);
+    }
   };
 
   const columns = [
@@ -62,6 +85,12 @@ export default function SetupPage() {
     <div className="space-y-6">
       <h1 className="text-3xl font-space-grotesk font-bold">Registration Setup</h1>
       
+      {error && (
+        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm">
+          {error}
+        </div>
+      )}
+
       <Card variant="glass">
         <CardHeader>Import Allowed Registrations (Excel/CSV)</CardHeader>
         <CardContent>
