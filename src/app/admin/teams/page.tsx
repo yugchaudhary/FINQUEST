@@ -3,14 +3,25 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DataTable } from '@/components/ui/data-table';
 import { Badge } from '@/components/ui/badge';
 import { createClient } from '@/lib/supabase/client';
-import { Shield, Target, Users, XCircle, CheckCircle } from 'lucide-react';
+import { clearAllTeams, updateTeamRole, getTeamMembers } from '@/app/actions/teams';
+import { ConfirmationModal } from '@/components/ui/confirmation-modal';
+import {
+  Users, Shield, Target, Trash2, ChevronDown, ChevronUp,
+  XCircle, CheckCircle, CheckCircle2, Info
+} from 'lucide-react';
 
 export default function AdminTeamsPage() {
   const [teams, setTeams] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
+  const [teamMembers, setTeamMembers] = useState<Record<string, any[]>>({});
+  const [updatingRole, setUpdatingRole] = useState<string | null>(null);
 
   const fetchTeams = async () => {
     setIsLoading(true);
@@ -19,109 +30,259 @@ export default function AdminTeamsPage() {
       .from('teams')
       .select('*, team_members(count)')
       .order('created_at', { ascending: false });
-    
-    if (!error && data) {
-      setTeams(data);
-    }
+    if (!error && data) setTeams(data);
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    fetchTeams();
-  }, []);
+  useEffect(() => { fetchTeams(); }, []);
 
-  const updateTeamRole = async (teamId: string, role: string) => {
-    const supabase = createClient();
-    await supabase.from('teams').update({ role }).eq('id', teamId);
-    fetchTeams();
+  const totalTeams = teams.length;
+  const innovators = teams.filter(t => t.role === 'INNOVATOR').length;
+  const investors = teams.filter(t => t.role === 'INVESTOR').length;
+  const pending = teams.filter(t => t.role === 'PENDING').length;
+  const active = teams.filter(t => t.is_active).length;
+
+  const handleUpdateRole = async (teamId: string, role: 'INNOVATOR' | 'INVESTOR') => {
+    setUpdatingRole(teamId);
+    setError(null);
+    const result = await updateTeamRole(teamId, role);
+    if (!result?.success) setError(result?.error || 'Failed to update role');
+    else setSuccess(`Role updated to ${role}`);
+    await fetchTeams();
+    setUpdatingRole(null);
   };
 
-  const toggleElimination = async (teamId: string, currentStatus: boolean) => {
+  const handleToggleElimination = async (teamId: string, currentStatus: boolean) => {
     const supabase = createClient();
     await supabase.from('teams').update({ is_active: !currentStatus }).eq('id', teamId);
     fetchTeams();
   };
 
-  const columns = [
-    {
-      header: 'Team Name',
-      accessorKey: 'team_name',
-      cell: (team: any) => (
-        <div>
-          <div className="font-bold">{team.team_name}</div>
-          <div className="text-xs text-gray-500">{team.category}</div>
-        </div>
-      )
-    },
-    {
-      header: 'Members',
-      accessorKey: 'members',
-      cell: (team: any) => (
-        <Badge variant={team.team_members?.[0]?.count === 4 ? 'complete' : 'default'}>
-          {team.team_members?.[0]?.count || 0}/4
-        </Badge>
-      )
-    },
-    {
-      header: 'Status',
-      accessorKey: 'status',
-      cell: (team: any) => (
-        <Badge variant={team.is_active ? 'complete' : 'error'}>
-          {team.is_active ? 'Active' : 'Eliminated'}
-        </Badge>
-      )
-    },
-    {
-      header: 'Role',
-      accessorKey: 'role',
-      cell: (team: any) => (
-        <div className="flex gap-2">
-          {team.role === 'PENDING' ? (
-            <>
-              <Button size="sm" variant="outline" className="text-blue-400 border-blue-400 hover:bg-blue-400/10" onClick={() => updateTeamRole(team.id, 'INNOVATOR')}>Make Innovator</Button>
-              <Button size="sm" variant="outline" className="text-green-400 border-green-400 hover:bg-green-400/10" onClick={() => updateTeamRole(team.id, 'INVESTOR')}>Make Investor</Button>
-            </>
-          ) : (
-            <Badge variant="default" className={team.role === 'INNOVATOR' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}>
-              {team.role}
-            </Badge>
-          )}
-        </div>
-      )
-    },
-    {
-      header: 'Actions',
-      accessorKey: 'actions',
-      cell: (team: any) => (
-        <Button 
-          size="sm" 
-          variant="ghost" 
-          className={team.is_active ? 'text-red-400 hover:text-red-300' : 'text-green-400 hover:text-green-300'}
-          onClick={() => toggleElimination(team.id, team.is_active)}
-        >
-          {team.is_active ? <XCircle className="w-4 h-4 mr-2" /> : <CheckCircle className="w-4 h-4 mr-2" />}
-          {team.is_active ? 'Eliminate' : 'Restore'}
-        </Button>
-      )
+  const handleExpandTeam = async (teamId: string) => {
+    if (expandedTeam === teamId) {
+      setExpandedTeam(null);
+      return;
     }
-  ];
+    setExpandedTeam(teamId);
+    if (!teamMembers[teamId]) {
+      const result = await getTeamMembers(teamId);
+      if (result?.success && result.data) {
+        setTeamMembers(prev => ({ ...prev, [teamId]: result.data! }));
+      }
+    }
+  };
+
+  const handleClearAll = async () => {
+    setIsClearing(true);
+    setError(null);
+    const result = await clearAllTeams();
+    if (result?.success) {
+      setIsClearModalOpen(false);
+      setSuccess('All team data cleared. Registration numbers reset to Available.');
+      setExpandedTeam(null);
+      setTeamMembers({});
+      fetchTeams();
+    } else {
+      setError(result?.error || 'Failed to clear team data');
+    }
+    setIsClearing(false);
+  };
+
+  const roleColors: Record<string, string> = {
+    INNOVATOR: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+    INVESTOR: 'bg-green-500/15 text-green-400 border-green-500/30',
+    PENDING: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-space-grotesk font-bold">Team Management</h1>
-        <Badge variant="default" className="text-lg py-1 px-4">{teams.length} Registered Teams</Badge>
+        <h1 className="text-3xl font-space-grotesk font-bold">Teams & Registrations</h1>
+        {teams.length > 0 && (
+          <Button
+            variant="ghost"
+            className="text-red-400 border border-red-500/30 hover:bg-red-500/10 hover:text-red-300"
+            onClick={() => setIsClearModalOpen(true)}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Reset All Data
+          </Button>
+        )}
       </div>
+
+      {/* Stats Bar */}
+      <div className="grid grid-cols-5 gap-3">
+        {[
+          { label: 'Total Teams', value: totalTeams, icon: Users, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
+          { label: 'Innovators', value: innovators, icon: Target, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
+          { label: 'Investors', value: investors, icon: Shield, color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
+          { label: 'Pending Role', value: pending, icon: Info, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
+          { label: 'Active Teams', value: active, icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
+        ].map((stat) => (
+          <div key={stat.label} className={`flex items-center gap-3 p-4 rounded-xl border ${stat.bg}`}>
+            <stat.icon className={`w-7 h-7 ${stat.color}`} />
+            <div>
+              <div className={`text-2xl font-black ${stat.color}`}>{stat.value}</div>
+              <div className="text-xs text-gray-400 font-medium">{stat.label}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {error && (
+        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center gap-2">
+          <XCircle className="w-4 h-4 flex-shrink-0" /> {error}
+        </div>
+      )}
+      {success && (
+        <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 text-sm flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> {success}
+        </div>
+      )}
 
       <Card variant="glass">
         <CardContent className="p-0">
-          <DataTable 
-            columns={columns} 
-            data={teams} 
-            emptyMessage={isLoading ? "Loading teams..." : "No teams registered yet"} 
-          />
+          {isLoading ? (
+            <div className="p-8 text-center text-gray-400">Loading teams...</div>
+          ) : teams.length === 0 ? (
+            <div className="p-8 text-center text-gray-400">No teams registered yet.</div>
+          ) : (
+            <div className="divide-y divide-white/5">
+              {teams.map((team) => (
+                <div key={team.id}>
+                  {/* Team Row */}
+                  <div className="flex items-center gap-4 px-6 py-4 hover:bg-white/[0.02] transition-colors">
+                    {/* Team Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-white truncate">{team.team_name}</div>
+                      <div className="text-xs text-gray-500 font-mono mt-0.5">{team.category}</div>
+                    </div>
+
+                    {/* Member Count */}
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <Users className="w-3.5 h-3.5 text-gray-500" />
+                      <span className={`font-bold ${team.team_members?.[0]?.count >= 4 ? 'text-green-400' : 'text-gray-300'}`}>
+                        {team.team_members?.[0]?.count || 0}/4
+                      </span>
+                    </div>
+
+                    {/* Status Badge */}
+                    <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border ${team.is_active ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                      {team.is_active ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                      {team.is_active ? 'Active' : 'Eliminated'}
+                    </span>
+
+                    {/* Role — always switchable */}
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-flex text-xs font-bold px-2.5 py-1 rounded-full border ${roleColors[team.role] || 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
+                        {team.role}
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          disabled={updatingRole === team.id || team.role === 'INNOVATOR'}
+                          onClick={() => handleUpdateRole(team.id, 'INNOVATOR')}
+                          className="text-xs px-2 py-1 rounded border border-blue-500/30 text-blue-400 hover:bg-blue-500/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                          Innovator
+                        </button>
+                        <button
+                          disabled={updatingRole === team.id || team.role === 'INVESTOR'}
+                          onClick={() => handleUpdateRole(team.id, 'INVESTOR')}
+                          className="text-xs px-2 py-1 rounded border border-green-500/30 text-green-400 hover:bg-green-500/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                          Investor
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Eliminate / Restore */}
+                    <button
+                      onClick={() => handleToggleElimination(team.id, team.is_active)}
+                      className={`text-xs px-2 py-1 rounded border transition-colors ${team.is_active ? 'border-red-500/30 text-red-400 hover:bg-red-500/10' : 'border-green-500/30 text-green-400 hover:bg-green-500/10'}`}
+                    >
+                      {team.is_active ? 'Eliminate' : 'Restore'}
+                    </button>
+
+                    {/* More Info Toggle */}
+                    <button
+                      onClick={() => handleExpandTeam(team.id)}
+                      className="flex items-center gap-1 text-xs text-gray-400 hover:text-white border border-white/10 px-2 py-1 rounded transition-colors"
+                    >
+                      <Info className="w-3 h-3" />
+                      {expandedTeam === team.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                    </button>
+                  </div>
+
+                  {/* Expanded Members Info */}
+                  {expandedTeam === team.id && (
+                    <div className="px-6 pb-5 bg-black/20 border-t border-white/5">
+                      <div className="pt-4 grid grid-cols-2 gap-6">
+                        {/* Team Details */}
+                        <div>
+                          <div className="text-xs text-gray-500 uppercase tracking-widest mb-3 font-semibold">Team Details</div>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Join Code</span>
+                              <span className="font-mono font-bold text-purple-400">{team.join_code || '—'}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Category</span>
+                              <span className="text-white">{team.category}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Balance</span>
+                              <span className="text-white">₹{(team.current_balance || 0).toLocaleString('en-IN')}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Finalist</span>
+                              <span className={team.is_finalist ? 'text-yellow-400 font-bold' : 'text-gray-500'}>
+                                {team.is_finalist ? '⭐ Yes' : 'No'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Members List */}
+                        <div>
+                          <div className="text-xs text-gray-500 uppercase tracking-widest mb-3 font-semibold">Members & Registration Numbers</div>
+                          {teamMembers[team.id] === undefined ? (
+                            <div className="text-xs text-gray-500">Loading...</div>
+                          ) : teamMembers[team.id].length === 0 ? (
+                            <div className="text-xs text-gray-500">No members joined yet.</div>
+                          ) : (
+                            <div className="space-y-2">
+                              {teamMembers[team.id].map((member: any, i: number) => (
+                                <div key={i} className="flex items-center gap-3 text-sm">
+                                  <div className="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center text-xs text-purple-400 font-bold flex-shrink-0">
+                                    {i + 1}
+                                  </div>
+                                  <div>
+                                    <div className="font-medium text-white">{member.name}</div>
+                                    <div className="text-xs font-mono text-gray-400">{member.email?.replace('@finfest.com', '')}</div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      <ConfirmationModal
+        isOpen={isClearModalOpen}
+        onClose={() => setIsClearModalOpen(false)}
+        onConfirm={handleClearAll}
+        title="⚠️ Reset All Team Data"
+        description="This will permanently delete ALL teams, all registered participants, and reset all registration numbers back to Available. Use this only between test runs. This cannot be undone."
+        confirmText={isClearing ? 'Resetting...' : 'Yes, Reset Everything'}
+      />
     </div>
   );
 }

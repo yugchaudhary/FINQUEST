@@ -63,3 +63,14 @@ export async function getAllowedRegistrations() {
   const { data } = await adminClient.from('allowed_registrations').select('*').order('created_at', { ascending: false })
   return data || []
 }
+
+export async function clearAllAllowedRegistrations() {
+  try {
+    const adminClient = createAdminClient()
+    const { error } = await adminClient.from('allowed_registrations').delete().neq('registration_number', '') // Deletes all
+    if (error) throw error
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}

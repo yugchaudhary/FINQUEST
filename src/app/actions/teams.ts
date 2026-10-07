@@ -163,3 +163,48 @@ export async function getTeamsByCategory(category: string) {
     return { success: false, error: error.message }
   }
 }
+
+export async function clearAllTeams() {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: 'Not authenticated' }
+    
+    const adminClient = createAdminClient()
+    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
+    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+
+    // 1. Unclaim allowed registrations by setting used_by_user_id to null and is_used to false
+    await adminClient.from('allowed_registrations').update({ is_used: false, used_by_user_id: null }).neq('registration_number', '')
+
+    // 2. Find all participant auth users
+    const { data: participantUsers } = await adminClient.from('users').select('id').eq('auth_role', 'PARTICIPANT')
+    
+    // 3. Delete participant auth users (which cascades to users table)
+    if (participantUsers && participantUsers.length > 0) {
+      for (const p of participantUsers) {
+        await adminClient.auth.admin.deleteUser(p.id)
+      }
+    }
+
+    // 4. Delete all teams (cascades to team_members)
+    await adminClient.from('teams').delete().neq('id', '00000000-0000-0000-0000-000000000000') // Deletes all
+
+    await logAdminAction(user.id, 'CLEAR_ALL_TEAMS', 'teams', undefined, {})
+    revalidatePath('/admin/teams')
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
+export async function getTeamMembers(teamId: string) {
+  try {
+    const adminClient = createAdminClient()
+    const { data, error } = await adminClient.from('team_members').select('*').eq('team_id', teamId)
+    if (error) return { success: false, error: error.message }
+    return { success: true, data }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
