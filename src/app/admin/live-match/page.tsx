@@ -139,7 +139,7 @@ export default function AdminLiveMatchPage() {
     if (res?.success && res.data) setGambitsLocked(res.data.gambitsLocked)
   }, [currentMatch])
 
-  useEffect(() => { fetchState() }, [])
+  useEffect(() => { fetchState() }, [fetchState])
 
   useEffect(() => {
     if (currentMatch && ['MATCH_LIVE', 'GAMBITS_CLOSED'].includes(phase)) {
