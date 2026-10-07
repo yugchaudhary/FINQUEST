@@ -37,8 +37,8 @@ export default function Phase1FinalePage() {
     { 
       header: 'Net P/L', 
       accessorKey: 'netPnL',
-      cell: (info: any) => {
-        const val = info.getValue();
+      cell: (item: any) => {
+        const val = item.netPnL;
         return <span className={val >= 0 ? 'text-green-500' : 'text-red-500'}>{formatIndianNumber(val)}</span>;
       }
     },
