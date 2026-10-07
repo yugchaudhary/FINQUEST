@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useSession } from '@/hooks/useSession'
 import { getInvestorLiveState } from '@/app/actions/matches'
 import { lockGambit } from '@/app/actions/gambits'
-import { getPhase1Leaderboard } from '@/app/actions/leaderboard'
+import { getPhase1Leaderboard, getFinalsLeaderboard } from '@/app/actions/leaderboard'
 import { getEventState } from '@/app/actions/event-state'
 import { TeamSetup } from '@/components/dashboard/team-setup'
 import { Phase1Leaderboard } from '@/components/leaderboard/phase1-leaderboard'
@@ -561,10 +561,14 @@ export default function DashboardPage() {
       // Handle global screen states
       // Always fetch leaderboard data so we can show it during WAITING
       try {
-        const lb = await getPhase1Leaderboard()
-        setPhase1Data(lb?.data || [])
+        const [lbPhase1, lbFinals] = await Promise.all([
+          getPhase1Leaderboard(),
+          getFinalsLeaderboard()
+        ])
+        if (lbPhase1?.success) setPhase1Data(lbPhase1.data || [])
+        if (lbFinals?.success) setFinalsData(lbFinals.data || [])
       } catch (e) {
-        console.error('Failed to fetch leaderboard in dashboard:', e)
+        console.error('Failed to fetch leaderboards in dashboard:', e)
       }
 
     } catch (err) {
@@ -659,8 +663,10 @@ export default function DashboardPage() {
         setCurrentFinalist(msg.payload)
         setHasRated(false)
       })
-      .on('broadcast', { event: 'FINALS_LEADERBOARD_UPDATE' }, () => {
+      .on('broadcast', { event: 'FINALS_LEADERBOARD_UPDATE' }, async () => {
         setScreenState('FINALS_LEADERBOARD')
+        const lb = await getFinalsLeaderboard()
+        if (lb?.success) setFinalsData(lb.data || [])
       })
       .subscribe(status => {
         setIsConnected(status === 'SUBSCRIBED')

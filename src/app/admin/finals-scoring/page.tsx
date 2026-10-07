@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/ui/data-table';
+import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import { calculateFinalistScore, publishFinalsLeaderboard, getFinalistScores, getFinalists } from '@/app/actions/finals';
 import { getFinalsLeaderboard } from '@/app/actions/leaderboard';
 
@@ -28,6 +29,9 @@ export default function FinalsScoringPage() {
     };
     init();
   }, []);
+
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const fetchLeaderboard = async () => {
     const lRes = await getFinalsLeaderboard();
@@ -62,7 +66,10 @@ export default function FinalsScoringPage() {
   };
 
   const handlePublish = async () => {
+    setIsPublishing(true);
     await publishFinalsLeaderboard();
+    setIsPublishing(false);
+    setIsPublishModalOpen(false);
   };
 
   const columns = [
@@ -115,10 +122,20 @@ export default function FinalsScoringPage() {
         <CardContent>
           <DataTable columns={columns} data={leaderboard} emptyMessage="No scores calculated yet" />
           <div className="mt-4 flex justify-end">
-            <Button variant="gold" onClick={handlePublish}>PUBLISH FINALS LEADERBOARD</Button>
+            <Button variant="gold" onClick={() => setIsPublishModalOpen(true)}>PUBLISH FINALS LEADERBOARD</Button>
           </div>
         </CardContent>
       </Card>
+
+      <ConfirmationModal
+        isOpen={isPublishModalOpen}
+        onClose={() => setIsPublishModalOpen(false)}
+        onConfirm={handlePublish}
+        title="Publish Finals Leaderboard"
+        description="This will end the event and transition ALL participant screens to the final winner's leaderboard."
+        confirmText="Publish Globally"
+        isLoading={isPublishing}
+      />
     </div>
   );
 }
