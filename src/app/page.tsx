@@ -1,11 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { getPhase1Leaderboard } from '@/app/actions/leaderboard';
+import { Phase1Leaderboard } from '@/components/leaderboard/phase1-leaderboard';
 import {
   Crown,
   Target,
@@ -35,6 +37,20 @@ const staggerContainer = {
 };
 
 export default function LandingPage() {
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        const res = await getPhase1Leaderboard();
+        if (res?.success) setLeaderboard(res.data || []);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchLeaderboard();
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white selection:bg-purple-500/30 font-sans">
       {/* Background Effects */}
@@ -122,8 +138,17 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Phase 1 Leaderboard (Live) */}
+        {leaderboard.length > 0 && (
+          <section className="py-24 px-6 border-y border-white/5 bg-black/40 relative overflow-hidden">
+            <div className="max-w-7xl mx-auto">
+              <Phase1Leaderboard leaderboardData={leaderboard} />
+            </div>
+          </section>
+        )}
+
         {/* About Section */}
-        <section className="py-24 px-6 bg-black/40 border-y border-white/5">
+        <section className="py-24 px-6 bg-black/40 border-b border-white/5">
           <div className="max-w-7xl mx-auto">
             <motion.div
               initial="hidden"

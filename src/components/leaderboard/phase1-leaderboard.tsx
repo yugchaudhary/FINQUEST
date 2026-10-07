@@ -47,7 +47,7 @@ export function Phase1Leaderboard({ leaderboardData }: Phase1LeaderboardProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-8 md:py-16 relative">
+    <div className="w-full flex flex-col items-center px-4 py-8 relative">
       {/* Background */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-gambit-gold/5 blur-[150px]" />
 
