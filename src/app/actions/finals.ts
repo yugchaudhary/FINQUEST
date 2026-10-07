@@ -7,6 +7,22 @@ import { EVENT_CHANNEL } from '@/lib/constants'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
+export async function getTeamsForTransition() {
+  try {
+    const adminClient = createAdminClient()
+    const { data: teams, error } = await adminClient
+      .from('teams')
+      .select('id, team_name, category, role, is_active, current_balance')
+      .eq('is_active', true)
+      .order('current_balance', { ascending: false })
+
+    if (error) return { success: false, error: error.message }
+    return { success: true, data: teams }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
 export async function changeTeamStatus(teamId: string, newRole: 'INNOVATOR' | 'INVESTOR') {
   try {
     z.string().uuid().parse(teamId)

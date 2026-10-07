@@ -4,13 +4,25 @@ import React, { useState } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
-import { changeTeamStatus, initializeFinals } from '@/app/actions/finals';
+import { changeTeamStatus, initializeFinals, getTeamsForTransition } from '@/app/actions/finals';
 
 export default function FinalsTransitionPage() {
   const [isInitModalOpen, setIsInitModalOpen] = useState(false);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
-  // dummy data for illustration
-  const teams = [{ id: '1', name: 'Team Alpha', role: 'INVESTOR' }];
+  const [teams, setTeams] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTeams = async () => {
+      setIsLoading(true);
+      const res = await getTeamsForTransition();
+      if (res.success && res.data) {
+        setTeams(res.data);
+      }
+      setIsLoading(false);
+    };
+    fetchTeams();
+  }, []);
 
   const handleInitialize = async () => {
     await initializeFinals(selectedTeams);
@@ -28,11 +40,15 @@ export default function FinalsTransitionPage() {
             {teams.map(team => (
               <div key={team.id} className="flex items-center justify-between p-4 border border-[#2a2a3a] rounded-lg">
                 <div>
-                  <span className="font-bold">{team.name}</span> - <span className="text-gray-400">{team.role}</span>
+                  <span className="font-bold">{team.team_name}</span> - <span className="text-gray-400">{team.role}</span>
                 </div>
                 <div className="flex gap-4 items-center">
-                  <Button variant="outline" size="sm" onClick={() => changeTeamStatus(team.id, 'INNOVATOR')}>
-                    Make Innovator
+                  <Button variant="outline" size="sm" onClick={async () => {
+                    const newRole = team.role === 'INNOVATOR' ? 'INVESTOR' : 'INNOVATOR';
+                    await changeTeamStatus(team.id, newRole);
+                    setTeams(teams.map(t => t.id === team.id ? { ...t, role: newRole } : t));
+                  }}>
+                    Make {team.role === 'INNOVATOR' ? 'Investor' : 'Innovator'}
                   </Button>
                   <label className="flex items-center gap-2">
                     <input type="checkbox" onChange={(e) => {
