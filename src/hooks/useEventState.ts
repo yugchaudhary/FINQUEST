@@ -11,9 +11,9 @@ export function useEventState() {
   const [matchData, setMatchData] = useState<any>(null)
   const [currentFinalist, setCurrentFinalist] = useState<any>(null)
 
+  const isFirstLoad = useState(true)
   const fetchInitialState = useCallback(async () => {
     try {
-      setIsLoading(true)
       const result = await getEventState()
       if (result && result.success && result.data) {
         const { eventState, matchData, currentFinalist } = result.data

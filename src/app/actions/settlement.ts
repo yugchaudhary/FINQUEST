@@ -136,3 +136,78 @@ export async function resetToWaiting() {
     return { success: false, error: error.message }
   }
 }
+
+export async function endMatch() {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: 'Not authenticated' }
+
+    const adminClient = createAdminClient()
+    const { data: adminUser } = await adminClient
+      .from('users').select('auth_role').eq('id', user.id).single()
+    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+
+    await adminClient.from('event_state').update({
+      current_screen_state: 'WAITING_FOR_MATCH',
+      current_match_id: null,
+      updated_at: new Date().toISOString(),
+    }).eq('id', 1)
+
+    await logAdminAction(user.id, 'END_MATCH', 'event_state')
+
+    const channel = adminClient.channel(EVENT_CHANNEL)
+    await channel.send({
+      type: 'broadcast',
+      event: 'MATCH_RESET',
+      payload: { screen_state: 'WAITING_FOR_MATCH' },
+    })
+
+    revalidatePath('/admin/live-match')
+    revalidatePath('/dashboard')
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
+export async function addInvestorBalance(amountPerTeam: number) {
+  try {
+    const z = await import('zod')
+    z.z.number().positive().max(10000000).parse(amountPerTeam)
+
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: 'Not authenticated' }
+
+    const adminClient = createAdminClient()
+    const { data: adminUser } = await adminClient
+      .from('users').select('auth_role').eq('id', user.id).single()
+    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+
+    // Fetch all active investor teams
+    const { data: investors, error: fetchError } = await adminClient
+      .from('teams')
+      .select('id, current_balance')
+      .eq('role', 'INVESTOR')
+      .eq('is_active', true)
+
+    if (fetchError) return { success: false, error: fetchError.message }
+    if (!investors || investors.length === 0) return { success: false, error: 'No active investor teams found' }
+
+    // Update each investor balance
+    for (const team of investors) {
+      await adminClient.from('teams').update({
+        current_balance: (team.current_balance || 0) + amountPerTeam
+      }).eq('id', team.id)
+    }
+
+    await logAdminAction(user.id, 'ADD_INVESTOR_BALANCE', 'teams', undefined, { amount: amountPerTeam, count: investors.length })
+    revalidatePath('/admin/live-match')
+    revalidatePath('/dashboard')
+    return { success: true, count: investors.length }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
