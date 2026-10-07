@@ -559,11 +559,14 @@ export default function DashboardPage() {
       setInvestorState(derived)
 
       // Handle global screen states
-      const ss = eventState?.current_screen_state
-      if (ss === 'PHASE_1_REVEAL') {
+      // Always fetch leaderboard data so we can show it during WAITING
+      try {
         const lb = await getPhase1Leaderboard()
         setPhase1Data(lb?.data || [])
+      } catch (e) {
+        console.error('Failed to fetch leaderboard in dashboard:', e)
       }
+
     } catch (err) {
       console.error('loadState error', err)
     } finally {
@@ -613,21 +616,25 @@ export default function DashboardPage() {
         )
         setCurrentMatch(prev => prev ? { ...prev, status: 'GAMBITS_CLOSED' } : null)
       })
-      .on('broadcast', { event: LIVE_EVENTS.MATCH_COMPLETED }, () => {
+      .on('broadcast', { event: LIVE_EVENTS.MATCH_COMPLETED }, async () => {
         setInvestorState('WAITING')
         setCurrentMatch(null)
         setMyGambit(null)
         setSelectedTeam(null)
         setSelectedColor(null)
         setIsModalOpen(false)
+        const lb = await getPhase1Leaderboard()
+        setPhase1Data(lb?.data || [])
       })
-      .on('broadcast', { event: 'RESULT_SUBMITTED' }, () => {
+      .on('broadcast', { event: 'RESULT_SUBMITTED' }, async () => {
         setInvestorState('WAITING')
         setCurrentMatch(null)
         setMyGambit(null)
         setSelectedTeam(null)
         setSelectedColor(null)
         setIsModalOpen(false)
+        const lb = await getPhase1Leaderboard()
+        setPhase1Data(lb?.data || [])
       })
       .on('broadcast', { event: 'MATCH_RESET' }, () => {
         setInvestorState('WAITING')
@@ -748,7 +755,11 @@ export default function DashboardPage() {
         <AnimatePresence mode="wait">
           {investorState === 'WAITING' || investorState === 'WAITING_FOR_NEXT_MATCH' ? (
             <motion.div key="waiting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <AwaitingMatch teamName={teamName} />
+              {phase1Data && phase1Data.length > 0 ? (
+                <Phase1Leaderboard leaderboardData={phase1Data} />
+              ) : (
+                <AwaitingMatch teamName={teamName} />
+              )}
             </motion.div>
           ) : investorState === 'LIVE_MATCH' && currentMatch ? (
             <motion.div key="live" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -798,5 +809,7 @@ export default function DashboardPage() {
   }
 
   // ── Innovator / non-investor ───────────────────────────────────────────────
-  return <AwaitingMatch teamName={teamName} />
+  return phase1Data && phase1Data.length > 0 
+    ? <div className="min-h-screen bg-[#0a0a0f] text-white"><Phase1Leaderboard leaderboardData={phase1Data} /></div>
+    : <AwaitingMatch teamName={teamName} />
 }

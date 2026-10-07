@@ -6,16 +6,24 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { getEventOverview } from '@/app/actions/event-state';
+import { getPhase1Leaderboard, getFinalsLeaderboard } from '@/app/actions/leaderboard';
+import { DataTable } from '@/components/ui/data-table';
+import { formatIndianNumber } from '@/lib/format';
 
 export default function AdminOverview() {
   const [overview, setOverview] = useState<any>(null);
+  const [phase1Leaderboard, setPhase1Leaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchOverview = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getEventOverview();
-        setOverview(data);
+        const [overviewData, lbData] = await Promise.all([
+          getEventOverview(),
+          getPhase1Leaderboard()
+        ]);
+        setOverview(overviewData);
+        if (lbData?.success) setPhase1Leaderboard(lbData.data || []);
       } catch (e) {
         console.error(e);
       } finally {
@@ -23,8 +31,8 @@ export default function AdminOverview() {
       }
     };
     
-    fetchOverview();
-    const interval = setInterval(fetchOverview, 10000);
+    fetchData();
+    const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -97,6 +105,31 @@ export default function AdminOverview() {
                 <Button variant="outline">View Detailed Logs</Button>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mt-8">
+        <h2 className="text-2xl font-space-grotesk font-bold mb-4">Phase 1 Leaderboard</h2>
+        <Card variant="glass">
+          <CardContent className="p-6">
+            <DataTable 
+              columns={[
+                { header: 'Rank', accessorKey: 'rank' },
+                { header: 'Team', accessorKey: 'team_name' },
+                { header: 'Category', accessorKey: 'category' },
+                { 
+                  header: 'Net P/L', 
+                  accessorKey: 'net_profit_loss',
+                  cell: (item: any) => {
+                    const val = item.net_profit_loss;
+                    return <span className={val >= 0 ? 'text-green-500' : 'text-red-500'}>{formatIndianNumber(val)}</span>;
+                  }
+                },
+              ]} 
+              data={phase1Leaderboard} 
+              emptyMessage="No leaderboard data available" 
+            />
           </CardContent>
         </Card>
       </div>
