@@ -52,13 +52,18 @@ export default function LiveMatchPage() {
     ]);
     if (matchRes?.success && matchRes.data) {
       setCurrentMatch(matchRes.data);
-      if (matchRes.data.status === 'LIVE') setPhase('live');
-      else if (matchRes.data.status === 'COMPLETED' && !settlementResult) setPhase('result_entered');
+      setPhase(prev => {
+        if (prev === 'leaderboard_preview') return prev;
+        if (matchRes.data.status === 'LIVE') return 'live';
+        if (matchRes.data.status === 'COMPLETED') return 'result_entered';
+        return prev;
+      });
     } else {
       setCurrentMatch(null);
+      setPhase(prev => prev === 'leaderboard_preview' ? prev : 'setup');
     }
     if (teamsRes?.success && teamsRes.data) setAllTeams(teamsRes.data);
-  }, [settlementResult]);
+  }, []);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -102,7 +107,9 @@ export default function LiveMatchPage() {
       await fetchAll();
       showSuccess('Result submitted! Bets settled automatically.');
     } else {
+      setIsResultModalOpen(false);
       setError(result?.error || 'Settlement failed');
+      alert('Error: ' + (result?.error || 'Settlement failed'));
     }
     setIsSubmitting(false);
   };
