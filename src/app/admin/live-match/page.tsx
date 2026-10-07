@@ -195,7 +195,7 @@ export default function LiveMatchPage() {
 
       <Modal isOpen={isResultModalOpen} onClose={() => setIsResultModalOpen(false)} title="Submit Match Result">
         <div className="space-y-4">
-          <div className="text-sm text-gray-400 mb-4">Select the final distribution of judges' votes for this match.</div>
+          <div className="text-sm text-gray-400 mb-4">Select the final distribution of judges&apos; votes for this match.</div>
           {Object.entries(SCORE_DISTRIBUTIONS).map(([key, dist]: [string, any]) => (
             <label key={key} className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${selectedScore === key ? 'border-purple-500 bg-purple-500/10' : 'border-[#2a2a3a] hover:bg-[#2a2a3a]'}`}>
               <input 
