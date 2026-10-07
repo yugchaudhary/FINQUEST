@@ -262,7 +262,7 @@ export default function LiveMatchPage() {
               onClick={handleBroadcast}
               disabled={isBroadcasting || !redTeamId || !blueTeamId}
             >
-              {isBroadcasting ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Broadcasting...</> : '🎙️ BROADCAST MATCH LIVE'}
+              {isBroadcasting ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Starting Match...</> : '▶️ START MATCH'}
             </Button>
             <Button
               variant="outline"

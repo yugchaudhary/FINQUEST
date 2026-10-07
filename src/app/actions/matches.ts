@@ -52,14 +52,11 @@ export async function broadcastMatch(data: {
 
     if (!redTeam || !blueTeam) return { success: false, error: 'One or both teams not found' }
 
-    // Check no match is currently live
-    const { data: liveMatch } = await adminClient
+    // Auto-cleanup any dangling matches that got stuck in LIVE status
+    await adminClient
       .from('matches')
-      .select('id')
+      .update({ status: 'COMPLETED' })
       .eq('status', 'LIVE')
-      .single()
-
-    if (liveMatch) return { success: false, error: 'A match is already live. Complete it first.' }
 
     // Get current round number
     const { count } = await adminClient
