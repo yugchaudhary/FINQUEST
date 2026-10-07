@@ -38,8 +38,7 @@ export async function submitMatchResult(data: {
       .single()
 
     if (!match) return { success: false, error: 'Match not found' }
-    // Allow if status is LIVE because closeGambits no longer changes status to GAMBITS_CLOSED
-    if (match.status !== 'LIVE') {
+    if (!['GAMBITS_CLOSED', 'AWAITING_JUDGE_RESULT'].includes(match.status)) {
       return { success: false, error: 'Gambits must be closed before entering a result' }
     }
 
@@ -59,7 +58,11 @@ export async function submitMatchResult(data: {
     await adminClient
       .from('matches')
       .update({
-        status: 'COMPLETED',
+        completed_by: user.id,
+        multiplier: listedMultiplier,
+        result: `${validated.red_votes}-${validated.blue_votes}`,
+        status: MATCH_STATUS.MATCH_COMPLETE,
+        completed_at: new Date().toISOString(),
       })
       .eq('id', validated.match_id)
 
