@@ -6,8 +6,10 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { getPhase1Leaderboard } from '@/app/actions/leaderboard';
+import { getPhase1Leaderboard, getFinalsLeaderboard } from '@/app/actions/leaderboard';
 import { Phase1Leaderboard } from '@/components/leaderboard/phase1-leaderboard';
+import { FinalsLeaderboard } from '@/components/leaderboard/finals-leaderboard';
+import { getEventState } from '@/app/actions/event-state';
 import {
   Crown,
   Target,
@@ -37,18 +39,28 @@ const staggerContainer = {
 };
 
 export default function LandingPage() {
-  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [phase1Leaderboard, setPhase1Leaderboard] = useState<any[]>([]);
+  const [finalsLeaderboard, setFinalsLeaderboard] = useState<any[]>([]);
+  const [showFinals, setShowFinals] = useState(false);
 
   useEffect(() => {
-    const fetchLeaderboard = async () => {
+    const fetchAll = async () => {
       try {
-        const res = await getPhase1Leaderboard();
-        if (res?.success) setLeaderboard(res.data || []);
+        const [p1Res, fRes, eRes] = await Promise.all([
+          getPhase1Leaderboard(),
+          getFinalsLeaderboard(),
+          getEventState()
+        ]);
+        if (p1Res?.success) setPhase1Leaderboard(p1Res.data || []);
+        if (fRes?.success) setFinalsLeaderboard(fRes.data || []);
+        if (eRes?.success && eRes.data?.eventState?.final_leaderboard_active) {
+          setShowFinals(true);
+        }
       } catch (e) {
         console.error(e);
       }
     };
-    fetchLeaderboard();
+    fetchAll();
   }, []);
 
   return (
@@ -138,14 +150,20 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Phase 1 Leaderboard (Live) */}
-        {leaderboard.length > 0 && (
+        {/* Leaderboards (Live) */}
+        {(showFinals && finalsLeaderboard.length > 0) ? (
           <section className="py-24 px-6 border-y border-white/5 bg-black/40 relative overflow-hidden">
             <div className="max-w-7xl mx-auto">
-              <Phase1Leaderboard leaderboardData={leaderboard} />
+              <FinalsLeaderboard data={finalsLeaderboard} />
             </div>
           </section>
-        )}
+        ) : (phase1Leaderboard.length > 0 && (
+          <section className="py-24 px-6 border-y border-white/5 bg-black/40 relative overflow-hidden">
+            <div className="max-w-7xl mx-auto">
+              <Phase1Leaderboard leaderboardData={phase1Leaderboard} />
+            </div>
+          </section>
+        ))}
 
         {/* About Section */}
         <section className="py-24 px-6 bg-black/40 border-b border-white/5">
