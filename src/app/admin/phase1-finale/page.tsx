@@ -32,13 +32,13 @@ export default function Phase1FinalePage() {
 
   const columns = [
     { header: 'Rank', accessorKey: 'rank' },
-    { header: 'Team', accessorKey: 'teamName' },
+    { header: 'Team', accessorKey: 'team_name' },
     { header: 'Category', accessorKey: 'category' },
     { 
       header: 'Net P/L', 
-      accessorKey: 'netPnL',
+      accessorKey: 'net_profit_loss',
       cell: (item: any) => {
-        const val = item.netPnL;
+        const val = item.net_profit_loss;
         return <span className={val >= 0 ? 'text-green-500' : 'text-red-500'}>{formatIndianNumber(val)}</span>;
       }
     },
