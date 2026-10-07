@@ -121,10 +121,13 @@ export default function AdminLiveMatchPage() {
     if (res.data) {
       setCurrentMatch(res.data as Match)
       setCurrentRound(res.currentRound || res.data.round_number)
-      const status = res.data.status
-      if (['GAMBITS_OPEN', 'MATCH_LIVE', 'LIVE'].includes(status)) setPhase('MATCH_LIVE')
-      else if (status === 'GAMBITS_CLOSED') setPhase('GAMBITS_CLOSED')
-      else if (status === 'AWAITING_JUDGE_RESULT') setPhase('GAMBITS_CLOSED')
+      const screenState = (res as any).screenState
+      
+      if (screenState === 'GAMBITS_CLOSED' || screenState === 'AWAITING_RESULT') {
+        setPhase('GAMBITS_CLOSED')
+      } else {
+        setPhase('MATCH_LIVE')
+      }
     } else {
       setCurrentMatch(null)
       setCurrentRound(res.currentRound || 0)

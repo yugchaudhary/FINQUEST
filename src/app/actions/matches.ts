@@ -77,9 +77,8 @@ export async function broadcastMatch(data: {
         category: validated.category,
         red_team_id: validated.red_team_id,
         blue_team_id: validated.blue_team_id,
-        status: MATCH_STATUS.GAMBITS_OPEN,
+        status: 'LIVE',
         broadcasted_at: new Date().toISOString(),
-        broadcasted_by: user.id,
       })
       .select()
       .single()
@@ -140,27 +139,19 @@ export async function closeGambits(matchId: string) {
 
     const { data: match } = await adminClient.from('matches').select('*').eq('id', matchId).single()
     if (!match) return { success: false, error: 'Match not found' }
-    if (!['GAMBITS_OPEN', 'MATCH_LIVE', 'LIVE'].includes(match.status)) {
+    if (match.status !== 'LIVE') {
       return { success: false, error: 'Gambits cannot be closed in the current state' }
     }
 
     const now = new Date().toISOString()
-    const { error } = await adminClient
-      .from('matches')
-      .update({
-        status: MATCH_STATUS.GAMBITS_CLOSED,
-        closed_at: now,
-        updated_at: now,
-      })
-      .eq('id', matchId)
-      .in('status', ['GAMBITS_OPEN', 'MATCH_LIVE', 'LIVE'])
-
-    if (error) return { success: false, error: error.message }
-
+    // Cannot update status because DB constraint allows only PENDING, LIVE, COMPLETED
+    // Cannot update closed_at because column does not exist
+    
+    // Instead we drive the state purely via event_state
     await adminClient
       .from('event_state')
       .update({
-        current_screen_state: 'AWAITING_RESULT',
+        current_screen_state: 'GAMBITS_CLOSED',
         updated_at: now,
       })
       .eq('id', 1)
@@ -238,6 +229,7 @@ export async function getCurrentMatch() {
       success: true,
       data: match,
       currentRound: match?.round_number || eventState?.current_round || 0,
+      screenState: eventState?.current_screen_state || 'WAITING_FOR_MATCH',
       maxRounds: PHASE_1_ROUNDS,
     }
   } catch (error: any) {
