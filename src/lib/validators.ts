@@ -8,7 +8,7 @@ export const teamImportSchema = z.object({
 export const gambitSchema = z.object({
   match_id: z.string().uuid(),
   selected_team_id: z.string().uuid(),
-  amount: z.number().min(1).max(250000)
+  amount: z.number().min(0).max(250000)
 })
 
 export const judgeResultSchema = z.object({

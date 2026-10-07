@@ -1,118 +1,62 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
-import { clampGambitAmount } from '@/lib/format'
-import { MAX_GAMBIT_AMOUNT } from '@/lib/constants'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import { requireInvestor, requireUser } from '@/lib/live-match/auth'
+import { emitLiveEvent } from '@/lib/live-match/realtime'
+import {
+  LIVE_EVENTS,
+  MAX_GAMBIT_AMOUNT,
+  sanitizeGambitAmount,
+} from '@/lib/live-match/engine'
 
 const lockGambitSchema = z.object({
   match_id: z.string().uuid(),
   selected_team_id: z.string().uuid(),
-  amount: z.number().positive().max(MAX_GAMBIT_AMOUNT),
+  amount: z.number().min(0).max(MAX_GAMBIT_AMOUNT),
 })
 
 export async function lockGambit(matchId: string, selectedTeamId: string, amount: number) {
   try {
-    // Validate input
     const validated = lockGambitSchema.parse({
       match_id: matchId,
       selected_team_id: selectedTeamId,
-      amount: clampGambitAmount(amount),
+      amount: sanitizeGambitAmount(amount),
     })
 
-    // Verify auth
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { success: false, error: 'Not authenticated' }
+    const auth = await requireInvestor()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, team } = auth
 
-    const adminClient = createAdminClient()
+    const gambitAmount = sanitizeGambitAmount(validated.amount)
 
-    // Get user's team data
-    const { data: userData } = await adminClient
-      .from('users')
-      .select('*, teams(*)')
-      .eq('id', user.id)
-      .single()
+    const { data, error } = await adminClient.rpc('lock_gambit', {
+      p_match_id: validated.match_id,
+      p_investor_team_id: team.id,
+      p_selected_team_id: validated.selected_team_id,
+      p_amount: gambitAmount,
+    })
 
-    if (!userData || !userData.teams) return { success: false, error: 'Team not found' }
-    if (userData.teams.role !== 'INVESTOR') return { success: false, error: 'Only INVESTOR teams can place Gambits' }
-
-    const team = userData.teams
-
-    // Verify match is live
-    const { data: match } = await adminClient
-      .from('matches')
-      .select('*')
-      .eq('id', validated.match_id)
-      .single()
-
-    if (!match || match.status !== 'LIVE') return { success: false, error: 'Match is not currently live' }
-
-    // Verify selected team is in this match
-    if (validated.selected_team_id !== match.red_team_id && validated.selected_team_id !== match.blue_team_id) {
-      return { success: false, error: 'Selected team is not in this match' }
-    }
-
-    // Clamp and validate amount
-    const gambitAmount = clampGambitAmount(validated.amount)
-    if (gambitAmount <= 0) return { success: false, error: 'Amount must be greater than 0' }
-    if (gambitAmount > MAX_GAMBIT_AMOUNT) return { success: false, error: `Maximum gambit amount is ${MAX_GAMBIT_AMOUNT}` }
-
-    // Check if already submitted gambit for this match
-    const { data: existingGambit } = await adminClient
-      .from('gambits')
-      .select('id')
-      .eq('match_id', validated.match_id)
-      .eq('investor_team_id', team.id)
-      .single()
-
-    if (existingGambit) return { success: false, error: 'You have already placed a Gambit for this match' }
-
-    // Verify sufficient balance
-    if (gambitAmount > team.current_balance) {
-      return { success: false, error: 'Insufficient balance for this Gambit' }
-    }
-
-    // Atomically: create gambit + deduct balance
-    // Insert gambit first (UNIQUE constraint prevents duplicates)
-    const { error: insertError } = await adminClient
-      .from('gambits')
-      .insert({
-        match_id: validated.match_id,
-        investor_team_id: team.id,
-        selected_team_id: validated.selected_team_id,
-        amount: gambitAmount,
-        status: 'LOCKED',
-        locked_at: new Date().toISOString(),
-      })
-
-    if (insertError) {
-      if (insertError.code === '23505') { // Unique violation
+    if (error) {
+      const message = error.message || 'Failed to lock Gambit'
+      if (message.includes('already placed') || error.code === '23505') {
         return { success: false, error: 'You have already placed a Gambit for this match' }
       }
-      return { success: false, error: 'Failed to lock Gambit: ' + insertError.message }
+      return { success: false, error: message.replace(/^.*ERROR:\s*/i, '') }
     }
 
-    // Deduct balance
-    const { error: balanceError } = await adminClient
-      .from('teams')
-      .update({ current_balance: team.current_balance - gambitAmount })
-      .eq('id', team.id)
+    const { count } = await adminClient
+      .from('gambits')
+      .select('*', { count: 'exact', head: true })
+      .eq('match_id', validated.match_id)
 
-    if (balanceError) {
-      // Rollback gambit
-      await adminClient
-        .from('gambits')
-        .delete()
-        .eq('match_id', validated.match_id)
-        .eq('investor_team_id', team.id)
-      return { success: false, error: 'Failed to update balance' }
-    }
+    await emitLiveEvent(LIVE_EVENTS.GAMBIT_LOCKED, {
+      matchId: validated.match_id,
+      lockedCount: count || 0,
+    })
 
     revalidatePath('/dashboard')
-    return { success: true }
+    return { success: true, data }
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return { success: false, error: error.errors[0].message }
@@ -124,25 +68,23 @@ export async function lockGambit(matchId: string, selectedTeamId: string, amount
 export async function getMyGambit(matchId: string) {
   try {
     z.string().uuid().parse(matchId)
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { success: false, error: 'Not authenticated' }
+    const auth = await requireUser()
+    if (!auth.ok) return { success: false, error: auth.error }
 
-    const adminClient = createAdminClient()
-    const { data: userData } = await adminClient
+    const { data: userData } = await auth.adminClient
       .from('users')
       .select('team_id')
-      .eq('id', user.id)
+      .eq('id', auth.user.id)
       .single()
 
     if (!userData?.team_id) return { success: false, error: 'Team not found' }
 
-    const { data, error } = await adminClient
+    const { data, error } = await auth.adminClient
       .from('gambits')
-      .select('*')
+      .select('id, match_id, selected_team_id, status, locked_at')
       .eq('match_id', matchId)
       .eq('investor_team_id', userData.team_id)
-      .single()
+      .maybeSingle()
 
     if (error && error.code !== 'PGRST116') return { success: false, error: error.message }
     return { success: true, data: data || null }

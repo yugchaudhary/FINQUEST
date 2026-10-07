@@ -109,7 +109,7 @@ export async function getEventOverview() {
       adminClient.from('teams').select('*', { count: 'exact', head: true }),
       adminClient.from('teams').select('*', { count: 'exact', head: true }).eq('role', 'INVESTOR'),
       adminClient.from('matches').select('*', { count: 'exact', head: true }),
-      adminClient.from('matches').select('*', { count: 'exact', head: true }).eq('status', 'COMPLETED'),
+      adminClient.from('matches').select('*', { count: 'exact', head: true }).in('status', ['COMPLETED', 'MATCH_COMPLETE']),
       adminClient.from('teams').select('*', { count: 'exact', head: true }).eq('is_finalist', true),
       adminClient.from('event_state').select('*').eq('id', 1).single(),
     ])

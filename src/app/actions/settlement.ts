@@ -6,6 +6,9 @@ import { logAdminAction } from '@/lib/audit'
 import { EVENT_CHANNEL } from '@/lib/constants'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import { requireAdmin } from '@/lib/live-match/auth'
+import { emitLiveEvent } from '@/lib/live-match/realtime'
+import { LIVE_EVENTS, MATCH_STATUS, getMultiplierForResult } from '@/lib/live-match/engine'
 
 const resultSchema = z.object({
   match_id: z.string().uuid(),
@@ -22,22 +25,12 @@ export async function submitMatchResult(data: {
 }) {
   try {
     const validated = resultSchema.parse(data)
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
-    // Verify admin
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { success: false, error: 'Not authenticated' }
+    const listedMultiplier = getMultiplierForResult(validated.red_votes, validated.blue_votes)
 
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient
-      .from('users')
-      .select('auth_role')
-      .eq('id', user.id)
-      .single()
-
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
-
-    // Verify match is live
     const { data: match } = await adminClient
       .from('matches')
       .select('*')
@@ -45,9 +38,10 @@ export async function submitMatchResult(data: {
       .single()
 
     if (!match) return { success: false, error: 'Match not found' }
-    if (match.status !== 'LIVE') return { success: false, error: 'Match is not currently live' }
+    if (!['GAMBITS_CLOSED', 'AWAITING_JUDGE_RESULT'].includes(match.status)) {
+      return { success: false, error: 'Gambits must be closed before entering a result' }
+    }
 
-    // Call settlement RPC function
     const { data: settlementResult, error: rpcError } = await adminClient.rpc('settle_match_gambits', {
       p_match_id: validated.match_id,
       p_red_votes: validated.red_votes,
@@ -56,31 +50,43 @@ export async function submitMatchResult(data: {
 
     if (rpcError) return { success: false, error: 'Settlement failed: ' + rpcError.message }
 
-    // Update event state
+    await emitLiveEvent(LIVE_EVENTS.MATCH_RESULT_SUBMITTED, {
+      matchId: validated.match_id,
+      result: `${validated.red_votes}-${validated.blue_votes}`,
+    })
+
+    await adminClient
+      .from('matches')
+      .update({
+        completed_by: user.id,
+        multiplier: listedMultiplier,
+        result: `${validated.red_votes}-${validated.blue_votes}`,
+        status: MATCH_STATUS.MATCH_COMPLETE,
+        completed_at: new Date().toISOString(),
+      })
+      .eq('id', validated.match_id)
+
     await adminClient
       .from('event_state')
       .update({
-        current_screen_state: 'MATCH_COMPLETE',
+        current_screen_state: 'WAITING_FOR_MATCH',
+        current_match_id: null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', 1)
 
-    // Audit log
     await logAdminAction(user.id, 'SUBMIT_MATCH_RESULT', 'match', validated.match_id, {
       red_votes: validated.red_votes,
       blue_votes: validated.blue_votes,
+      multiplier: listedMultiplier,
+    })
+    await logAdminAction(user.id, 'MATCH_SETTLED', 'match', validated.match_id, {
+      settlement: settlementResult,
     })
 
-    // Broadcast realtime event
-    const channel = adminClient.channel(EVENT_CHANNEL)
-    await channel.send({
-      type: 'broadcast',
-      event: 'RESULT_SUBMITTED',
-      payload: {
-        match_id: validated.match_id,
-        red_votes: validated.red_votes,
-        blue_votes: validated.blue_votes,
-      },
+    await emitLiveEvent(LIVE_EVENTS.MATCH_COMPLETED, {
+      matchId: validated.match_id,
+      status: MATCH_STATUS.MATCH_COMPLETE,
     })
 
     revalidatePath('/admin/live-match')
@@ -195,11 +201,17 @@ export async function addInvestorBalance(amountPerTeam: number) {
     if (fetchError) return { success: false, error: fetchError.message }
     if (!investors || investors.length === 0) return { success: false, error: 'No active investor teams found' }
 
-    // Update each investor balance
     for (const team of investors) {
       await adminClient.from('teams').update({
         current_balance: (team.current_balance || 0) + amountPerTeam
       }).eq('id', team.id)
+      await adminClient.from('ledger_transactions').insert({
+        team_id: team.id,
+        transaction_type: 'MANUAL_ADJUSTMENT',
+        amount: amountPerTeam,
+        reference_type: 'admin_grant',
+        reference_id: user.id,
+      })
     }
 
     await logAdminAction(user.id, 'ADD_INVESTOR_BALANCE', 'teams', undefined, { amount: amountPerTeam, count: investors.length })
