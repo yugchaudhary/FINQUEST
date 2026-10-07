@@ -5,6 +5,7 @@ import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { broadcastFinalist, getFinalists } from '@/app/actions/finals';
+import { getEventState } from '@/app/actions/event-state';
 
 export default function FinalsBroadcastPage() {
   const [finalists, setFinalists] = useState<any[]>([]);
@@ -12,13 +13,28 @@ export default function FinalsBroadcastPage() {
   const [activeFinalist, setActiveFinalist] = useState<any>(null);
 
   useEffect(() => {
-    const fetchFinalists = async () => {
-      const result = await getFinalists();
-      if (result.success) {
-        setFinalists(result.data || []);
+    const fetchInit = async () => {
+      const [fResult, eResult] = await Promise.all([
+        getFinalists(),
+        getEventState()
+      ]);
+      
+      let loadedFinalists: any[] = [];
+      if (fResult.success) {
+        loadedFinalists = fResult.data || [];
+        setFinalists(loadedFinalists);
+      }
+      
+      if (eResult?.success && eResult.data?.eventState?.current_finalist_id) {
+        const currentId = eResult.data.eventState.current_finalist_id;
+        const current = loadedFinalists.find(f => f.id === currentId);
+        if (current) {
+          setActiveFinalist(current);
+          setSelectedFinalist(currentId);
+        }
       }
     };
-    fetchFinalists();
+    fetchInit();
   }, []);
 
   const handleBroadcast = async () => {
@@ -39,7 +55,7 @@ export default function FinalsBroadcastPage() {
             <div className="flex-1">
               <Select 
                 label="Finalist Team" 
-                options={finalists.map(f => ({ label: f.name, value: f.id }))} 
+                options={[{label: 'Select a team', value: ''}, ...finalists.map(f => ({ label: f.team_name, value: f.id }))]} 
                 value={selectedFinalist} 
                 onChange={(e) => setSelectedFinalist(e.target.value)} 
               />
@@ -53,11 +69,11 @@ export default function FinalsBroadcastPage() {
 
       {activeFinalist && (
         <Card variant="elevated" className="border-[#8b5cf6]">
-          <CardHeader>Currently Pitching: {activeFinalist.name}</CardHeader>
+          <CardHeader>Currently Pitching: {activeFinalist.team_name}</CardHeader>
           <CardContent>
             <div className="text-center py-8">
-              <h2 className="text-4xl font-bold mb-4">{activeFinalist.name}</h2>
-              <div className="text-xl text-gray-400">Scores Collected: 0 / 10</div>
+              <h2 className="text-4xl font-bold mb-4">{activeFinalist.team_name}</h2>
+              <div className="text-xl text-gray-400">Waiting for investor scores...</div>
             </div>
           </CardContent>
         </Card>

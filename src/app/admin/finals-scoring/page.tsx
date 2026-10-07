@@ -6,23 +6,49 @@ import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/ui/data-table';
-import { calculateFinalistScore, publishFinalsLeaderboard, getFinalistScores } from '@/app/actions/finals';
+import { calculateFinalistScore, publishFinalsLeaderboard, getFinalistScores, getFinalists } from '@/app/actions/finals';
+import { getFinalsLeaderboard } from '@/app/actions/leaderboard';
 
 export default function FinalsScoringPage() {
+  const [finalists, setFinalists] = useState<any[]>([]);
   const [selectedFinalist, setSelectedFinalist] = useState('');
   const [judgesAvg, setJudgesAvg] = useState('');
-  const [scores, setScores] = useState<any[]>([]);
+  
+  const [investorAvg, setInvestorAvg] = useState<number>(0);
+  const [scoreCount, setScoreCount] = useState<number>(0);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  
+  // Fetch finalists & leaderboard on mount
+  useEffect(() => {
+    const init = async () => {
+      const fRes = await getFinalists();
+      if (fRes.success) setFinalists(fRes.data || []);
+      
+      fetchLeaderboard();
+    };
+    init();
+  }, []);
 
-  const fetchScores = async (finalistId: string) => {
-    if (!finalistId) return;
-    const result = await getFinalistScores(finalistId);
-    if (result.success) {
-      setScores(result.data?.scores || []);
-    }
+  const fetchLeaderboard = async () => {
+    const lRes = await getFinalsLeaderboard();
+    if (lRes.success) setLeaderboard(lRes.data || []);
   };
 
+  // Fetch investor scores when a finalist is selected
   useEffect(() => {
-    if (selectedFinalist) fetchScores(selectedFinalist);
+    const fetchScores = async () => {
+      if (!selectedFinalist) {
+        setInvestorAvg(0);
+        setScoreCount(0);
+        return;
+      }
+      const result = await getFinalistScores(selectedFinalist);
+      if (result.success) {
+        setInvestorAvg(result.data?.average || 0);
+        setScoreCount(result.data?.count || 0);
+      }
+    };
+    fetchScores();
   }, [selectedFinalist]);
 
   const handleCalculate = async () => {
@@ -31,7 +57,8 @@ export default function FinalsScoringPage() {
       finalist_team_id: selectedFinalist, 
       judges_average: parseFloat(judgesAvg)
     });
-    fetchScores(selectedFinalist);
+    setJudgesAvg('');
+    fetchLeaderboard();
   };
 
   const handlePublish = async () => {
@@ -40,8 +67,10 @@ export default function FinalsScoringPage() {
 
   const columns = [
     { header: 'Rank', accessorKey: 'rank' },
-    { header: 'Team', accessorKey: 'teamName' },
-    { header: 'Final Score', accessorKey: 'score' },
+    { header: 'Team', accessorKey: 'team_name' },
+    { header: 'Inv Avg', accessorKey: 'investor_average' },
+    { header: 'Judge Avg', accessorKey: 'judges_average' },
+    { header: 'Final Score', accessorKey: 'final_score' },
   ];
 
   return (
@@ -51,10 +80,26 @@ export default function FinalsScoringPage() {
       <Card variant="glass">
         <CardHeader>Calculate Final Score</CardHeader>
         <CardContent className="space-y-4">
-          <Select label="Finalist Team" options={[]} value={selectedFinalist} onChange={(e) => setSelectedFinalist(e.target.value)} />
+          <Select 
+            label="Finalist Team" 
+            options={[{label: 'Select a finalist', value: ''}, ...finalists.map(f => ({ label: f.team_name, value: f.id }))]} 
+            value={selectedFinalist} 
+            onChange={(e) => setSelectedFinalist(e.target.value)} 
+          />
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Investor Average (Auto)" type="text" value="8.5" disabled />
-            <Input label="Judges Average (1.0-10.0)" type="number" value={judgesAvg} onChange={(e) => setJudgesAvg(e.target.value)} />
+            <Input 
+              label={`Investor Average (from ${scoreCount} votes)`} 
+              type="text" 
+              value={investorAvg.toFixed(2)} 
+              disabled 
+            />
+            <Input 
+              label="Judges Average (1.0-10.0)" 
+              type="number" 
+              step="0.1"
+              value={judgesAvg} 
+              onChange={(e) => setJudgesAvg(e.target.value)} 
+            />
           </div>
           <div className="bg-[#2a2a3a] p-4 rounded-lg text-sm text-gray-300">
             Formula: Final = (Investor Avg × 0.5) + (Judges Avg × 0.5)
@@ -68,7 +113,7 @@ export default function FinalsScoringPage() {
       <Card variant="default">
         <CardHeader>Live Finals Leaderboard</CardHeader>
         <CardContent>
-          <DataTable columns={columns} data={scores} emptyMessage="No scores calculated yet" />
+          <DataTable columns={columns} data={leaderboard} emptyMessage="No scores calculated yet" />
           <div className="mt-4 flex justify-end">
             <Button variant="gold" onClick={handlePublish}>PUBLISH FINALS LEADERBOARD</Button>
           </div>
