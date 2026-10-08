@@ -4,13 +4,7 @@ DECLARE
   v_cat_id UUID;
 BEGIN
   -- LET US COOK
-  INSERT INTO categories (name, slug, description, sort_order) VALUES ('LET US COOK', 'let-us-cook', 'Problems related to LET US COOK', 0) RETURNING id INTO v_cat_id;
-  INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 20, 'WHAT THE FIT', 'WHAT THE FIT', false);
-  INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 20, 'BON VOYAGE, BESTIE', 'BON VOYAGE, BESTIE', false);
-  INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 20, 'DIGITAL DISORDER', 'DIGITAL DISORDER', false);
-  INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 20, 'CASH & CHAOS', 'CASH & CHAOS', false);
-  INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 20, 'FEELING 404', 'FEELING 404', false);
-  INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 20, 'LET US COOK', 'LET US COOK', false);
+  INSERT INTO categories (name, slug, sort_order) VALUES ('LET US COOK', 'let-us-cook', 0) RETURNING id INTO v_cat_id;
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 1, 'The Healthy Food Problem', 'Healthy food being more expensive.', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 2, 'The Chip Oxygen Problem', 'Your packet contains 30% chips and 70% atmosphere.', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 3, 'The Hot Food Problem', 'Food is either too hot or already cold.', false);
@@ -32,7 +26,7 @@ BEGIN
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 19, 'The Sharing Problem', 'Someone always wants “just one bite.”', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 20, 'The Expiry Date Problem', 'You don''t know what''s still safe to eat.', false);
   -- WHAT THE FIT
-  INSERT INTO categories (name, slug, description, sort_order) VALUES ('WHAT THE FIT', 'what-the-fit', 'Problems related to WHAT THE FIT', 1) RETURNING id INTO v_cat_id;
+  INSERT INTO categories (name, slug, sort_order) VALUES ('WHAT THE FIT', 'what-the-fit', 1) RETURNING id INTO v_cat_id;
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 1, 'The Bag Betrayal', 'Your bag contains everything except the one thing you need.', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 2, 'The Perfume Paradox', 'Want to smell good without overdoing it.', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 3, 'The Comfort vs Style War', 'Looks good, feels terrible.', false);
@@ -54,7 +48,7 @@ BEGIN
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 19, 'The Outfit Malfunction', 'One broken zip ruins everything.', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 20, 'The Underdressed Panic', 'Everyone looks more dressed up than you.', false);
   -- BON VOYAGE, BESTIE
-  INSERT INTO categories (name, slug, description, sort_order) VALUES ('BON VOYAGE, BESTIE', 'bon-voyage-bestie', 'Problems related to BON VOYAGE, BESTIE', 2) RETURNING id INTO v_cat_id;
+  INSERT INTO categories (name, slug, sort_order) VALUES ('BON VOYAGE, BESTIE', 'bon-voyage-bestie', 2) RETURNING id INTO v_cat_id;
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 1, 'The Photo Storage Problem', 'Your trip fills your phone in two days.', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 2, 'The Group Decision Problem', 'Thirty minutes are spent deciding where to go next.', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 3, 'The Underpacking Problem', 'You forgot the one thing you actually needed.', false);
@@ -76,7 +70,7 @@ BEGIN
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 19, 'The 23KG Final Boss', 'Your luggage is always overweight.', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 20, 'The Overpacking Crisis', 'Three days away, suitcase packed for three months.', false);
   -- DIGITAL DISORDER
-  INSERT INTO categories (name, slug, description, sort_order) VALUES ('DIGITAL DISORDER', 'digital-disorder', 'Problems related to DIGITAL DISORDER', 3) RETURNING id INTO v_cat_id;
+  INSERT INTO categories (name, slug, sort_order) VALUES ('DIGITAL DISORDER', 'digital-disorder', 3) RETURNING id INTO v_cat_id;
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 1, 'The Group Chat Explosion', 'Hundreds of messages appear at once.', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 2, 'The Google Maps Gaslighting', 'Travel times are never what they promise.', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 3, 'The Lost Device Problem', 'You can lose your phone while holding your phone.', false);
@@ -98,7 +92,7 @@ BEGIN
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 19, 'The Digital FBI Incident', 'Accidental like while scrolling someone''s profile.', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 20, 'The Seen-Zone', 'Your message was seen and silence followed.', false);
   -- CASH & CHAOS
-  INSERT INTO categories (name, slug, description, sort_order) VALUES ('CASH & CHAOS', 'cash-&-chaos', 'Problems related to CASH & CHAOS', 4) RETURNING id INTO v_cat_id;
+  INSERT INTO categories (name, slug, sort_order) VALUES ('CASH & CHAOS', 'cash-&-chaos', 4) RETURNING id INTO v_cat_id;
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 1, 'The Parent Money Interrogation', 'You ask for money and immediately hear: “For what?”', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 2, 'The Unpaid Friend', 'Someone owes you a tiny amount forever.', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 3, 'The Sale Countdown', 'Urgency makes you buy things you didn''t need.', false);
@@ -120,7 +114,7 @@ BEGIN
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 19, 'The Free-Trial Trap', '“Free” becomes a recurring payment.', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 20, 'The Financial FOMO', 'Everyone is buying something and you don''t want to miss out.', false);
   -- FEELING 404
-  INSERT INTO categories (name, slug, description, sort_order) VALUES ('FEELING 404', 'feeling-404', 'Problems related to FEELING 404', 5) RETURNING id INTO v_cat_id;
+  INSERT INTO categories (name, slug, sort_order) VALUES ('FEELING 404', 'feeling-404', 5) RETURNING id INTO v_cat_id;
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 1, 'The Gas Leak', 'A fart is incoming in a completely silent room, and there is nowhere to escape.', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 2, 'The Accidental Mic Drop', 'You burp while your microphone is on, and the entire room hears it.', false);
   INSERT INTO problem_statements (category_id, number, title, description, published) VALUES (v_cat_id, 3, 'The Forever Hiccups', 'Hiccups that refuse to leave.', false);
