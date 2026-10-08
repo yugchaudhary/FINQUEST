@@ -56,7 +56,7 @@ export default function LoginPage() {
         >
           <div className="text-center mb-8">
             <h2 className="text-3xl font-display font-black tracking-tight text-white mb-2">
-              THE FOUNDER&apos;S GAMBIT
+              FOUNDER&apos;S GOT PATENT
             </h2>
             <p className="text-gray-400">Sign in to your participant account</p>
           </div>

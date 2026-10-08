@@ -15,7 +15,11 @@ import {
   Settings, 
   LogOut,
   Menu,
-  X
+  X,
+  Tags,
+  FileText,
+  PiggyBank,
+  Megaphone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +29,10 @@ const NAV_LINKS = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard },
   { href: '/admin/setup', label: 'Setup', icon: Upload },
   { href: '/admin/teams', label: 'Teams & Registration', icon: Trophy },
+  { href: '/admin/categories', label: 'Category Assignment', icon: Tags },
+  { href: '/admin/problem-statements', label: 'Problem Statements', icon: FileText },
+  { href: '/admin/investment-setup', label: 'Investment Setup', icon: PiggyBank },
+  { href: '/admin/announcements', label: 'Announcements', icon: Megaphone },
   { href: '/admin/live-match', label: 'Live Match', icon: Radio },
   { href: '/admin/phase1-finale', label: 'Phase 1 Finale', icon: Trophy },
   { href: '/admin/finals-transition', label: 'Finals Transition', icon: ArrowRightLeft },
@@ -43,8 +51,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     const checkAuth = async () => {
       const session = await getSession();
-      if (!session) {
-        router.push('/login');
+      if (!session || !session.success) {
+        router.push('/admin/login');
       }
     };
     checkAuth();
@@ -59,7 +67,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="flex h-screen bg-[#0a0a0f] text-white overflow-hidden">
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b border-[#2a2a3a] bg-[#16161f]">
-        <h1 className="font-space-grotesk font-bold text-lg text-[#8b5cf6]">TFG ADMIN</h1>
+        <h1 className="font-space-grotesk font-bold text-lg text-[#8b5cf6]">FGP ADMIN</h1>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -72,7 +80,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       `}>
         <div className="p-6">
           <h1 className="font-space-grotesk font-bold text-xl tracking-wider mb-2">
-            THE FOUNDER&apos;S<br/><span className="text-[#8b5cf6]">GAMBIT</span>
+            FOUNDER&apos;S GOT<br/><span className="text-[#8b5cf6]">PATENT</span>
           </h1>
           <Badge variant="default" className="w-full justify-center">
             PHASE: {currentPhase}

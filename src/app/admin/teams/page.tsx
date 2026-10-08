@@ -1,16 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { createClient } from '@/lib/supabase/client';
-import { clearAllTeams, updateTeamRole, getTeamMembers } from '@/app/actions/teams';
+import { getTeamsWithDetails, updateTeamRole, getTeamMembers, clearAllTeams } from '@/app/actions/teams';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import {
   Users, Shield, Target, Trash2, ChevronDown, ChevronUp,
-  XCircle, CheckCircle, CheckCircle2, Info
+  XCircle, CheckCircle, Info, Loader2, Search, Trophy
 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 export default function AdminTeamsPage() {
   const [teams, setTeams] = useState<any[]>([]);
@@ -23,24 +25,25 @@ export default function AdminTeamsPage() {
   const [teamMembers, setTeamMembers] = useState<Record<string, any[]>>({});
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
 
+  // Filters
+  const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [memberFilter, setMemberFilter] = useState('ALL');
+  const [selectionFilter, setSelectionFilter] = useState('ALL');
+
   const fetchTeams = async () => {
     setIsLoading(true);
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from('teams')
-      .select('*, team_members(count)')
-      .order('created_at', { ascending: false });
-    if (!error && data) setTeams(data);
+    const result = await getTeamsWithDetails();
+    if (result.success && result.data) {
+      setTeams(result.data);
+    }
     setIsLoading(false);
   };
 
-  useEffect(() => { fetchTeams(); }, []);
-
-  const totalTeams = teams.length;
-  const innovators = teams.filter(t => t.role === 'INNOVATOR').length;
-  const investors = teams.filter(t => t.role === 'INVESTOR').length;
-  const pending = teams.filter(t => t.role === 'PENDING').length;
-  const active = teams.filter(t => t.is_active).length;
+  useEffect(() => {
+    fetchTeams();
+  }, []);
 
   const handleUpdateRole = async (teamId: string, role: 'INNOVATOR' | 'INVESTOR') => {
     setUpdatingRole(teamId);
@@ -78,93 +81,144 @@ export default function AdminTeamsPage() {
     const result = await clearAllTeams();
     if (result?.success) {
       setIsClearModalOpen(false);
-      setSuccess('All team data cleared. Registration numbers reset to Available.');
-      setExpandedTeam(null);
-      setTeamMembers({});
+      setSuccess('All teams cleared successfully');
       fetchTeams();
     } else {
-      setError(result?.error || 'Failed to clear team data');
+      setError(result?.error || 'Failed to clear teams');
     }
     setIsClearing(false);
   };
 
-  const roleColors: Record<string, string> = {
-    INNOVATOR: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-    INVESTOR: 'bg-green-500/15 text-green-400 border-green-500/30',
-    PENDING: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
+  const filteredTeams = useMemo(() => {
+    return teams.filter(t => {
+      // Search
+      if (search && !t.team_name.toLowerCase().includes(search.toLowerCase())) return false;
+      
+      // Role
+      if (roleFilter !== 'ALL' && t.role !== roleFilter) return false;
+      
+      // Status
+      if (statusFilter === 'ACTIVE' && !t.is_active) return false;
+      if (statusFilter === 'ELIMINATED' && t.is_active) return false;
+
+      // Members
+      if (memberFilter === 'FULL' && t.memberCount !== 4) return false;
+      if (memberFilter === 'PARTIAL' && (t.memberCount === 4 || t.memberCount === 0)) return false;
+      if (memberFilter === 'EMPTY' && t.memberCount !== 0) return false;
+
+      // Selection
+      if (selectionFilter === 'FINALIZED' && t.selectionStatus !== 'FINALIZED') return false;
+      if (selectionFilter === 'IN_PROGRESS' && t.selectionStatus !== 'IN_PROGRESS') return false;
+      if (selectionFilter === 'NOT_STARTED' && t.selectionStatus !== 'NOT_STARTED') return false;
+
+      return true;
+    });
+  }, [teams, search, roleFilter, statusFilter, memberFilter, selectionFilter]);
+
+  const roleColors: any = {
+    INNOVATOR: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    INVESTOR: 'bg-green-500/10 text-green-400 border-green-500/20',
+    PENDING: 'bg-gray-500/10 text-gray-400 border-gray-500/20'
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-space-grotesk font-bold">Teams & Registrations</h1>
-        {teams.length > 0 && (
-          <Button
-            variant="ghost"
-            className="text-red-400 border border-red-500/30 hover:bg-red-500/10 hover:text-red-300"
-            onClick={() => setIsClearModalOpen(true)}
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
-            Reset All Data
-          </Button>
-        )}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-space-grotesk font-bold tracking-tight flex items-center gap-2">
+            <Trophy className="text-purple-500" />
+            Teams & Registration
+          </h1>
+          <p className="text-gray-400 mt-1">Manage all registered teams and their progress.</p>
+        </div>
+        <Button 
+          variant="outline" 
+          className="border-red-500/50 hover:bg-red-500/10 text-red-400"
+          onClick={() => setIsClearModalOpen(true)}
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          Reset All Data
+        </Button>
       </div>
 
-      {/* Stats Bar */}
-      <div className="grid grid-cols-5 gap-3">
-        {[
-          { label: 'Total Teams', value: totalTeams, icon: Users, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
-          { label: 'Innovators', value: innovators, icon: Target, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
-          { label: 'Investors', value: investors, icon: Shield, color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
-          { label: 'Pending Role', value: pending, icon: Info, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
-          { label: 'Active Teams', value: active, icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
-        ].map((stat) => (
-          <div key={stat.label} className={`flex items-center gap-3 p-4 rounded-xl border ${stat.bg}`}>
-            <stat.icon className={`w-7 h-7 ${stat.color}`} />
-            <div>
-              <div className={`text-2xl font-black ${stat.color}`}>{stat.value}</div>
-              <div className="text-xs text-gray-400 font-medium">{stat.label}</div>
-            </div>
-          </div>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="md:col-span-2 relative">
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search teams..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-[#16161f] border border-[#2a2a3a] rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:border-purple-500 transition-colors"
+          />
+        </div>
+        <Select 
+          label="Role"
+          options={[
+            { label: 'All Roles', value: 'ALL' },
+            { label: 'Innovator', value: 'INNOVATOR' },
+            { label: 'Investor', value: 'INVESTOR' },
+            { label: 'Pending', value: 'PENDING' }
+          ]}
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+        />
+        <Select 
+          label="Members"
+          options={[
+            { label: 'All Members', value: 'ALL' },
+            { label: 'Full (4/4)', value: 'FULL' },
+            { label: 'Partial (1-3)', value: 'PARTIAL' },
+            { label: 'Empty (0/4)', value: 'EMPTY' }
+          ]}
+          value={memberFilter}
+          onChange={(e) => setMemberFilter(e.target.value)}
+        />
+        <Select 
+          label="Selection"
+          options={[
+            { label: 'All States', value: 'ALL' },
+            { label: 'Finalized', value: 'FINALIZED' },
+            { label: 'In Progress', value: 'IN_PROGRESS' },
+            { label: 'Not Started', value: 'NOT_STARTED' }
+          ]}
+          value={selectionFilter}
+          onChange={(e) => setSelectionFilter(e.target.value)}
+        />
       </div>
 
-      {error && (
-        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center gap-2">
-          <XCircle className="w-4 h-4 flex-shrink-0" /> {error}
-        </div>
-      )}
-      {success && (
-        <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 text-sm flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> {success}
-        </div>
-      )}
-
-      <Card variant="glass">
+      <Card>
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="p-8 text-center text-gray-400">Loading teams...</div>
-          ) : teams.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">No teams registered yet.</div>
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+            </div>
           ) : (
-            <div className="divide-y divide-white/5">
-              {teams.map((team) => (
+            <div className="divide-y divide-[#2a2a3a]">
+              {filteredTeams.map((team) => (
                 <div key={team.id}>
                   {/* Team Row */}
                   <div className="flex items-center gap-4 px-6 py-4 hover:bg-white/[0.02] transition-colors">
                     {/* Team Info */}
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold text-white truncate">{team.team_name}</div>
-                      <div className="text-xs text-gray-500 font-mono mt-0.5">{team.category}</div>
+                      <div className="text-xs text-gray-500 font-mono mt-0.5">{team.categoryName || 'Unassigned Category'}</div>
                     </div>
 
                     {/* Member Count */}
                     <div className="flex items-center gap-1.5 text-sm">
                       <Users className="w-3.5 h-3.5 text-gray-500" />
-                      <span className={`font-bold ${team.team_members?.[0]?.count >= 4 ? 'text-green-400' : 'text-gray-300'}`}>
-                        {team.team_members?.[0]?.count || 0}/4
+                      <span className={`font-bold ${team.memberCount >= 4 ? 'text-green-400' : 'text-gray-300'}`}>
+                        {team.memberCount || 0}/4
                       </span>
                     </div>
+
+                    {/* Selection Status */}
+                    {team.role === 'INNOVATOR' && (
+                      <span className={`inline-flex text-xs font-bold px-2.5 py-1 rounded-full border ${team.selectionStatus === 'FINALIZED' ? 'bg-green-500/10 text-green-400 border-green-500/20' : team.selectionStatus === 'IN_PROGRESS' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
+                        {team.selectionStatus === 'FINALIZED' ? 'Finalized' : team.selectionStatus === 'IN_PROGRESS' ? `${team.selectionsCount} Selected` : 'Not Started'}
+                      </span>
+                    )}
 
                     {/* Status Badge */}
                     <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border ${team.is_active ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
@@ -172,7 +226,7 @@ export default function AdminTeamsPage() {
                       {team.is_active ? 'Active' : 'Eliminated'}
                     </span>
 
-                    {/* Role — always switchable */}
+                    {/* Role — switchable */}
                     <div className="flex items-center gap-2">
                       <span className={`inline-flex text-xs font-bold px-2.5 py-1 rounded-full border ${roleColors[team.role] || 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
                         {team.role}
@@ -227,7 +281,7 @@ export default function AdminTeamsPage() {
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-400">Category</span>
-                              <span className="text-white">{team.category}</span>
+                              <span className="text-white">{team.categoryName || 'Unassigned'}</span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-400">Balance</span>

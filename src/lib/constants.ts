@@ -26,3 +26,14 @@ export const SCORE_RANGE = { min: 1.0, max: 10.0, step: 0.5 }
 export const EVENT_CHANNEL = 'founders-gambit-live'
 export const PRESENCE_CHANNEL = 'founders-gambit-presence'
 export const PHASE_1_ROUNDS = 10
+
+export const CATEGORIES = [
+  'LET US COOK',
+  'WHAT THE FIT',
+  'BON VOYAGE, BESTIE',
+  'DIGITAL DISORDER',
+  'CASH & CHAOS',
+  'FEELING 404'
+]
+
+export const MIN_PROBLEM_SELECTIONS = 4

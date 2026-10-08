@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
-import { Select } from '@/components/ui/select';
 import { registerLeader, registerMember } from '@/app/actions/auth';
 import { Shield, Target, CheckCircle2, XCircle, Users, User, ArrowLeft, Copy } from 'lucide-react';
 
@@ -24,7 +23,6 @@ export default function RegisterPage() {
   
   // Leader Fields
   const [teamName, setTeamName] = useState('');
-  const [category, setCategory] = useState('Technology');
   
   // Member Fields
   const [joinCode, setJoinCode] = useState('');
@@ -36,13 +34,6 @@ export default function RegisterPage() {
   // For Leader Success
   const [generatedCode, setGeneratedCode] = useState<string>('');
   const [copied, setCopied] = useState(false);
-
-  const categories = [
-    { label: 'Technology', value: 'Technology' },
-    { label: 'Healthcare', value: 'Healthcare' },
-    { label: 'Finance', value: 'Finance' },
-    { label: 'Social Impact', value: 'Social Impact' }
-  ];
 
   const handleSelectRole = (selectedRole: 'leader' | 'member') => {
     setRole(selectedRole);
@@ -76,8 +67,7 @@ export default function RegisterPage() {
         const result = await registerLeader({
           leader_name: name,
           team_name: teamName,
-          registration_number: emailPrefix,
-          category
+          registration_number: emailPrefix
         });
 
         if (result?.error) {
@@ -206,13 +196,6 @@ export default function RegisterPage() {
                         placeholder="E.g. NeuralForge"
                         value={teamName}
                         onChange={(e) => setTeamName(e.target.value)}
-                        required
-                      />
-                      <Select
-                        label="Category"
-                        options={categories}
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
                         required
                       />
                     </>

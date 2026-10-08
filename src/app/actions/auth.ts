@@ -14,7 +14,6 @@ const signInSchema = z.object({
 const registerLeaderSchema = z.object({
   registration_number: z.string().min(1),
   team_name: z.string().min(2),
-  category: z.string().min(2),
   leader_name: z.string().min(2)
 })
 
@@ -79,7 +78,6 @@ export async function registerLeader(data: any) {
     // 1. Create the team
     const { data: team, error: teamError } = await adminClient.from('teams').insert({
       team_name: validated.team_name,
-      category: validated.category,
       role: 'PENDING',
       starting_balance: 0,
       current_balance: 0,

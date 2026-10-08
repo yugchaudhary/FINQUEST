@@ -208,3 +208,70 @@ export async function getTeamMembers(teamId: string) {
     return { success: false, error: error.message }
   }
 }
+
+export async function getTeamsWithDetails() {
+  try {
+    const adminClient = createAdminClient()
+    // Fetch all teams with member count, category info, and selection state
+    const { data, error } = await adminClient
+      .from('teams')
+      .select(`
+        *,
+        categories(name, slug),
+        team_members(count),
+        team_problem_selection_state(status),
+        team_problem_selections(count)
+      `)
+      .order('team_name')
+
+    if (error) return { success: false, error: error.message }
+
+    const formattedData = data.map((team: any) => ({
+      ...team,
+      memberCount: team.team_members?.[0]?.count || 0,
+      categoryName: team.categories?.name || null,
+      selectionStatus: team.team_problem_selection_state?.status || 'NOT_STARTED',
+      selectionsCount: team.team_problem_selections?.[0]?.count || 0
+    }))
+
+    return { success: true, data: formattedData }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
+export async function updateTeamCategory(teamId: string, categoryId: string | null) {
+  try {
+    z.string().uuid().parse(teamId)
+    if (categoryId) z.string().uuid().parse(categoryId)
+
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: 'Not authenticated' }
+    
+    const adminClient = createAdminClient()
+    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
+    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+
+    let categoryName = null
+    if (categoryId) {
+      const { data: cat } = await adminClient.from('categories').select('name').eq('id', categoryId).single()
+      if (cat) categoryName = cat.name
+    }
+
+    const { error } = await adminClient.from('teams').update({
+      category_id: categoryId,
+      category: categoryName
+    }).eq('id', teamId)
+
+    if (error) return { success: false, error: error.message }
+
+    await logAdminAction(user.id, 'UPDATE_TEAM_CATEGORY', 'teams', teamId, { categoryId, categoryName })
+    revalidatePath('/admin/teams')
+    revalidatePath('/admin/categories')
+    
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}

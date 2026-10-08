@@ -117,8 +117,8 @@ export default function LandingPage() {
               variants={fadeIn}
               className="font-display text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-br from-white via-gray-200 to-gray-500"
             >
-              THE FOUNDER&apos;S <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500">GAMBIT</span>
+              FOUNDER&apos;S GOT <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500">PATENT</span>
             </motion.h1>
             
             <motion.p
@@ -314,7 +314,7 @@ export default function LandingPage() {
             <Crown className="w-4 h-4" />
             <span className="font-display font-semibold text-gray-300">FINQUEST</span>
           </div>
-          <p>© {new Date().getFullYear()} The Founder&apos;s Gambit. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Founder&apos;s Got Patent. All rights reserved.</p>
           <div className="flex gap-4">
             <a href="#" className="hover:text-white transition-colors">Twitter</a>
             <a href="#" className="hover:text-white transition-colors">LinkedIn</a>

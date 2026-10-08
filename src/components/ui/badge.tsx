@@ -3,7 +3,7 @@
 import React from 'react';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: 'default' | 'live' | 'locked' | 'complete' | 'pending' | 'error' | 'gold';
+  variant?: 'default' | 'live' | 'locked' | 'complete' | 'pending' | 'error' | 'gold' | 'outline';
   size?: 'sm' | 'md';
 }
 
@@ -24,6 +24,7 @@ export const Badge: React.FC<BadgeProps> = ({
     pending: 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
     error: 'bg-red-500/10 text-red-500 border border-red-500/20',
     gold: 'bg-amber-500/10 text-amber-500 border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]',
+    outline: 'bg-transparent text-gray-300 border border-gray-600',
   };
 
   const sizes = {
