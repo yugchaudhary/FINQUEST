@@ -47,7 +47,11 @@ export default function DashboardPage() {
         setCurrentFinalist({ id: eventState.current_finalist_id })
       }
     } else {
-      router.push('/login')
+      if (res.error === 'Not authenticated' || res.error === 'Team not found') {
+        router.push('/login')
+      } else {
+        console.error('Failed to load dashboard:', res.error)
+      }
     }
     setIsLoading(false)
   }

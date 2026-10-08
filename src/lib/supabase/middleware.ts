@@ -15,12 +15,8 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet: any[]) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            const persistentOptions = {
-              ...options,
-              maxAge: options.maxAge ?? 60 * 60 * 24 * 7,
-            }
-            request.cookies.set({ name, value, ...persistentOptions })
+          cookiesToSet.forEach(({ name, value }) => {
+            request.cookies.set(name, value)
           })
           supabaseResponse = NextResponse.next({
             request,
@@ -48,12 +44,16 @@ export async function updateSession(request: NextRequest) {
     if (pathname.startsWith('/dashboard')) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
-      return NextResponse.redirect(url)
+      const redirectResponse = NextResponse.redirect(url)
+      supabaseResponse.cookies.getAll().forEach(c => redirectResponse.cookies.set(c.name, c.value, c))
+      return redirectResponse
     }
     if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
       const url = request.nextUrl.clone()
       url.pathname = '/admin/login'
-      return NextResponse.redirect(url)
+      const redirectResponse = NextResponse.redirect(url)
+      supabaseResponse.cookies.getAll().forEach(c => redirectResponse.cookies.set(c.name, c.value, c))
+      return redirectResponse
     }
   }
 
@@ -68,7 +68,9 @@ export async function updateSession(request: NextRequest) {
     if (userData?.auth_role !== 'ADMIN') {
       const url = request.nextUrl.clone()
       url.pathname = '/admin/login'
-      return NextResponse.redirect(url)
+      const redirectResponse = NextResponse.redirect(url)
+      supabaseResponse.cookies.getAll().forEach(c => redirectResponse.cookies.set(c.name, c.value, c))
+      return redirectResponse
     }
   }
 
