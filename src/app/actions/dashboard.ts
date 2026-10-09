@@ -5,7 +5,9 @@ import { createClient } from '@/lib/supabase/server'
 export async function getDashboardData() {
   try {
     const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) return { success: false, error: 'Network error connecting to auth server' }
+    
     const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
