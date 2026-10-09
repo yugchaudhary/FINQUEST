@@ -55,6 +55,9 @@ export async function assignTeamCategory(teamId: string, categoryId: string) {
 
     await logAdminAction(user.id, 'CATEGORY_ASSIGNED', 'teams', teamId, { categoryId, categoryName: category.name })
 
+    // Force a global realtime update by touching the event_state singleton table
+    await adminClient.from('event_state').update({ updated_at: new Date().toISOString() }).eq('id', 1)
+
     // Broadcast category assignment to participants
     const channel = adminClient.channel(EVENT_CHANNEL)
     await channel.send({

@@ -67,24 +67,43 @@ export default function DashboardPage() {
   useEffect(() => {
     loadData()
 
+    // Add a small randomized delay to prevent thundering herd when 200 users fetch at once
+    let timeoutId: NodeJS.Timeout
+    const throttledLoadData = () => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        loadData()
+      }, Math.random() * 1500) // Random jitter between 0-1.5s
+    }
+
     const supabase = createClient()
     const ch = supabase.channel(EVENT_CHANNEL)
-      .on('broadcast', { event: 'CATEGORY_ASSIGNED' }, loadData)
-      .on('broadcast', { event: 'PROBLEM_PUBLISHED' }, loadData)
-      .on('broadcast', { event: 'PROBLEM_SELECTION_UPDATE' }, loadData)
-      .on('broadcast', { event: 'ANNOUNCEMENT' }, loadData)
-      .on('broadcast', { event: 'ANNOUNCEMENT_DELETED' }, loadData)
-      .on('broadcast', { event: 'PHASE_CHANGE' }, loadData)
-      .on('broadcast', { event: 'LEADERBOARD_PUBLISHED' }, loadData)
-      .on('broadcast', { event: 'FINALS_LEADERBOARD_UPDATE' }, loadData)
+      // Broadcast events (Fallback / Custom payload events)
+      .on('broadcast', { event: 'CATEGORY_ASSIGNED' }, throttledLoadData)
+      .on('broadcast', { event: 'PROBLEM_PUBLISHED' }, throttledLoadData)
+      .on('broadcast', { event: 'PROBLEM_SELECTION_UPDATE' }, throttledLoadData)
+      .on('broadcast', { event: 'ANNOUNCEMENT' }, throttledLoadData)
+      .on('broadcast', { event: 'ANNOUNCEMENT_DELETED' }, throttledLoadData)
+      .on('broadcast', { event: 'PHASE_CHANGE' }, throttledLoadData)
+      .on('broadcast', { event: 'LEADERBOARD_PUBLISHED' }, throttledLoadData)
+      .on('broadcast', { event: 'FINALS_LEADERBOARD_UPDATE' }, throttledLoadData)
       .on('broadcast', { event: 'FINALIST_BROADCAST' }, (msg) => {
         setHasRated(false)
         setCurrentFinalist(msg.payload)
-        loadData()
+        throttledLoadData()
       })
+      // Database changes (Highly reliable, bypasses Serverless edge issues)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_state' }, throttledLoadData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, throttledLoadData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'problem_statements' }, throttledLoadData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'team_problem_selections' }, throttledLoadData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, throttledLoadData)
       .subscribe()
 
-    return () => { supabase.removeChannel(ch) }
+    return () => { 
+      clearTimeout(timeoutId)
+      supabase.removeChannel(ch) 
+    }
   }, [router])
 
   if (isLoading) {
