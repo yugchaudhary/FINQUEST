@@ -45,7 +45,7 @@ export function TeamOverviewCard({ team, members }: TeamOverviewProps) {
                       {team.role}
                     </Badge>
                     <span className="text-slate-500 text-sm">/</span>
-                    <span className="text-slate-600 font-medium text-sm px-3 py-1 bg-white/5 rounded-full border border-white/10">
+                    <span className="text-slate-600 font-medium text-sm px-3 py-1 bg-surface/5 rounded-full border border-white/10">
                       {team.categoryName || 'Category Not Assigned'}
                     </span>
                   </div>

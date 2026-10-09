@@ -49,7 +49,7 @@ export function TeamSetup({ joinCode }: { joinCode?: string }) {
               <div className="text-4xl font-space-grotesk font-black tracking-widest text-white px-6 py-2 bg-black/50 rounded-lg">
                 {joinCode}
               </div>
-              <Button variant="outline" size="sm" onClick={copyCode} className="h-12 px-4 hover:bg-white/10">
+              <Button variant="outline" size="sm" onClick={copyCode} className="h-12 px-4 hover:bg-surface/10">
                 {copied ? <CheckCircle2 className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
               </Button>
             </div>

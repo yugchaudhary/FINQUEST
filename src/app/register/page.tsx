@@ -247,7 +247,7 @@ export default function RegisterPage() {
                     <div className="text-4xl font-space-grotesk font-black tracking-widest text-foreground">
                       {generatedCode}
                     </div>
-                    <Button variant="ghost" size="sm" onClick={copyCode} className="hover:bg-white/10">
+                    <Button variant="ghost" size="sm" onClick={copyCode} className="hover:bg-surface/10">
                       {copied ? <CheckCircle2 className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
                     </Button>
                   </div>

@@ -198,7 +198,7 @@ export default function AdminTeamsPage() {
               {filteredTeams.map((team) => (
                 <div key={team.id}>
                   {/* Team Row */}
-                  <div className="flex items-center gap-4 px-6 py-4 hover:bg-white/[0.02] transition-colors">
+                  <div className="flex items-center gap-4 px-6 py-4 hover:bg-surface/[0.02] transition-colors">
                     {/* Team Info */}
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold text-foreground truncate">{team.team_name}</div>

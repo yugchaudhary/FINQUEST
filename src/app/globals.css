@@ -6,10 +6,10 @@
 
 @layer base {
   :root {
-    --background: #f8fafc;
+    --background: #f1f5f9;
     --foreground: #0f172a;
-    --surface: #ffffff;
-    --surface-2: #f1f5f9;
+    --surface: #f8fafc;
+    --surface-2: #e2e8f0;
     --border: #000000;
     --border-light: #94a3b8;
     --muted: #64748b;
@@ -29,7 +29,7 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    background-color: #f8fafc;
+    background-color: #f1f5f9;
     background-image: 
       radial-gradient(circle at 15% 50%, rgba(94, 179, 209, 0.15), transparent 25%),
       radial-gradient(circle at 85% 30%, rgba(37, 99, 235, 0.1), transparent 25%),
@@ -47,13 +47,13 @@
   }
   
   ::-webkit-scrollbar-track {
-    background: #f8fafc;
+    background: #f1f5f9;
     border-left: 1px solid #000;
   }
   
   ::-webkit-scrollbar-thumb {
     background: #000;
-    border: 2px solid #f8fafc;
+    border: 2px solid #f1f5f9;
     border-radius: 6px;
   }
   
@@ -65,7 +65,7 @@
 @layer components {
   /* Polished Neo-Brutalist Card */
   .glass-card {
-    @apply bg-white border-2 border-black rounded-xl;
+    @apply bg-surface border-2 border-black rounded-xl;
     box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
     transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
@@ -87,7 +87,7 @@
 
   /* Red team card */
   .team-card-red {
-    @apply glass-card border-2 border-black bg-white;
+    @apply glass-card border-2 border-black bg-surface;
   }
 
   .team-card-red.selected {
@@ -97,7 +97,7 @@
 
   /* Blue team card */
   .team-card-blue {
-    @apply glass-card border-2 border-black bg-white;
+    @apply glass-card border-2 border-black bg-surface;
   }
 
   .team-card-blue.selected {
@@ -127,7 +127,7 @@
 
   /* Range slider custom styling */
   input[type='range'] {
-    @apply appearance-none w-full h-3 rounded-full bg-white border-2 border-black outline-none;
+    @apply appearance-none w-full h-3 rounded-full bg-surface border-2 border-black outline-none;
     box-shadow: 2px 2px 0px 0px rgba(0,0,0,1);
   }
 

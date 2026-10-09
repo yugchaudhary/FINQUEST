@@ -61,7 +61,7 @@ export default function LoginPage() {
             <p className="text-slate-500">Sign in to your participant account</p>
           </div>
 
-          <Card className="bg-white/5 border-white/10 backdrop-blur-xl shadow-2xl">
+          <Card className="bg-surface/5 border-white/10 backdrop-blur-xl shadow-2xl">
             <CardHeader>
               <CardTitle className="text-xl">Welcome Back</CardTitle>
               <CardDescription className="text-slate-500">Enter your credentials to access the board.</CardDescription>

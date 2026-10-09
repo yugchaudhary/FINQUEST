@@ -74,7 +74,7 @@ export default function LandingPage() {
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-10 border-b border-border bg-white/80 backdrop-blur-md">
+      <nav className="relative z-10 border-b border-border bg-surface/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg overflow-hidden border border-border shadow-sm"><img src="/logo.png" alt="FYI" className="w-full h-full object-cover" /></div>
@@ -179,7 +179,7 @@ export default function LandingPage() {
                 { icon: Trophy, title: "1 Champion", desc: "Only the strongest strategy will prevail." }
               ].map((item, i) => (
                 <motion.div key={i} variants={fadeIn}>
-                  <Card className="bg-white border-border hover:bg-slate-50 shadow-sm transition-colors h-full">
+                  <Card className="bg-surface border-border hover:bg-surface-2 shadow-sm transition-colors h-full">
                     <CardContent className="p-8 text-center flex flex-col items-center">
                       <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mb-6 text-accent">
                         <item.icon className="w-7 h-7 animate-bounce-subtle" />
@@ -210,7 +210,7 @@ export default function LandingPage() {
                 variants={fadeIn}
                 className="relative p-1 rounded-2xl bg-gradient-to-b from-blue-500/20 to-transparent"
               >
-                <div className="bg-white rounded-xl p-8 h-full border border-border shadow-md">
+                <div className="bg-surface rounded-xl p-8 h-full border border-border shadow-md">
                   <Badge className="bg-blue-500/10 text-blue-400 hover:bg-blue-500/30 mb-6">Phase 1</Badge>
                   <h3 className="text-3xl font-display font-bold mb-4 flex items-center gap-3">
                     <Swords className="text-blue-500" />
@@ -243,7 +243,7 @@ export default function LandingPage() {
                 variants={fadeIn}
                 className="relative p-1 rounded-2xl bg-gradient-to-b from-accent/20 to-transparent"
               >
-                <div className="bg-white rounded-xl p-8 h-full border border-border shadow-md">
+                <div className="bg-surface rounded-xl p-8 h-full border border-border shadow-md">
                   <Badge className="bg-accent/10 text-accent hover:bg-accent/30 mb-6">Phase 2</Badge>
                   <h3 className="text-3xl font-display font-bold mb-4 flex items-center gap-3">
                     <Crown className="text-accent" />
@@ -292,7 +292,7 @@ export default function LandingPage() {
                 { name: "Impact", icon: TrendingUp, color: "text-accent" }
               ].map((cat, i) => (
                 <motion.div key={i} variants={fadeIn}>
-                  <Card className="bg-white border-border hover:bg-slate-50 shadow-sm transition-colors cursor-pointer group">
+                  <Card className="bg-surface border-border hover:bg-surface-2 shadow-sm transition-colors cursor-pointer group">
                     <CardContent className="p-6 text-center flex flex-col items-center">
                       <cat.icon className={`w-8 h-8 mb-4 animate-float ${cat.color} group-hover:scale-110 transition-transform`} />
                       <h4 className="font-semibold text-lg">{cat.name}</h4>
@@ -306,7 +306,7 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 py-12 px-6 border-t border-white/10 bg-white">
+      <footer className="relative z-10 py-12 px-6 border-t border-white/10 bg-surface">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-slate-500">
           <div className="flex items-center gap-2">
             <Crown className="w-4 h-4" />

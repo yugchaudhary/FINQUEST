@@ -60,7 +60,7 @@ function StatusBadge({ status }: { status: string }) {
     GAMBITS_CLOSED: { label: 'GAMBITS CLOSED', className: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
     AWAITING_JUDGE_RESULT: { label: 'AWAITING RESULT', className: 'bg-purple-500/10 text-purple-400 border-purple-500/30' },
   }
-  const s = map[status] || { label: status, className: 'bg-white/5 text-slate-500 border-white/10' }
+  const s = map[status] || { label: status, className: 'bg-surface/5 text-slate-500 border-white/10' }
   return (
     <span className={`text-xs font-bold px-3 py-1 rounded-full border uppercase tracking-wider ${s.className}`}>
       {s.label}
@@ -289,7 +289,7 @@ export default function AdminLiveMatchPage() {
                     className={`px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
                       selectedCategory === cat
                         ? 'bg-accent/20 border-accent/60 text-accent'
-                        : 'bg-white/[0.03] border-white/10 text-slate-500 hover:border-accent/30 hover:text-gray-200'
+                        : 'bg-surface/[0.03] border-white/10 text-slate-500 hover:border-accent/30 hover:text-gray-200'
                     }`}
                   >
                     {cat}
@@ -327,8 +327,8 @@ export default function AdminLiveMatchPage() {
                           isSelected
                             ? 'bg-red-500/20 border-red-500/50 text-white font-semibold shadow-[0_0_20px_rgba(239,68,68,0.1)]'
                             : isDisabled
-                            ? 'opacity-25 cursor-not-allowed bg-white/[0.02] border-white/5 text-slate-500'
-                            : 'bg-white/[0.03] border-white/8 text-slate-600 hover:border-red-500/30 hover:bg-red-500/5'
+                            ? 'opacity-25 cursor-not-allowed bg-surface/[0.02] border-white/5 text-slate-500'
+                            : 'bg-surface/[0.03] border-white/8 text-slate-600 hover:border-red-500/30 hover:bg-red-500/5'
                         }`}
                       >
                         <div className="font-medium">{team.team_name}</div>
@@ -360,8 +360,8 @@ export default function AdminLiveMatchPage() {
                           isSelected
                             ? 'bg-blue-500/20 border-blue-500/50 text-white font-semibold shadow-[0_0_20px_rgba(59,130,246,0.1)]'
                             : isDisabled
-                            ? 'opacity-25 cursor-not-allowed bg-white/[0.02] border-white/5 text-slate-500'
-                            : 'bg-white/[0.03] border-white/8 text-slate-600 hover:border-blue-500/30 hover:bg-blue-500/5'
+                            ? 'opacity-25 cursor-not-allowed bg-surface/[0.02] border-white/5 text-slate-500'
+                            : 'bg-surface/[0.03] border-white/8 text-slate-600 hover:border-blue-500/30 hover:bg-blue-500/5'
                         }`}
                       >
                         <div className="font-medium">{team.team_name}</div>
@@ -381,7 +381,7 @@ export default function AdminLiveMatchPage() {
             className={`w-full h-14 rounded-xl font-bold text-base tracking-wider transition-all ${
               isReady
                 ? 'bg-accent hover:bg-[#7c3aed] text-white shadow-[0_0_30px_rgba(139,92,246,0.2)] hover:shadow-[0_0_40px_rgba(139,92,246,0.35)]'
-                : 'bg-white/5 text-gray-600 cursor-not-allowed border border-white/5'
+                : 'bg-surface/5 text-gray-600 cursor-not-allowed border border-white/5'
             }`}
           >
             {!isReady
@@ -404,7 +404,7 @@ export default function AdminLiveMatchPage() {
               This will immediately open Gambits for all eligible Investors.
             </p>
             <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="bg-white/[0.03] rounded-xl p-4 text-center">
+              <div className="bg-surface/[0.03] rounded-xl p-4 text-center">
                 <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">Category</div>
                 <div className="font-bold text-foreground">{selectedCategory}</div>
               </div>
@@ -507,7 +507,7 @@ export default function AdminLiveMatchPage() {
               </button>
               <button
                 disabled
-                className="flex-1 h-12 rounded-xl bg-white/[0.02] border border-white/5 text-gray-600 cursor-not-allowed font-bold text-sm"
+                className="flex-1 h-12 rounded-xl bg-surface/[0.02] border border-white/5 text-gray-600 cursor-not-allowed font-bold text-sm"
                 title="Lock Gambits first"
               >
                 Enter Result
@@ -600,7 +600,7 @@ export default function AdminLiveMatchPage() {
                   className={`flex items-center gap-4 px-4 py-3.5 border rounded-xl cursor-pointer transition-all ${
                     isSelected
                       ? 'border-accent/60 bg-accent/10'
-                      : 'border-white/8 hover:border-white/20 hover:bg-white/[0.02]'
+                      : 'border-white/8 hover:border-white/20 hover:bg-surface/[0.02]'
                   }`}
                 >
                   <input
@@ -637,7 +637,7 @@ export default function AdminLiveMatchPage() {
             className={`w-full h-14 rounded-xl font-bold text-base tracking-wide transition-all ${
               selectedScore
                 ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                : 'bg-white/5 text-gray-600 cursor-not-allowed'
+                : 'bg-surface/5 text-gray-600 cursor-not-allowed'
             }`}
           >
             Submit Results & Settle Gambits

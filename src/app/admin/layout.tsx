@@ -125,7 +125,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-background relative">
         {/* Logo in top right */}
-        <div className="absolute top-4 right-4 md:top-8 md:right-8 h-12 w-12 rounded-full overflow-hidden border border-border shadow-sm z-40 bg-white">
+        <div className="absolute top-4 right-4 md:top-8 md:right-8 h-12 w-12 rounded-full overflow-hidden border border-border shadow-sm z-40 bg-surface">
           <img src="/logo.png" alt="FYI Logo" className="w-full h-full object-cover" />
         </div>
         <div className="max-w-7xl mx-auto h-full">

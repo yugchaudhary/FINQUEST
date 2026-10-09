@@ -25,7 +25,7 @@ export function DashboardNav({ user, team, eventState }: DashboardNavProps) {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-16 bg-white/90 backdrop-blur-md border-b border-border z-50 px-4 md:px-8 flex items-center justify-between">
+    <nav className="fixed top-0 left-0 right-0 h-16 bg-surface/90 backdrop-blur-md border-b border-border z-50 px-4 md:px-8 flex items-center justify-between">
       <div className="flex items-center gap-4">
         <h1 className="font-space-grotesk font-black text-xl text-foreground hidden sm:block">
           FOUNDER&apos;S GOT PATENT

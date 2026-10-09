@@ -68,7 +68,7 @@ export const Slider: React.FC<SliderProps> = ({
         />
         
         <div 
-          className={`absolute h-6 w-6 rounded-full bg-white shadow-lg pointer-events-none transform -translate-x-1/2 transition-transform duration-150 ${isDragging ? 'scale-125' : 'scale-100 group-hover:scale-110'}`}
+          className={`absolute h-6 w-6 rounded-full bg-surface shadow-lg pointer-events-none transform -translate-x-1/2 transition-transform duration-150 ${isDragging ? 'scale-125' : 'scale-100 group-hover:scale-110'}`}
           style={{ 
             left: `${percentage}%`,
             border: `2px solid ${color}`

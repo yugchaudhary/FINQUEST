@@ -168,7 +168,7 @@ export function ProblemSelectionPanel({ problems, selections, selectionState, on
               `}
             >
               <div className="flex justify-between items-start mb-4">
-                <Badge variant="outline" className={`font-mono ${isSelected ? 'bg-purple-500/20 text-purple-300 border-purple-500/30' : 'bg-white/5 text-slate-500 border-white/10'}`}>
+                <Badge variant="outline" className={`font-mono ${isSelected ? 'bg-purple-500/20 text-purple-300 border-purple-500/30' : 'bg-surface/5 text-slate-500 border-white/10'}`}>
                   #{String(p.number).padStart(2, '0')}
                 </Badge>
                 {isSelected && (
@@ -195,12 +195,12 @@ export function ProblemSelectionPanel({ problems, selections, selectionState, on
       {selections.length > 0 && (
         <Card className="w-full bg-surface border-border overflow-hidden mb-8">
           <button 
-            className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+            className="w-full p-4 flex items-center justify-between hover:bg-surface/5 transition-colors"
             onClick={() => setShowSummary(!showSummary)}
           >
             <div className="flex items-center gap-3">
               <h3 className="font-space-grotesk font-bold text-foreground">YOUR SELECTED PROBLEMS</h3>
-              <Badge variant="outline" className="bg-white/5 text-slate-500 border-white/10">{selections.length}</Badge>
+              <Badge variant="outline" className="bg-surface/5 text-slate-500 border-white/10">{selections.length}</Badge>
             </div>
             {showSummary ? <ChevronUp className="w-5 h-5 text-slate-500" /> : <ChevronDown className="w-5 h-5 text-slate-500" />}
           </button>

@@ -66,7 +66,7 @@ export default function AdminLoginPage() {
             <p className="text-slate-500 uppercase tracking-widest text-sm font-semibold">Authorized Personnel Only</p>
           </div>
 
-          <Card className="bg-white/5 border-red-500/20 backdrop-blur-xl shadow-2xl">
+          <Card className="bg-surface/5 border-red-500/20 backdrop-blur-xl shadow-2xl">
             <CardHeader>
               <CardTitle className="text-xl text-red-100">System Access</CardTitle>
               <CardDescription className="text-slate-500">Enter administrator credentials to proceed.</CardDescription>

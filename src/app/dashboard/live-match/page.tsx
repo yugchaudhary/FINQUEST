@@ -219,7 +219,7 @@ export default function ParticipantLiveMatchPage() {
                     key={amt}
                     variant="outline"
                     onClick={() => setAmountStr(amt.toString())}
-                    className={`border-border hover:bg-white/5 ${amountStr === amt.toString() ? 'bg-purple-500/20 text-purple-400 border-purple-500/50' : 'text-slate-500'}`}
+                    className={`border-border hover:bg-surface/5 ${amountStr === amt.toString() ? 'bg-purple-500/20 text-purple-400 border-purple-500/50' : 'text-slate-500'}`}
                     disabled={amt > team.current_balance}
                   >
                     {QUICK_AMOUNT_LABELS[idx]}

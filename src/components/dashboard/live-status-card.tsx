@@ -77,7 +77,7 @@ export function LiveStatusCard({ eventState, team }: LiveStatusCardProps) {
           
           <Button 
             onClick={() => router.push('/dashboard/live-match')}
-            className="w-full md:w-auto bg-white text-black hover:bg-gray-200 font-bold"
+            className="w-full md:w-auto bg-surface text-black hover:bg-gray-200 font-bold"
             size="lg"
           >
             ENTER LIVE MATCH
