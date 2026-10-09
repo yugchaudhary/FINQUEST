@@ -97,7 +97,7 @@ export function Phase1Leaderboard({ leaderboardData }: Phase1LeaderboardProps) {
 
               {/* Team Name */}
               <div className="flex-1">
-                <span className={`font-medium ${entry.rank <= 3 ? 'text-white' : 'text-slate-600'}`}>
+                <span className={`font-medium ${entry.rank <= 3 ? 'text-black' : 'text-slate-600'}`}>
                   {entry.team_name}
                 </span>
                 <span className="md:hidden text-xs text-slate-500 block mt-0.5">{entry.category}</span>

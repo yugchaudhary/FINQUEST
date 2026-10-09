@@ -87,7 +87,7 @@ export function FinalsLeaderboard({ data }: FinalsLeaderboardProps) {
 
             {/* Team */}
             <div className="flex-1">
-              <span className={`font-display text-lg ${entry.rank === 1 ? 'text-gambit-gold' : entry.rank <= 3 ? 'text-white' : 'text-slate-600'}`}>
+              <span className={`font-display text-lg ${entry.rank === 1 ? 'text-gambit-gold' : entry.rank <= 3 ? 'text-black' : 'text-slate-600'}`}>
                 {entry.team_name}
               </span>
             </div>
@@ -95,7 +95,7 @@ export function FinalsLeaderboard({ data }: FinalsLeaderboardProps) {
             {/* Score */}
             <div className="w-32 text-right">
               <span className={`font-mono text-xl font-bold ${
-                entry.rank === 1 ? 'text-gambit-gold' : 'text-white'
+                entry.rank === 1 ? 'text-gambit-gold' : 'text-black'
               }`}>
                 {formatScore(entry.final_score)}
               </span>

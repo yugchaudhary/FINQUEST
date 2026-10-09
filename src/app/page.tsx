@@ -20,7 +20,13 @@ import {
   ChevronRight,
   Zap,
   BarChart3,
-  Shield
+  Shield,
+  Utensils,
+  Dumbbell,
+  Plane,
+  MonitorSmartphone,
+  Banknote,
+  Ghost
 } from 'lucide-react';
 
 const fadeIn = {
@@ -174,9 +180,9 @@ export default function LandingPage() {
               className="grid grid-cols-1 md:grid-cols-3 gap-6"
             >
               {[
-                { icon: Users, title: "20 Teams", desc: "Elite founders pitching their boldest visions." },
-                { icon: Target, title: "10 Rounds", desc: "Intense evaluation and strategic maneuvering." },
-                { icon: Trophy, title: "1 Champion", desc: "Only the strongest strategy will prevail." }
+                { icon: Users, title: "Teams of 4", desc: "Collaborate and brainstorm with 3 other visionary founders." },
+                { icon: Target, title: "6 Categories", desc: "Each with 20 distinct, chaotic problem statements to choose from." },
+                { icon: Trophy, title: "1 Ultimate Pitch", desc: "Combine 4 problems into one product. Weird, funny, and pitchable wins!" }
               ].map((item, i) => (
                 <motion.div key={i} variants={fadeIn}>
                   <Card className="bg-surface border-border hover:bg-surface-2 shadow-sm transition-colors h-full">
@@ -283,13 +289,15 @@ export default function LandingPage() {
               whileInView="visible"
               viewport={{ once: true }}
               variants={staggerContainer}
-              className="grid grid-cols-2 md:grid-cols-4 gap-4"
+              className="grid grid-cols-2 md:grid-cols-3 gap-6"
             >
               {[
-                { name: "Tech & AI", icon: Zap, color: "text-yellow-500" },
-                { name: "Finance", icon: BarChart3, color: "text-green-500" },
-                { name: "Health", icon: Shield, color: "text-blue-500" },
-                { name: "Impact", icon: TrendingUp, color: "text-accent" }
+                { name: "Let Us Cook", icon: Utensils, color: "text-orange-500" },
+                { name: "What the Fit", icon: Dumbbell, color: "text-green-500" },
+                { name: "Bon Voyage, Bestie", icon: Plane, color: "text-blue-500" },
+                { name: "Digital Disorder", icon: MonitorSmartphone, color: "text-purple-500" },
+                { name: "Cash & Chaos", icon: Banknote, color: "text-yellow-500" },
+                { name: "Feeling 404", icon: Ghost, color: "text-slate-500" }
               ].map((cat, i) => (
                 <motion.div key={i} variants={fadeIn}>
                   <Card className="bg-surface border-border hover:bg-surface-2 shadow-sm transition-colors cursor-pointer group">
