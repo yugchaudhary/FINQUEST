@@ -125,7 +125,7 @@ export function LiveStatusCard({ eventState, team, selectionState, problemsPubli
       animate={{ opacity: 1, y: 0 }}
       className="w-full"
     >
-      <div className="text-xs font-bold text-gray-500 tracking-widest mb-3 ml-1">WHAT'S HAPPENING NOW</div>
+      <div className="text-xs font-bold text-gray-500 tracking-widest mb-3 ml-1">WHAT&apos;S HAPPENING NOW</div>
       <Card className="w-full bg-[#16161f] border-[#2a2a3a] overflow-hidden relative group">
         {screen === 'MATCH_LIVE' && !gambitLocked && (
           <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-transparent to-blue-500/5 pointer-events-none" />

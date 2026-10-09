@@ -78,7 +78,7 @@ export function ProblemSelectionPanel({ problems, selections, selectionState, on
           <CardContent className="flex flex-col items-center justify-center py-16 text-gray-500">
             <FileText className="w-10 h-10 mb-4 opacity-50" />
             <p className="text-lg font-medium text-white mb-2">Problem Statements Not Available</p>
-            <p>Your category's problem statements haven't been published yet.</p>
+            <p>Your category&apos;s problem statements haven&apos;t been published yet.</p>
           </CardContent>
         </Card>
       </div>
@@ -108,7 +108,7 @@ export function ProblemSelectionPanel({ problems, selections, selectionState, on
             </h3>
             <p className="text-sm text-gray-400">
               {isFinalized 
-                ? "Your team's selection is locked."
+                ? "Your team&apos;s selection is locked."
                 : `Combine at least ${MIN_PROBLEM_SELECTIONS} problems into ONE solution.`}
             </p>
           </div>

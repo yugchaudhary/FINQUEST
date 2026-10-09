@@ -11,7 +11,7 @@ interface FinalistCardProps {
 export function FinalistCard({ isFinalist, teamName }: FinalistCardProps) {
   return (
     <div className="w-full pt-8">
-      <div className="text-xs font-bold text-gray-500 tracking-widest mb-4 ml-1">WHAT'S NEXT?</div>
+      <div className="text-xs font-bold text-gray-500 tracking-widest mb-4 ml-1">WHAT&apos;S NEXT?</div>
       
       <motion.div
         initial={{ opacity: 0, y: 20 }}
