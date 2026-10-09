@@ -15,16 +15,15 @@ const config: Config = {
         surface: 'var(--surface)',
         'surface-2': 'var(--surface-2)',
         border: 'var(--border)',
-        accent: 'var(--accent)',
         'border-light': 'var(--border-light)',
+        accent: 'var(--accent)',
         
-        // Core backgrounds (legacy, keeping just in case)
+        // Core backgrounds (legacy)
         gambit: {
           bg: 'var(--background)',
           surface: 'var(--surface)',
           'surface-2': 'var(--surface-2)',
           border: 'var(--border)',
-        accent: 'var(--accent)',
           'border-light': 'var(--border-light)',
         },
         // Team colors
@@ -50,19 +49,10 @@ const config: Config = {
           bg: 'rgba(245, 158, 11, 0.1)',
         },
         'gambit-purple': {
-          DEFAULT: '#5eb3d1', // Updated to match logo light blue
+          DEFAULT: '#5eb3d1',
           hover: '#4ea2c0',
           dark: '#3e91b0',
           bg: 'rgba(94, 179, 209, 0.1)',
-        },
-        // Status colors
-        'profit-green': {
-          DEFAULT: '#22c55e',
-          bg: 'rgba(34, 197, 94, 0.1)',
-        },
-        'loss-red': {
-          DEFAULT: '#ef4444',
-          bg: 'rgba(239, 68, 68, 0.1)',
         },
       },
       fontFamily: {
@@ -73,16 +63,26 @@ const config: Config = {
       keyframes: {
         'pulse-live': {
           '0%, 100%': { opacity: '1', transform: 'scale(1)' },
-          '50%': { opacity: '0.5', transform: 'scale(1.5)' },
+          '50%': { opacity: '0.8', transform: 'scale(1.2)' },
         },
-        'glow': {
-          '0%, 100%': { boxShadow: '0 0 5px rgba(94, 179, 209, 0.3)' },
-          '50%': { boxShadow: '0 0 20px rgba(94, 179, 209, 0.6)' },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        'wiggle': {
+          '0%, 100%': { transform: 'rotate(-3deg)' },
+          '50%': { transform: 'rotate(3deg)' },
+        },
+        'bounce-subtle': {
+          '0%, 100%': { transform: 'translateY(-5%)' },
+          '50%': { transform: 'translateY(0)' },
         },
       },
       animation: {
-        'pulse-live': 'pulse-live 2s ease-in-out infinite',
-        'glow': 'glow 2s ease-in-out infinite',
+        'pulse-live': 'pulse-live 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'float': 'float 3s ease-in-out infinite',
+        'wiggle': 'wiggle 1s ease-in-out infinite',
+        'bounce-subtle': 'bounce-subtle 2s infinite',
       },
     },
   },

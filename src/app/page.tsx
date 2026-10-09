@@ -105,7 +105,7 @@ export default function LandingPage() {
               variants={fadeIn}
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-purple-500/20 text-accent text-sm font-medium mb-8"
             >
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-accent animate-pulse-live"></span>
               Live Event Registration Open
             </motion.div>
             
@@ -182,7 +182,7 @@ export default function LandingPage() {
                   <Card className="bg-white border-border hover:bg-slate-50 shadow-sm transition-colors h-full">
                     <CardContent className="p-8 text-center flex flex-col items-center">
                       <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mb-6 text-accent">
-                        <item.icon className="w-7 h-7" />
+                        <item.icon className="w-7 h-7 animate-bounce-subtle" />
                       </div>
                       <h3 className="text-2xl font-display font-bold mb-2">{item.title}</h3>
                       <p className="text-slate-500">{item.desc}</p>
@@ -294,7 +294,7 @@ export default function LandingPage() {
                 <motion.div key={i} variants={fadeIn}>
                   <Card className="bg-white border-border hover:bg-slate-50 shadow-sm transition-colors cursor-pointer group">
                     <CardContent className="p-6 text-center flex flex-col items-center">
-                      <cat.icon className={`w-8 h-8 mb-4 ${cat.color} group-hover:scale-110 transition-transform`} />
+                      <cat.icon className={`w-8 h-8 mb-4 animate-float ${cat.color} group-hover:scale-110 transition-transform`} />
                       <h4 className="font-semibold text-lg">{cat.name}</h4>
                     </CardContent>
                   </Card>

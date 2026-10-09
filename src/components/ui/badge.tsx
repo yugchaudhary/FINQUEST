@@ -1,39 +1,25 @@
-'use client';
+import * as React from 'react';
 
-import React from 'react';
-
-export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'live' | 'locked' | 'complete' | 'pending' | 'error' | 'gold' | 'outline';
-  size?: 'sm' | 'md';
 }
 
-export const Badge: React.FC<BadgeProps> = ({ 
-  className = '', 
-  variant = 'default', 
-  size = 'md',
-  children,
-  ...props 
-}) => {
-  const baseStyles = 'inline-flex items-center justify-center rounded-full font-medium';
+export function Badge({ className = '', variant = 'default', children, ...props }: BadgeProps) {
+  const baseStyles = 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-colors border-2 border-black';
   
   const variants = {
-    default: 'bg-surface-2 text-slate-500 border border-border',
-    live: 'bg-red-500/10 text-red-500 border border-red-500/20',
-    locked: 'bg-surface-2 text-slate-500 border border-border',
-    complete: 'bg-green-500/10 text-green-500 border border-green-500/20',
-    pending: 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
-    error: 'bg-red-500/10 text-red-500 border border-red-500/20',
-    gold: 'bg-amber-500/10 text-amber-500 border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]',
-    outline: 'bg-transparent text-slate-600 border border-gray-600',
-  };
-
-  const sizes = {
-    sm: 'px-2 py-0.5 text-xs',
-    md: 'px-3 py-1 text-sm',
+    default: 'bg-white text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+    live: 'bg-red-50 text-red-600 shadow-[2px_2px_0px_0px_rgba(239,68,68,1)] border-red-200',
+    locked: 'bg-slate-100 text-slate-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+    complete: 'bg-green-100 text-green-800 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+    pending: 'bg-yellow-100 text-yellow-800 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+    error: 'bg-red-100 text-red-800 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+    gold: 'bg-yellow-100 text-yellow-800 border-yellow-500 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+    outline: 'bg-white text-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
   };
 
   return (
-    <span className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`} {...props}>
+    <div className={`${baseStyles} ${variants[variant]} ${className}`} {...props}>
       {variant === 'live' && (
         <span className="mr-1.5 flex h-2 w-2 relative">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -41,6 +27,6 @@ export const Badge: React.FC<BadgeProps> = ({
         </span>
       )}
       {children}
-    </span>
+    </div>
   );
-};
+}

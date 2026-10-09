@@ -11,31 +11,29 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className = '', variant = 'default', size = 'md', isLoading = false, children, disabled, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 focus:ring-offset-[#0a0a0f] disabled:opacity-50 disabled:pointer-events-none';
+    const baseStyles = 'inline-flex items-center justify-center font-bold border-2 border-black transition-all focus:outline-none focus:ring-4 focus:ring-blue-500/30 disabled:opacity-50 disabled:pointer-events-none active:translate-x-[2px] active:translate-y-[2px] active:shadow-none';
     
     const variants = {
-      default: 'bg-accent text-white hover:bg-[#4ea2c0]',
-      destructive: 'bg-red-600 text-white hover:bg-red-700',
-      outline: 'border border-border bg-transparent hover:bg-surface-2 text-foreground',
-      ghost: 'bg-transparent hover:bg-surface-2 text-foreground',
-      'gambit-red': 'bg-[#ef4444] text-white hover:bg-[#dc2626] shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:shadow-[0_0_20px_rgba(239,68,68,0.5)]',
-      'gambit-blue': 'bg-[#3b82f6] text-white hover:bg-[#2563eb] shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]',
-      success: 'bg-[#22c55e] text-white hover:bg-[#16a34a]',
-      gold: 'bg-[#f59e0b] text-white hover:bg-[#d97706] shadow-[0_0_15px_rgba(245,158,11,0.3)]',
+      default: 'bg-accent text-black hover:bg-[#4ea2c0] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]',
+      destructive: 'bg-red-500 text-black hover:bg-red-600 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]',
+      outline: 'bg-white hover:bg-slate-100 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]',
+      ghost: 'bg-transparent border-transparent hover:bg-slate-100 text-black shadow-none active:translate-x-0 active:translate-y-0',
+      'gambit-red': 'bg-[#ef4444] text-black hover:bg-[#dc2626] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]',
+      'gambit-blue': 'bg-[#3b82f6] text-black hover:bg-[#2563eb] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]',
+      success: 'bg-[#22c55e] text-black hover:bg-[#16a34a] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]',
+      gold: 'bg-[#f59e0b] text-black hover:bg-[#d97706] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]',
     };
 
     const sizes = {
-      sm: 'h-8 px-3 text-xs',
-      md: 'h-10 px-4 py-2 text-sm',
-      lg: 'h-12 px-8 text-base',
-      xl: 'h-16 px-10 text-lg uppercase tracking-wider font-bold',
+      sm: 'h-8 px-3 text-xs rounded-md',
+      md: 'h-10 px-4 py-2 text-sm rounded-lg',
+      lg: 'h-12 px-8 text-base rounded-xl',
+      xl: 'h-16 px-10 text-lg uppercase tracking-wider font-black rounded-2xl',
     };
 
     return (
       <motion.button
         ref={ref}
-        whileHover={{ scale: disabled || isLoading ? 1 : 1.02 }}
-        whileTap={{ scale: disabled || isLoading ? 1 : 0.98 }}
         className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
         disabled={disabled || isLoading}
         {...(props as any)}
