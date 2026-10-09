@@ -33,9 +33,12 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
+  // Use getSession instead of getUser in middleware to prevent Supabase Auth API rate limits 
+  // from logging out all active users when there is high traffic.
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
+  const user = session?.user
 
   const pathname = request.nextUrl.pathname
 

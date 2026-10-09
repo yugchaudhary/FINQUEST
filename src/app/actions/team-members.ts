@@ -15,7 +15,8 @@ export async function addTeamMember(data: any) {
   try {
     const validated = memberSchema.parse(data)
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()
@@ -46,7 +47,8 @@ export async function addTeamMember(data: any) {
 export async function removeTeamMember(memberId: string) {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const { error } = await supabase.from('team_members').delete().eq('id', memberId)
@@ -62,7 +64,8 @@ export async function removeTeamMember(memberId: string) {
 export async function getTeamMembers() {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const { data, error } = await supabase.from('team_members').select('*').order('created_at', { ascending: true })

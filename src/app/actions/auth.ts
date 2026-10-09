@@ -271,7 +271,8 @@ export async function signOut() {
 export async function getSession() {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()

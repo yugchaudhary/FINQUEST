@@ -43,7 +43,8 @@ export async function confirmImport(teams: Array<{category: string, team_name: s
   try {
     const validated = z.array(teamSchema).parse(teams)
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
@@ -100,7 +101,8 @@ export async function updateTeamRole(teamId: string, role: 'INNOVATOR'|'INVESTOR
     z.string().uuid().parse(teamId)
     roleSchema.parse(role)
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
@@ -123,7 +125,8 @@ export async function updateStartingBalance(teamId: string, balance: number) {
     z.string().uuid().parse(teamId)
     z.number().positive().parse(balance)
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
@@ -167,7 +170,8 @@ export async function getTeamsByCategory(category: string) {
 export async function clearAllTeams() {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
@@ -246,7 +250,8 @@ export async function updateTeamCategory(teamId: string, categoryId: string | nu
     if (categoryId) z.string().uuid().parse(categoryId)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()

@@ -29,7 +29,8 @@ export async function changeTeamStatus(teamId: string, newRole: 'INNOVATOR' | 'I
     z.enum(['INNOVATOR', 'INVESTOR']).parse(newRole)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()
@@ -51,7 +52,8 @@ export async function initializeFinals(finalistTeamIds: string[]) {
     z.array(z.string().uuid()).min(1).parse(finalistTeamIds)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()
@@ -100,7 +102,8 @@ export async function broadcastFinalist(finalistTeamId: string) {
     z.string().uuid().parse(finalistTeamId)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()
@@ -152,7 +155,8 @@ export async function submitInvestorScore(finalistTeamId: string, score: number)
     }
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()
@@ -215,7 +219,8 @@ export async function calculateFinalistScore(data: {
     const judgesAvg = z.number().min(1.0).max(10.0).parse(data.judges_average)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()
@@ -278,7 +283,8 @@ export async function calculateFinalistScore(data: {
 export async function publishFinalsLeaderboard() {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()
@@ -329,7 +335,8 @@ export async function hasRatedFinalist(finalistTeamId: string) {
   try {
     z.string().uuid().parse(finalistTeamId)
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()
@@ -354,7 +361,8 @@ export async function getFinalistScores(finalistTeamId: string) {
   try {
     z.string().uuid().parse(finalistTeamId)
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()

@@ -20,7 +20,8 @@ async function notifySelectionUpdate(teamId: string) {
 export async function getTeamSelections() {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     // RLS ensures they only get their own team's selections
@@ -52,7 +53,8 @@ export async function selectProblem(problemStatementId: string) {
     z.string().uuid().parse(problemStatementId)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     // First check if finalized
@@ -99,7 +101,8 @@ export async function deselectProblem(problemStatementId: string) {
     z.string().uuid().parse(problemStatementId)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     // First check if finalized
@@ -128,7 +131,8 @@ export async function deselectProblem(problemStatementId: string) {
 export async function finalizeSelection() {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const { data: userData } = await supabase.from('users').select('team_id').eq('id', user.id).single()
@@ -164,7 +168,8 @@ export async function adminReopenSelection(teamId: string) {
     z.string().uuid().parse(teamId)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()

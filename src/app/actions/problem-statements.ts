@@ -10,7 +10,8 @@ import { EVENT_CHANNEL } from '@/lib/constants'
 export async function getPublishedProblemsForTeam() {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     // RLS handles everything: we just query the table.
@@ -32,7 +33,8 @@ export async function getAllProblemsForAdmin(categoryId: string) {
     z.string().uuid().parse(categoryId)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
@@ -67,7 +69,8 @@ export async function publishProblem(problemId: string) {
     z.string().uuid().parse(problemId)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
@@ -85,6 +88,7 @@ export async function publishProblem(problemId: string) {
 
     await logAdminAction(user.id, 'PROBLEM_PUBLISHED', 'problem_statements', problemId, { problemNumber: problem.number, categoryId: problem.category_id })
     await notifyProblemChange(problem.category_id)
+    await adminClient.from('event_state').update({ updated_at: new Date().toISOString() }).eq('id', 1)
 
     revalidatePath('/admin/problem-statements')
     revalidatePath('/dashboard')
@@ -100,7 +104,8 @@ export async function unpublishProblem(problemId: string) {
     z.string().uuid().parse(problemId)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
@@ -118,6 +123,7 @@ export async function unpublishProblem(problemId: string) {
 
     await logAdminAction(user.id, 'PROBLEM_UNPUBLISHED', 'problem_statements', problemId, { problemNumber: problem.number, categoryId: problem.category_id })
     await notifyProblemChange(problem.category_id)
+    await adminClient.from('event_state').update({ updated_at: new Date().toISOString() }).eq('id', 1)
 
     revalidatePath('/admin/problem-statements')
     revalidatePath('/dashboard')
@@ -133,7 +139,8 @@ export async function publishAllInCategory(categoryId: string) {
     z.string().uuid().parse(categoryId)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
@@ -149,6 +156,8 @@ export async function publishAllInCategory(categoryId: string) {
 
     await logAdminAction(user.id, 'PROBLEM_PUBLISHED_ALL', 'problem_statements', undefined, { categoryId })
     await notifyProblemChange(categoryId)
+    await adminClient.from('event_state').update({ updated_at: new Date().toISOString() }).eq('id', 1)
+    await adminClient.from('event_state').update({ updated_at: new Date().toISOString() }).eq('id', 1)
 
     revalidatePath('/admin/problem-statements')
     revalidatePath('/dashboard')
@@ -164,7 +173,8 @@ export async function unpublishAllInCategory(categoryId: string) {
     z.string().uuid().parse(categoryId)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
@@ -180,6 +190,8 @@ export async function unpublishAllInCategory(categoryId: string) {
 
     await logAdminAction(user.id, 'PROBLEM_UNPUBLISHED_ALL', 'problem_statements', undefined, { categoryId })
     await notifyProblemChange(categoryId)
+    await adminClient.from('event_state').update({ updated_at: new Date().toISOString() }).eq('id', 1)
+    await adminClient.from('event_state').update({ updated_at: new Date().toISOString() }).eq('id', 1)
 
     revalidatePath('/admin/problem-statements')
     revalidatePath('/dashboard')

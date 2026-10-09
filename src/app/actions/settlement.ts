@@ -103,7 +103,8 @@ export async function submitMatchResult(data: {
 export async function resetToWaiting() {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()
@@ -146,7 +147,8 @@ export async function resetToWaiting() {
 export async function endMatch() {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()
@@ -183,7 +185,8 @@ export async function addInvestorBalance(amountPerTeam: number) {
     z.z.number().positive().max(10000000).parse(amountPerTeam)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()

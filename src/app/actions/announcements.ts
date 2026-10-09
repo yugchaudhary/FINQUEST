@@ -23,7 +23,8 @@ export async function publishAnnouncement(content: string) {
     z.string().min(1).parse(content)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
@@ -60,7 +61,8 @@ export async function deleteAnnouncement(id: string) {
     z.string().uuid().parse(id)
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
