@@ -9,17 +9,17 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className = '', variant = 'default', children, ...props }, ref) => {
     const variants = {
-      default: 'bg-[#16161f] border border-[#2a2a3a]',
-      glass: 'bg-[#16161f]/60 backdrop-blur-md border border-[#2a2a3a]/50',
-      elevated: 'bg-[#1e1e2d] border border-[#2a2a3a] shadow-xl',
-      red: 'bg-[#16161f] border border-[#ef4444]/30 shadow-[0_0_15px_rgba(239,68,68,0.1)]',
-      blue: 'bg-[#16161f] border border-[#3b82f6]/30 shadow-[0_0_15px_rgba(59,130,246,0.1)]',
+      default: 'bg-surface border border-border',
+      glass: 'bg-surface/60 backdrop-blur-md border border-border/50',
+      elevated: 'bg-surface-2 border border-border shadow-xl',
+      red: 'bg-surface border border-[#ef4444]/30 shadow-[0_0_15px_rgba(239,68,68,0.1)]',
+      blue: 'bg-surface border border-[#3b82f6]/30 shadow-[0_0_15px_rgba(59,130,246,0.1)]',
     };
 
     return (
       <div
         ref={ref}
-        className={`rounded-xl text-[#f4f4f5] ${variants[variant]} ${className}`}
+        className={`rounded-xl text-foreground ${variants[variant]} ${className}`}
         {...props}
       >
         {children}
@@ -45,7 +45,7 @@ CardTitle.displayName = 'CardTitle';
 
 export const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
   ({ className = '', ...props }, ref) => (
-    <p ref={ref} className={`text-sm text-[#9ca3af] ${className}`} {...props} />
+    <p ref={ref} className={`text-sm text-slate-500 ${className}`} {...props} />
   )
 );
 CardDescription.displayName = 'CardDescription';

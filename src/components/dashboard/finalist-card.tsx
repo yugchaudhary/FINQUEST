@@ -11,7 +11,7 @@ interface FinalistCardProps {
 export function FinalistCard({ isFinalist, teamName }: FinalistCardProps) {
   return (
     <div className="w-full pt-8">
-      <div className="text-xs font-bold text-gray-500 tracking-widest mb-4 ml-1">WHAT&apos;S NEXT?</div>
+      <div className="text-xs font-bold text-slate-500 tracking-widest mb-4 ml-1">WHAT&apos;S NEXT?</div>
       
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -24,9 +24,9 @@ export function FinalistCard({ isFinalist, teamName }: FinalistCardProps) {
               <div className="w-20 h-20 mx-auto rounded-full bg-gambit-gold/20 flex items-center justify-center mb-6">
                 <Trophy className="w-10 h-10 text-gambit-gold" />
               </div>
-              <h2 className="text-3xl font-space-grotesk font-black text-white mb-2">YOU MADE THE FINALS</h2>
+              <h2 className="text-3xl font-space-grotesk font-black text-foreground mb-2">YOU MADE THE FINALS</h2>
               <h3 className="text-xl font-bold text-gambit-gold mb-4">{teamName}</h3>
-              <p className="text-gray-300 max-w-md mx-auto mb-8">
+              <p className="text-slate-600 max-w-md mx-auto mb-8">
                 Get ready for the Final Pitch. You will be presenting your integrated solution to the entire audience.
               </p>
               
@@ -36,10 +36,10 @@ export function FinalistCard({ isFinalist, teamName }: FinalistCardProps) {
             </CardContent>
           </Card>
         ) : (
-          <Card className="w-full bg-[#16161f] border-[#2a2a3a]">
+          <Card className="w-full bg-surface border-border">
             <CardContent className="p-8 text-center">
-              <h3 className="text-xl font-space-grotesk font-bold text-white mb-2">Phase 2: Final Round</h3>
-              <p className="text-gray-400">
+              <h3 className="text-xl font-space-grotesk font-bold text-foreground mb-2">Phase 2: Final Round</h3>
+              <p className="text-slate-500">
                 The top teams will now present their ultimate integrated pitch.
               </p>
             </CardContent>

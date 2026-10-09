@@ -39,13 +39,13 @@ export const Slider: React.FC<SliderProps> = ({
   return (
     <div className={`relative w-full ${className}`}>
       <div className="flex justify-between items-center mb-2">
-        <span className="text-xs text-[#9ca3af]">{formatLabel(min)}</span>
-        <span className="text-lg font-bold text-white tracking-wide font-display">{formatLabel(value)}</span>
-        <span className="text-xs text-[#9ca3af]">{formatLabel(max)}</span>
+        <span className="text-xs text-slate-500">{formatLabel(min)}</span>
+        <span className="text-lg font-bold text-foreground tracking-wide font-display">{formatLabel(value)}</span>
+        <span className="text-xs text-slate-500">{formatLabel(max)}</span>
       </div>
       
       <div className="relative h-6 flex items-center group">
-        <div className="absolute w-full h-2 bg-[#1e1e2d] rounded-full overflow-hidden border border-[#2a2a3a]">
+        <div className="absolute w-full h-2 bg-surface-2 rounded-full overflow-hidden border border-border">
           <div 
             className="h-full rounded-full transition-all duration-150 ease-out"
             style={{ width: `${percentage}%`, backgroundColor: color }}

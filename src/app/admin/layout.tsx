@@ -63,10 +63,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="flex h-screen bg-[#0a0a0f] text-white overflow-hidden">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden">
       {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between p-4 border-b border-[#2a2a3a] bg-[#16161f]">
-        <h1 className="font-space-grotesk font-bold text-lg text-[#8b5cf6]">FGP ADMIN</h1>
+      <div className="md:hidden flex items-center justify-between p-4 border-b border-border bg-surface">
+        <h1 className="font-space-grotesk font-bold text-lg text-accent">FGP ADMIN</h1>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -74,12 +74,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-[#16161f] border-r border-[#2a2a3a] transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col
+        fixed inset-y-0 left-0 z-50 w-64 bg-surface border-r border-border transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="p-6">
           <h1 className="font-space-grotesk font-bold text-xl tracking-wider mb-2">
-            FOUNDER&apos;S GOT<br/><span className="text-[#8b5cf6]">PATENT</span>
+            FOUNDER&apos;S GOT<br/><span className="text-accent">PATENT</span>
           </h1>
           <Badge variant="default" className="w-full justify-center">
             PHASE: {currentPhase}
@@ -97,8 +97,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                       isActive 
-                        ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] border border-[#8b5cf6]/30' 
-                        : 'text-gray-400 hover:bg-[#2a2a3a] hover:text-white'
+                        ? 'bg-accent/20 text-accent border border-accent/30' 
+                        : 'text-slate-500 hover:bg-border hover:text-foreground'
                     }`}
                   >
                     <link.icon size={20} />
@@ -110,10 +110,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </ul>
         </nav>
 
-        <div className="p-4 border-t border-[#2a2a3a]">
+        <div className="p-4 border-t border-border">
           <Button 
             variant="ghost" 
-            className="w-full flex items-center justify-center space-x-2 text-gray-400 hover:text-white"
+            className="w-full flex items-center justify-center space-x-2 text-slate-500 hover:text-foreground"
             onClick={handleSignOut}
           >
             <LogOut size={20} />
@@ -122,8 +122,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#0a0a0f]">
+            {/* Main Content */}
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-background relative">
+        {/* Logo in top right */}
+        <div className="absolute top-4 right-4 md:top-8 md:right-8 h-12 w-12 rounded-full overflow-hidden border border-border shadow-sm z-40 bg-white">
+          <img src="/logo.png" alt="FYI Logo" className="w-full h-full object-cover" />
+        </div>
         <div className="max-w-7xl mx-auto h-full">
           {children}
         </div>

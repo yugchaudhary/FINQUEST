@@ -19,9 +19,9 @@ export function Phase1Leaderboard({ leaderboardData }: Phase1LeaderboardProps) {
   const getRankStyle = (rank: number) => {
     switch (rank) {
       case 1: return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/30'
-      case 2: return 'text-gray-300 bg-gray-300/10 border-gray-400/30'
+      case 2: return 'text-slate-600 bg-gray-300/10 border-gray-400/30'
       case 3: return 'text-amber-600 bg-amber-600/10 border-amber-600/30'
-      default: return 'text-gray-500 bg-gambit-surface-2 border-gambit-border'
+      default: return 'text-slate-500 bg-gambit-surface-2 border-gambit-border'
     }
   }
 
@@ -41,8 +41,8 @@ export function Phase1Leaderboard({ leaderboardData }: Phase1LeaderboardProps) {
     }
     return {
       text: '₹0',
-      color: 'text-gray-400',
-      icon: <Minus size={16} className="text-gray-400" />,
+      color: 'text-slate-500',
+      icon: <Minus size={16} className="text-slate-500" />,
     }
   }
 
@@ -62,7 +62,7 @@ export function Phase1Leaderboard({ leaderboardData }: Phase1LeaderboardProps) {
         <h1 className="font-display text-display-sm md:text-display-md text-gradient-gold mb-2">
           PHASE 1 LEADERBOARD
         </h1>
-        <p className="text-gray-500 text-sm uppercase tracking-[0.2em] font-display">
+        <p className="text-slate-500 text-sm uppercase tracking-[0.2em] font-display">
           The Gambit Standings
         </p>
       </motion.div>
@@ -70,7 +70,7 @@ export function Phase1Leaderboard({ leaderboardData }: Phase1LeaderboardProps) {
       {/* Leaderboard Table */}
       <div className="w-full max-w-3xl z-10">
         {/* Header row */}
-        <div className="flex items-center gap-4 px-6 py-3 text-xs text-gray-500 uppercase tracking-wider border-b border-gambit-border/50 font-display">
+        <div className="flex items-center gap-4 px-6 py-3 text-xs text-slate-500 uppercase tracking-wider border-b border-gambit-border/50 font-display">
           <div className="w-14 text-center">Rank</div>
           <div className="flex-1">Team</div>
           <div className="w-28 text-center hidden md:block">Category</div>
@@ -97,15 +97,15 @@ export function Phase1Leaderboard({ leaderboardData }: Phase1LeaderboardProps) {
 
               {/* Team Name */}
               <div className="flex-1">
-                <span className={`font-medium ${entry.rank <= 3 ? 'text-white' : 'text-gray-300'}`}>
+                <span className={`font-medium ${entry.rank <= 3 ? 'text-white' : 'text-slate-600'}`}>
                   {entry.team_name}
                 </span>
-                <span className="md:hidden text-xs text-gray-500 block mt-0.5">{entry.category}</span>
+                <span className="md:hidden text-xs text-slate-500 block mt-0.5">{entry.category}</span>
               </div>
 
               {/* Category (desktop) */}
               <div className="w-28 text-center hidden md:block">
-                <span className="text-xs px-2 py-1 rounded-full bg-gambit-surface-2 text-gray-400 border border-gambit-border">
+                <span className="text-xs px-2 py-1 rounded-full bg-gambit-surface-2 text-slate-500 border border-gambit-border">
                   {entry.category}
                 </span>
               </div>
@@ -120,7 +120,7 @@ export function Phase1Leaderboard({ leaderboardData }: Phase1LeaderboardProps) {
         })}
 
         {leaderboardData.length === 0 && (
-          <div className="text-center py-20 text-gray-500">
+          <div className="text-center py-20 text-slate-500">
             No leaderboard data available
           </div>
         )}

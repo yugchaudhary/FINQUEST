@@ -19,9 +19,9 @@ export function AnnouncementsBanner({ announcements }: AnnouncementsBannerProps)
   if (!announcements || announcements.length === 0) {
     return (
       <div className="w-full pt-8">
-        <div className="text-xs font-bold text-gray-500 tracking-widest mb-4 ml-1">EVENT UPDATES</div>
-        <Card className="w-full bg-[#16161f] border-[#2a2a3a]">
-          <CardContent className="flex flex-col items-center justify-center py-10 text-gray-500">
+        <div className="text-xs font-bold text-slate-500 tracking-widest mb-4 ml-1">EVENT UPDATES</div>
+        <Card className="w-full bg-surface border-border">
+          <CardContent className="flex flex-col items-center justify-center py-10 text-slate-500">
             <Bell className="w-8 h-8 mb-3 opacity-30" />
             <p className="text-sm">No updates from the Admin yet.</p>
           </CardContent>
@@ -32,7 +32,7 @@ export function AnnouncementsBanner({ announcements }: AnnouncementsBannerProps)
 
   return (
     <div className="w-full pt-8">
-      <div className="text-xs font-bold text-gray-500 tracking-widest mb-4 ml-1">EVENT UPDATES</div>
+      <div className="text-xs font-bold text-slate-500 tracking-widest mb-4 ml-1">EVENT UPDATES</div>
       <div className="w-full flex flex-col gap-3">
         <AnimatePresence initial={false}>
           {announcements.map((a) => {
@@ -52,11 +52,11 @@ export function AnnouncementsBanner({ announcements }: AnnouncementsBannerProps)
                   w-full rounded-xl p-5 md:p-6 flex flex-col sm:flex-row items-start gap-4 border 
                   ${isNew 
                     ? 'bg-blue-900/20 border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.15)]' 
-                    : 'bg-[#16161f] border-[#2a2a3a] hover:bg-[#1a1a24]'} 
+                    : 'bg-surface border-border hover:bg-[#1a1a24]'} 
                   transition-colors
                 `}>
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${isNew ? 'bg-blue-500/20 border-blue-500/30' : 'bg-black/30 border-[#2a2a3a]'}`}>
-                    <Megaphone className={`w-5 h-5 ${isNew ? 'text-blue-400' : 'text-gray-400'}`} />
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${isNew ? 'bg-blue-500/20 border-blue-500/30' : 'bg-black/30 border-border'}`}>
+                    <Megaphone className={`w-5 h-5 ${isNew ? 'text-blue-400' : 'text-slate-500'}`} />
                   </div>
                   
                   <div className="flex-1 min-w-0">
@@ -66,11 +66,11 @@ export function AnnouncementsBanner({ announcements }: AnnouncementsBannerProps)
                           NEW
                         </Badge>
                       )}
-                      <span className="text-xs text-gray-500 font-mono">
+                      <span className="text-xs text-slate-500 font-mono">
                         {new Date(a.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
-                    <p className={`text-base ${isNew ? 'text-blue-50 font-medium' : 'text-gray-300'}`}>
+                    <p className={`text-base ${isNew ? 'text-blue-50 font-medium' : 'text-slate-600'}`}>
                       {a.content}
                     </p>
                   </div>

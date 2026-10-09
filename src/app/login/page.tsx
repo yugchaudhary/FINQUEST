@@ -37,14 +37,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white flex flex-col justify-center py-12 sm:px-6 lg:px-8 selection:bg-purple-500/30">
+    <div className="min-h-screen bg-background text-white flex flex-col justify-center py-12 sm:px-6 lg:px-8 selection:bg-purple-500/30">
       {/* Background Effect */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-purple-600/10 rounded-full blur-[120px] opacity-50"></div>
       </div>
 
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
-        <Link href="/" className="inline-flex items-center text-sm font-medium text-gray-400 hover:text-white mb-8 group transition-colors">
+        <Link href="/" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-foreground mb-8 group transition-colors">
           <ChevronLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
           Back to Event
         </Link>
@@ -55,16 +55,16 @@ export default function LoginPage() {
           transition={{ duration: 0.5 }}
         >
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-display font-black tracking-tight text-white mb-2">
+            <h2 className="text-3xl font-display font-black tracking-tight text-foreground mb-2">
               FOUNDER&apos;S GOT PATENT
             </h2>
-            <p className="text-gray-400">Sign in to your participant account</p>
+            <p className="text-slate-500">Sign in to your participant account</p>
           </div>
 
           <Card className="bg-white/5 border-white/10 backdrop-blur-xl shadow-2xl">
             <CardHeader>
               <CardTitle className="text-xl">Welcome Back</CardTitle>
-              <CardDescription className="text-gray-400">Enter your credentials to access the board.</CardDescription>
+              <CardDescription className="text-slate-500">Enter your credentials to access the board.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -89,7 +89,7 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-11 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0 shadow-[0_0_20px_-5px_rgba(139,92,246,0.5)] transition-all duration-300"
+                  className="w-full h-11 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-foreground border-0 shadow-[0_0_20px_-5px_rgba(139,92,246,0.5)] transition-all duration-300"
                 >
                   {isLoading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -100,7 +100,7 @@ export default function LoginPage() {
               </form>
             </CardContent>
             <CardFooter className="flex justify-center border-t border-white/5 pt-6">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-slate-500">
                 Need access? Contact the event organizers.
               </p>
             </CardFooter>

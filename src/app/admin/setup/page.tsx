@@ -110,7 +110,7 @@ export default function SetupPage() {
       header: 'Used By',
       accessorKey: 'used_by_user_id',
       cell: (row: any) => (
-        <span className="text-xs text-gray-500 font-mono">
+        <span className="text-xs text-slate-500 font-mono">
           {row.used_by_user_id ? row.used_by_user_id.substring(0, 8) + '...' : '—'}
         </span>
       )
@@ -144,7 +144,7 @@ export default function SetupPage() {
             <stat.icon className={`w-8 h-8 ${stat.color}`} />
             <div>
               <div className={`text-2xl font-black ${stat.color}`}>{stat.value}</div>
-              <div className="text-xs text-gray-400 font-medium">{stat.label}</div>
+              <div className="text-xs text-slate-500 font-medium">{stat.label}</div>
             </div>
           </div>
         ))}

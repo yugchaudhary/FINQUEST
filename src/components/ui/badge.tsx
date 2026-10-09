@@ -17,14 +17,14 @@ export const Badge: React.FC<BadgeProps> = ({
   const baseStyles = 'inline-flex items-center justify-center rounded-full font-medium';
   
   const variants = {
-    default: 'bg-[#1e1e2d] text-[#9ca3af] border border-[#2a2a3a]',
+    default: 'bg-surface-2 text-slate-500 border border-border',
     live: 'bg-red-500/10 text-red-500 border border-red-500/20',
-    locked: 'bg-[#1e1e2d] text-[#9ca3af] border border-[#2a2a3a]',
+    locked: 'bg-surface-2 text-slate-500 border border-border',
     complete: 'bg-green-500/10 text-green-500 border border-green-500/20',
     pending: 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
     error: 'bg-red-500/10 text-red-500 border border-red-500/20',
     gold: 'bg-amber-500/10 text-amber-500 border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]',
-    outline: 'bg-transparent text-gray-300 border border-gray-600',
+    outline: 'bg-transparent text-slate-600 border border-gray-600',
   };
 
   const sizes = {

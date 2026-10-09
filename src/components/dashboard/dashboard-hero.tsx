@@ -71,7 +71,7 @@ export function DashboardHero({ user, team, eventState }: DashboardHeroProps) {
   const content = getHeroContent()
 
   return (
-    <div className="w-full relative overflow-hidden rounded-2xl bg-[#111118] border border-[#2a2a3a] p-8 md:p-12 mt-20 mb-8">
+    <div className="w-full relative overflow-hidden rounded-2xl bg-surface border border-border p-8 md:p-12 mt-20 mb-8">
       {/* Background glow */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3" />
       <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-600/10 rounded-full blur-[60px] translate-y-1/3 -translate-x-1/3" />
@@ -91,10 +91,10 @@ export function DashboardHero({ user, team, eventState }: DashboardHeroProps) {
               </span>
             )}
           </div>
-          <h1 className="font-space-grotesk font-black text-4xl md:text-5xl text-white">
+          <h1 className="font-space-grotesk font-black text-4xl md:text-5xl text-foreground">
             {content.title}
           </h1>
-          <p className="text-gray-400 text-lg">
+          <p className="text-slate-500 text-lg">
             {content.subtitle}
           </p>
         </motion.div>
@@ -105,8 +105,8 @@ export function DashboardHero({ user, team, eventState }: DashboardHeroProps) {
           transition={{ delay: 0.2 }}
           className="flex flex-col gap-1 text-left md:text-right"
         >
-          <div className="text-sm text-gray-500">WELCOME BACK</div>
-          <div className="text-xl font-medium text-white">{user?.name || 'Participant'}</div>
+          <div className="text-sm text-slate-500">WELCOME BACK</div>
+          <div className="text-xl font-medium text-foreground">{user?.name || 'Participant'}</div>
         </motion.div>
       </div>
     </div>

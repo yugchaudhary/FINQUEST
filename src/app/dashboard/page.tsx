@@ -103,14 +103,14 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-3">
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-            className="w-10 h-10 rounded-full border-2 border-[#8b5cf6] border-t-transparent mx-auto"
+            className="w-10 h-10 rounded-full border-2 border-accent border-t-transparent mx-auto"
           />
-          <p className="text-gray-500 text-xs uppercase tracking-widest">Loading Dashboard...</p>
+          <p className="text-slate-500 text-xs uppercase tracking-widest">Loading Dashboard...</p>
         </div>
       </div>
     )
@@ -122,12 +122,12 @@ export default function DashboardPage() {
   const screen = data.eventState?.current_screen_state
 
   if (data.eventState?.final_leaderboard_active || screen === 'FINALS_LEADERBOARD') {
-    return <div className="min-h-screen bg-[#0a0a0f] text-white pt-24"><FinalsLeaderboard data={finalsData} /></div>
+    return <div className="min-h-screen bg-background text-foreground pt-24"><FinalsLeaderboard data={finalsData} /></div>
   }
 
   if (screen === 'FINALIST_LIVE' || screen === 'RATINGS_OPEN') {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] text-white">
+      <div className="min-h-screen bg-background text-foreground">
         <FinalistBroadcast 
           finalistTeam={currentFinalist} 
           onScoreSubmit={async (score) => {
@@ -143,7 +143,7 @@ export default function DashboardPage() {
 
   if (screen === 'SETUP') {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] text-white flex flex-col">
+      <div className="min-h-screen bg-background text-foreground flex flex-col">
         <DashboardNav user={data.user} team={data.team} eventState={data.eventState} />
         <div className="flex-1 px-4 py-8 mt-16 max-w-5xl mx-auto w-full">
           <DashboardHero 
@@ -165,7 +165,7 @@ export default function DashboardPage() {
 
   // Active Dashboard
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white pb-32 flex flex-col relative overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground pb-32 flex flex-col relative overflow-x-hidden">
       <DashboardNav user={data.user} team={data.team} eventState={data.eventState} />
 
       <main className="flex-1 px-4 max-w-5xl mx-auto w-full relative z-10 flex flex-col gap-6">

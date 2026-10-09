@@ -119,14 +119,14 @@ export function GambitModal({ isOpen, onClose, selectedTeam, selectedColor, matc
             {/* Close button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
+              className="absolute top-4 right-4 text-slate-500 hover:text-foreground transition-colors"
             >
               <X size={20} />
             </button>
 
             {/* Title */}
             <div className="text-center mb-6">
-              <h2 className="font-display text-xl md:text-2xl text-white tracking-wide">
+              <h2 className="font-display text-xl md:text-2xl text-foreground tracking-wide">
                 PLACE YOUR GAMBIT
               </h2>
               <div className={`mt-2 text-sm ${colorClass}`}>
@@ -136,7 +136,7 @@ export function GambitModal({ isOpen, onClose, selectedTeam, selectedColor, matc
 
             {/* Amount Display */}
             <div className="text-center mb-6">
-              <div className="text-3xl md:text-4xl font-display font-bold text-white">
+              <div className="text-3xl md:text-4xl font-display font-bold text-foreground">
                 ₹{formatIndianNumber(amount)}
               </div>
             </div>
@@ -174,7 +174,7 @@ export function GambitModal({ isOpen, onClose, selectedTeam, selectedColor, matc
                       ? selectedColor === 'red'
                         ? 'bg-red-500/20 border-red-500/50 text-red-300'
                         : 'bg-blue-500/20 border-blue-500/50 text-blue-300'
-                      : 'bg-gambit-surface-2 border-gambit-border text-gray-400 hover:border-gray-500'
+                      : 'bg-gambit-surface-2 border-gambit-border text-slate-500 hover:border-gray-500'
                   }`}
                 >
                   {QUICK_AMOUNT_LABELS[i]}
@@ -184,11 +184,11 @@ export function GambitModal({ isOpen, onClose, selectedTeam, selectedColor, matc
 
             {/* Numeric Input */}
             <div className="mb-6">
-              <label className="text-xs text-gray-500 uppercase tracking-wider mb-2 block">
+              <label className="text-xs text-slate-500 uppercase tracking-wider mb-2 block">
                 Enter Amount
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">₹</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">₹</span>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -196,7 +196,7 @@ export function GambitModal({ isOpen, onClose, selectedTeam, selectedColor, matc
                   onChange={handleInputChange}
                   onBlur={handleInputBlur}
                   onPaste={handlePaste}
-                  className="w-full pl-8 pr-4 py-3 bg-gambit-surface-2 border border-gambit-border rounded-lg text-white font-mono text-lg focus:outline-none focus:border-gambit-purple transition-colors"
+                  className="w-full pl-8 pr-4 py-3 bg-gambit-surface-2 border border-gambit-border rounded-lg text-foreground font-mono text-lg focus:outline-none focus:border-gambit-purple transition-colors"
                   placeholder="0"
                 />
               </div>

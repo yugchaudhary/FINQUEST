@@ -50,7 +50,7 @@ export default function CategoryAssignmentPage() {
       header: 'Role', 
       accessorKey: 'role',
       cell: (row: any) => (
-        <Badge variant="outline" className={row.role === 'INVESTOR' ? 'text-blue-400 border-blue-400' : row.role === 'INNOVATOR' ? 'text-purple-400 border-purple-400' : 'text-gray-400 border-gray-400'}>
+        <Badge variant="outline" className={row.role === 'INVESTOR' ? 'text-blue-400 border-blue-400' : row.role === 'INNOVATOR' ? 'text-purple-400 border-purple-400' : 'text-slate-500 border-gray-400'}>
           {row.role}
         </Badge>
       )
@@ -64,7 +64,7 @@ export default function CategoryAssignmentPage() {
           value={row.category_id || 'none'}
           onChange={(e) => handleCategoryChange(row.id, e.target.value)}
           disabled={updating === row.id}
-          className="bg-[#16161f] border border-[#2a2a3a] rounded px-3 py-1 text-sm focus:outline-none focus:border-purple-500 min-w-[200px]"
+          className="bg-surface border border-border rounded px-3 py-1 text-sm focus:outline-none focus:border-purple-500 min-w-[200px]"
         >
           <option value="none">Unassigned</option>
           {categories.map(c => (
@@ -83,20 +83,20 @@ export default function CategoryAssignmentPage() {
             <Tags className="text-purple-500" />
             Category Assignment
           </h1>
-          <p className="text-gray-400 mt-1">Assign teams to their problem categories.</p>
+          <p className="text-slate-500 mt-1">Assign teams to their problem categories.</p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
           <div className="relative w-72">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
             <input
               type="text"
               placeholder="Search teams or categories..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#16161f] border border-[#2a2a3a] rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:border-purple-500 transition-colors"
+              className="w-full bg-surface border border-border rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:border-purple-500 transition-colors"
             />
           </div>
         </CardHeader>

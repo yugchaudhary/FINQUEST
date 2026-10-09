@@ -108,7 +108,7 @@ export default function FinalsScoringPage() {
               onChange={(e) => setJudgesAvg(e.target.value)} 
             />
           </div>
-          <div className="bg-[#2a2a3a] p-4 rounded-lg text-sm text-gray-300">
+          <div className="bg-border p-4 rounded-lg text-sm text-slate-600">
             Formula: Final = (Investor Avg × 0.5) + (Judges Avg × 0.5)
           </div>
           <Button onClick={handleCalculate} disabled={!selectedFinalist || !judgesAvg}>

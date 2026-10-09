@@ -18,7 +18,7 @@ export function FinalistBroadcast({ finalistTeam, onScoreSubmit, hasRated }: Fin
 
   if (!finalistTeam) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500">
+      <div className="min-h-screen flex items-center justify-center text-slate-500">
         Waiting for finalist broadcast...
       </div>
     )
@@ -56,8 +56,8 @@ export function FinalistBroadcast({ finalistTeam, onScoreSubmit, hasRated }: Fin
           >
             <Check size={40} className="text-green-400" />
           </motion.div>
-          <h1 className="font-display text-display-sm text-white mb-2">SCORE SUBMITTED</h1>
-          <p className="text-gray-500 text-sm">Your rating has been recorded</p>
+          <h1 className="font-display text-display-sm text-foreground mb-2">SCORE SUBMITTED</h1>
+          <p className="text-slate-500 text-sm">Your rating has been recorded</p>
         </motion.div>
       </div>
     )
@@ -91,7 +91,7 @@ export function FinalistBroadcast({ finalistTeam, onScoreSubmit, hasRated }: Fin
             {finalistTeam.team_name}
           </h1>
           {finalistTeam.category && (
-            <span className="text-sm text-gray-500">{finalistTeam.category}</span>
+            <span className="text-sm text-slate-500">{finalistTeam.category}</span>
           )}
         </motion.div>
 
@@ -102,7 +102,7 @@ export function FinalistBroadcast({ finalistTeam, onScoreSubmit, hasRated }: Fin
           transition={{ delay: 0.4 }}
           className="mb-8"
         >
-          <div className="text-6xl md:text-7xl font-display font-bold text-white mb-2">
+          <div className="text-6xl md:text-7xl font-display font-bold text-foreground mb-2">
             {score.toFixed(1)}
           </div>
           <div className="flex items-center justify-center gap-1 text-gambit-gold/60">
@@ -141,7 +141,7 @@ export function FinalistBroadcast({ finalistTeam, onScoreSubmit, hasRated }: Fin
               className={`py-2 rounded-lg text-xs font-medium transition-all border ${
                 Math.floor(score) === s
                   ? 'bg-gambit-gold/20 border-gambit-gold/50 text-gambit-gold'
-                  : 'bg-gambit-surface-2 border-gambit-border text-gray-400 hover:border-gray-500'
+                  : 'bg-gambit-surface-2 border-gambit-border text-slate-500 hover:border-gray-500'
               }`}
             >
               {s}

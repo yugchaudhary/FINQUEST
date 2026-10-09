@@ -33,13 +33,13 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           <path d="M22 12C22 6.47715 17.5228 2 12 2" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </motion.div>
-      {label && <p className="text-[#9ca3af] font-medium text-sm animate-pulse">{label}</p>}
+      {label && <p className="text-slate-500 font-medium text-sm animate-pulse">{label}</p>}
     </div>
   );
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0a0f]/80 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
         {spinner}
       </div>
     );

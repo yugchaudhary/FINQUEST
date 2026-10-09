@@ -48,7 +48,7 @@ export default function AdminOverview() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card variant="elevated">
-          <CardHeader className="text-gray-400 pb-2">Current Phase</CardHeader>
+          <CardHeader className="text-slate-500 pb-2">Current Phase</CardHeader>
           <CardContent>
             <div className="text-2xl font-bold mb-2">{overview?.currentPhase || 'SETUP'}</div>
             <Badge variant="live">ACTIVE</Badge>
@@ -56,35 +56,35 @@ export default function AdminOverview() {
         </Card>
         
         <Card variant="elevated">
-          <CardHeader className="text-gray-400 pb-2">Current Round</CardHeader>
+          <CardHeader className="text-slate-500 pb-2">Current Round</CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-[#8b5cf6]">{overview?.currentRound || 0}</div>
+            <div className="text-3xl font-bold text-accent">{overview?.currentRound || 0}</div>
           </CardContent>
         </Card>
 
         <Card variant="elevated">
-          <CardHeader className="text-gray-400 pb-2">Teams Registered</CardHeader>
+          <CardHeader className="text-slate-500 pb-2">Teams Registered</CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{overview?.totalTeams || 0}</div>
           </CardContent>
         </Card>
 
         <Card variant="elevated">
-          <CardHeader className="text-gray-400 pb-2">Active Investors</CardHeader>
+          <CardHeader className="text-slate-500 pb-2">Active Investors</CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{overview?.activeInvestors || 0}</div>
           </CardContent>
         </Card>
 
         <Card variant="elevated">
-          <CardHeader className="text-gray-400 pb-2">Matches Completed</CardHeader>
+          <CardHeader className="text-slate-500 pb-2">Matches Completed</CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{overview?.matchesCompleted || 0}</div>
           </CardContent>
         </Card>
 
         <Card variant="elevated">
-          <CardHeader className="text-gray-400 pb-2">Finalists Selected</CardHeader>
+          <CardHeader className="text-slate-500 pb-2">Finalists Selected</CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{overview?.finalistsSelected || 0}</div>
           </CardContent>
@@ -93,11 +93,11 @@ export default function AdminOverview() {
 
       <div className="mt-8">
         <h2 className="text-2xl font-space-grotesk font-bold mb-4">Current Live Status</h2>
-        <Card variant="glass" className="border-[#8b5cf6]/30">
+        <Card variant="glass" className="border-accent/30">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-center justify-between">
               <div>
-                <p className="text-gray-400 mb-1">Activity</p>
+                <p className="text-slate-500 mb-1">Activity</p>
                 <p className="text-xl font-bold">{overview?.currentActivity || 'Waiting for setup'}</p>
               </div>
               <div className="mt-4 md:mt-0 flex gap-4">

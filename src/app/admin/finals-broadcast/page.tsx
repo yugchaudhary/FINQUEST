@@ -68,12 +68,12 @@ export default function FinalsBroadcastPage() {
       </Card>
 
       {activeFinalist && (
-        <Card variant="elevated" className="border-[#8b5cf6]">
+        <Card variant="elevated" className="border-accent">
           <CardHeader>Currently Pitching: {activeFinalist.team_name}</CardHeader>
           <CardContent>
             <div className="text-center py-8">
               <h2 className="text-4xl font-bold mb-4">{activeFinalist.team_name}</h2>
-              <div className="text-xl text-gray-400">Waiting for investor scores...</div>
+              <div className="text-xl text-slate-500">Waiting for investor scores...</div>
             </div>
           </CardContent>
         </Card>

@@ -36,7 +36,7 @@ export function MatchBroadcast({ redTeam, blueTeam, roundNumber, category, onSel
       >
         <Badge variant="live">LIVE</Badge>
         {roundNumber && (
-          <span className="text-sm text-gray-400 uppercase tracking-wider font-display">
+          <span className="text-sm text-slate-500 uppercase tracking-wider font-display">
             Round {roundNumber}
           </span>
         )}
@@ -52,7 +52,7 @@ export function MatchBroadcast({ redTeam, blueTeam, roundNumber, category, onSel
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="text-sm text-gray-500 uppercase tracking-[0.3em] mb-8 font-display"
+        className="text-sm text-slate-500 uppercase tracking-[0.3em] mb-8 font-display"
       >
         Select Your Side
       </motion.h2>
@@ -72,10 +72,10 @@ export function MatchBroadcast({ redTeam, blueTeam, roundNumber, category, onSel
           <div className="text-red-400/60 text-xs uppercase tracking-[0.3em] mb-3 font-display">
             Red Team
           </div>
-          <div className="font-display text-display-sm md:text-display-md text-white group-hover:text-red-100 transition-colors">
+          <div className="font-display text-display-sm md:text-display-md text-foreground group-hover:text-red-100 transition-colors">
             {redTeam.team_name}
           </div>
-          <div className="mt-4 text-sm text-gray-500 group-hover:text-red-300/50 transition-colors">
+          <div className="mt-4 text-sm text-slate-500 group-hover:text-red-300/50 transition-colors">
             Tap to select
           </div>
           {/* Red glow */}
@@ -91,7 +91,7 @@ export function MatchBroadcast({ redTeam, blueTeam, roundNumber, category, onSel
           className="flex-shrink-0"
         >
           <div className="w-16 h-16 rounded-full border-2 border-gambit-border flex items-center justify-center bg-gambit-surface">
-            <span className="font-display text-lg text-gray-400 font-bold">VS</span>
+            <span className="font-display text-lg text-slate-500 font-bold">VS</span>
           </div>
         </motion.div>
 
@@ -108,10 +108,10 @@ export function MatchBroadcast({ redTeam, blueTeam, roundNumber, category, onSel
           <div className="text-blue-400/60 text-xs uppercase tracking-[0.3em] mb-3 font-display">
             Blue Team
           </div>
-          <div className="font-display text-display-sm md:text-display-md text-white group-hover:text-blue-100 transition-colors">
+          <div className="font-display text-display-sm md:text-display-md text-foreground group-hover:text-blue-100 transition-colors">
             {blueTeam.team_name}
           </div>
-          <div className="mt-4 text-sm text-gray-500 group-hover:text-blue-300/50 transition-colors">
+          <div className="mt-4 text-sm text-slate-500 group-hover:text-blue-300/50 transition-colors">
             Tap to select
           </div>
           {/* Blue glow */}

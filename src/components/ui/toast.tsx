@@ -64,10 +64,10 @@ export const useToast = () => {
 
 const ToastItem: React.FC<{ toast: Toast; onRemove: () => void }> = ({ toast, onRemove }) => {
   const styles = {
-    success: 'bg-[#16161f] border-green-500/50 text-white',
-    error: 'bg-[#16161f] border-red-500/50 text-white',
-    warning: 'bg-[#16161f] border-amber-500/50 text-white',
-    info: 'bg-[#16161f] border-blue-500/50 text-white',
+    success: 'bg-surface border-green-500/50 text-foreground',
+    error: 'bg-surface border-red-500/50 text-foreground',
+    warning: 'bg-surface border-amber-500/50 text-foreground',
+    info: 'bg-surface border-blue-500/50 text-foreground',
   };
 
   const icons = {
@@ -104,11 +104,11 @@ const ToastItem: React.FC<{ toast: Toast; onRemove: () => void }> = ({ toast, on
       <div className="flex-shrink-0 mt-0.5">{icons[toast.type]}</div>
       <div className="flex-1">
         <h4 className="text-sm font-semibold">{toast.title}</h4>
-        {toast.description && <p className="text-sm text-[#9ca3af] mt-1">{toast.description}</p>}
+        {toast.description && <p className="text-sm text-slate-500 mt-1">{toast.description}</p>}
       </div>
       <button
         onClick={onRemove}
-        className="flex-shrink-0 text-[#9ca3af] hover:text-white transition-colors focus:outline-none"
+        className="flex-shrink-0 text-slate-500 hover:text-foreground transition-colors focus:outline-none"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

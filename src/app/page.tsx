@@ -64,32 +64,30 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white selection:bg-purple-500/30 font-sans">
+    <div className="min-h-screen bg-background text-foreground selection:bg-accent/30 font-sans">
       {/* Background Effects */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent"></div>
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-purple-500/20 rounded-full blur-[128px]"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-500/20 rounded-full blur-[128px]"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent"></div>
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-accent/10 rounded-full blur-[128px]"></div>
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-[128px]"></div>
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-10 border-b border-white/10 bg-black/50 backdrop-blur-md">
+      <nav className="relative z-10 border-b border-border bg-white/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
-              <Crown className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-display font-bold text-xl tracking-tight">FINQUEST</span>
+            <div className="w-10 h-10 rounded-lg overflow-hidden border border-border shadow-sm"><img src="/logo.png" alt="FYI" className="w-full h-full object-cover" /></div>
+            <span className="font-display font-black text-xl tracking-tight text-foreground">FOUNDER&apos;S GOT PATENT</span>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/admin/login">
-              <Button variant="ghost" className="text-gray-400 hover:text-white hover:bg-white/5">
+              <Button variant="ghost" className="text-slate-500 hover:bg-slate-100">
                 Admin
               </Button>
             </Link>
             <Link href="/login">
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white border-0">
+              <Button className="bg-[#5eb3d1] hover:bg-[#4ea2c0] text-foreground border-0">
                 Participant Login
               </Button>
             </Link>
@@ -105,9 +103,9 @@ export default function LandingPage() {
               initial="hidden"
               animate="visible"
               variants={fadeIn}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-8"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-purple-500/20 text-accent text-sm font-medium mb-8"
             >
-              <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
               Live Event Registration Open
             </motion.div>
             
@@ -115,17 +113,17 @@ export default function LandingPage() {
               initial="hidden"
               animate="visible"
               variants={fadeIn}
-              className="font-display text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-br from-white via-gray-200 to-gray-500"
+              className="font-display text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-br from-slate-900 via-slate-700 to-slate-900"
             >
               FOUNDER&apos;S GOT <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500">PATENT</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-blue-500">PATENT</span>
             </motion.h1>
             
             <motion.p
               initial="hidden"
               animate="visible"
               variants={fadeIn}
-              className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-12 font-light"
+              className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-12 font-light"
             >
               A strategic battle of ideas, conviction and calculated risk. Where visionary innovators meet strategic capital.
             </motion.p>
@@ -137,7 +135,7 @@ export default function LandingPage() {
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
               <Link href="/register">
-                <Button size="lg" className="h-14 px-8 text-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0 shadow-[0_0_40px_-10px_rgba(139,92,246,0.5)]">
+                <Button size="lg" className="h-14 px-8 text-lg bg-gradient-to-r from-[#5eb3d1] to-blue-500 hover:from-[#4ea2c0] hover:to-blue-600 text-foreground border-0 shadow-[0_0_30px_-5px_rgba(94,179,209,0.4)]">
                   REGISTER TEAM <ChevronRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
@@ -152,13 +150,13 @@ export default function LandingPage() {
 
         {/* Leaderboards (Live) */}
         {(showFinals && finalsLeaderboard.length > 0) ? (
-          <section className="py-24 px-6 border-y border-white/5 bg-black/40 relative overflow-hidden">
+          <section className="py-24 px-6 border-y border-border bg-surface relative overflow-hidden">
             <div className="max-w-7xl mx-auto">
               <FinalsLeaderboard data={finalsLeaderboard} />
             </div>
           </section>
         ) : (phase1Leaderboard.length > 0 && (
-          <section className="py-24 px-6 border-y border-white/5 bg-black/40 relative overflow-hidden">
+          <section className="py-24 px-6 border-y border-border bg-surface relative overflow-hidden">
             <div className="max-w-7xl mx-auto">
               <Phase1Leaderboard leaderboardData={phase1Leaderboard} />
             </div>
@@ -166,7 +164,7 @@ export default function LandingPage() {
         ))}
 
         {/* About Section */}
-        <section className="py-24 px-6 bg-black/40 border-b border-white/5">
+        <section className="py-24 px-6 bg-surface border-b border-border">
           <div className="max-w-7xl mx-auto">
             <motion.div
               initial="hidden"
@@ -181,13 +179,13 @@ export default function LandingPage() {
                 { icon: Trophy, title: "1 Champion", desc: "Only the strongest strategy will prevail." }
               ].map((item, i) => (
                 <motion.div key={i} variants={fadeIn}>
-                  <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors h-full">
+                  <Card className="bg-white border-border hover:bg-slate-50 shadow-sm transition-colors h-full">
                     <CardContent className="p-8 text-center flex flex-col items-center">
-                      <div className="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-6 text-purple-400">
+                      <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mb-6 text-accent">
                         <item.icon className="w-7 h-7" />
                       </div>
                       <h3 className="text-2xl font-display font-bold mb-2">{item.title}</h3>
-                      <p className="text-gray-400">{item.desc}</p>
+                      <p className="text-slate-500">{item.desc}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -201,7 +199,7 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-5xl font-display font-bold mb-4">The Strategy</h2>
-              <p className="text-gray-400 max-w-2xl mx-auto">Master the board. Navigate two intense phases of competition where every decision counts.</p>
+              <p className="text-slate-500 max-w-2xl mx-auto">Master the board. Navigate two intense phases of competition where every decision counts.</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -212,13 +210,13 @@ export default function LandingPage() {
                 variants={fadeIn}
                 className="relative p-1 rounded-2xl bg-gradient-to-b from-blue-500/20 to-transparent"
               >
-                <div className="bg-[#0a0a0f] rounded-xl p-8 h-full border border-blue-500/20">
-                  <Badge className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 mb-6">Phase 1</Badge>
+                <div className="bg-white rounded-xl p-8 h-full border border-border shadow-md">
+                  <Badge className="bg-blue-500/10 text-blue-400 hover:bg-blue-500/30 mb-6">Phase 1</Badge>
                   <h3 className="text-3xl font-display font-bold mb-4 flex items-center gap-3">
                     <Swords className="text-blue-500" />
                     The Gambit
                   </h3>
-                  <p className="text-gray-400 mb-8 leading-relaxed">
+                  <p className="text-slate-500 mb-8 leading-relaxed">
                     Investors evaluate innovators across intense rapid-fire pitch sessions. Place strategic bets, build conviction, and secure your position for the final board.
                   </p>
                   <ul className="space-y-4">
@@ -227,8 +225,8 @@ export default function LandingPage() {
                       "Strategic capital allocation",
                       "Dynamic leaderboards"
                     ].map((item, i) => (
-                      <li key={i} className="flex items-center gap-3 text-sm font-medium text-gray-300">
-                        <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-xs">
+                      <li key={i} className="flex items-center gap-3 text-sm font-medium text-slate-600">
+                        <div className="w-6 h-6 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 text-xs">
                           {i + 1}
                         </div>
                         {item}
@@ -243,15 +241,15 @@ export default function LandingPage() {
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={fadeIn}
-                className="relative p-1 rounded-2xl bg-gradient-to-b from-purple-500/20 to-transparent"
+                className="relative p-1 rounded-2xl bg-gradient-to-b from-accent/20 to-transparent"
               >
-                <div className="bg-[#0a0a0f] rounded-xl p-8 h-full border border-purple-500/20">
-                  <Badge className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 mb-6">Phase 2</Badge>
+                <div className="bg-white rounded-xl p-8 h-full border border-border shadow-md">
+                  <Badge className="bg-accent/10 text-accent hover:bg-accent/30 mb-6">Phase 2</Badge>
                   <h3 className="text-3xl font-display font-bold mb-4 flex items-center gap-3">
-                    <Crown className="text-purple-500" />
+                    <Crown className="text-accent" />
                     The Finals
                   </h3>
-                  <p className="text-gray-400 mb-8 leading-relaxed">
+                  <p className="text-slate-500 mb-8 leading-relaxed">
                     The top performers face off in the ultimate showdown. Deep diligence, rigorous Q&A, and final verdicts from the grandmaster judges.
                   </p>
                   <ul className="space-y-4">
@@ -260,8 +258,8 @@ export default function LandingPage() {
                       "Live Q&A defense",
                       "Final judging & awards"
                     ].map((item, i) => (
-                      <li key={i} className="flex items-center gap-3 text-sm font-medium text-gray-300">
-                        <div className="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-xs">
+                      <li key={i} className="flex items-center gap-3 text-sm font-medium text-slate-600">
+                        <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center text-accent text-xs">
                           {i + 1}
                         </div>
                         {item}
@@ -275,7 +273,7 @@ export default function LandingPage() {
         </section>
 
         {/* Categories */}
-        <section className="py-24 px-6 bg-black/40 border-t border-white/5">
+        <section className="py-24 px-6 bg-surface border-t border-border">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Sectors of Play</h2>
@@ -291,10 +289,10 @@ export default function LandingPage() {
                 { name: "Tech & AI", icon: Zap, color: "text-yellow-500" },
                 { name: "Finance", icon: BarChart3, color: "text-green-500" },
                 { name: "Health", icon: Shield, color: "text-blue-500" },
-                { name: "Impact", icon: TrendingUp, color: "text-purple-500" }
+                { name: "Impact", icon: TrendingUp, color: "text-accent" }
               ].map((cat, i) => (
                 <motion.div key={i} variants={fadeIn}>
-                  <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors cursor-pointer group">
+                  <Card className="bg-white border-border hover:bg-slate-50 shadow-sm transition-colors cursor-pointer group">
                     <CardContent className="p-6 text-center flex flex-col items-center">
                       <cat.icon className={`w-8 h-8 mb-4 ${cat.color} group-hover:scale-110 transition-transform`} />
                       <h4 className="font-semibold text-lg">{cat.name}</h4>
@@ -308,17 +306,17 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 py-12 px-6 border-t border-white/10 bg-black">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-gray-500">
+      <footer className="relative z-10 py-12 px-6 border-t border-white/10 bg-white">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-slate-500">
           <div className="flex items-center gap-2">
             <Crown className="w-4 h-4" />
-            <span className="font-display font-semibold text-gray-300">FINQUEST</span>
+            <span className="font-display font-semibold text-slate-600">FOUNDER&apos;S GOT PATENT</span>
           </div>
           <p>© {new Date().getFullYear()} Founder&apos;s Got Patent. All rights reserved.</p>
           <div className="flex gap-4">
-            <a href="#" className="hover:text-white transition-colors">Twitter</a>
-            <a href="#" className="hover:text-white transition-colors">LinkedIn</a>
-            <a href="#" className="hover:text-white transition-colors">Contact</a>
+            <a href="#" className="hover:text-foreground transition-colors">Twitter</a>
+            <a href="#" className="hover:text-foreground transition-colors">LinkedIn</a>
+            <a href="#" className="hover:text-foreground transition-colors">Contact</a>
           </div>
         </div>
       </footer>

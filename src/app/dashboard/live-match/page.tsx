@@ -66,7 +66,7 @@ export default function ParticipantLiveMatchPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-purple-500 animate-spin" />
       </div>
     )
@@ -74,13 +74,13 @@ export default function ParticipantLiveMatchPage() {
 
   if (!match || match.status === 'COMPLETED' || match.status === 'PENDING') {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center justify-center p-4">
-        <Card className="max-w-md w-full bg-[#16161f] border-[#2a2a3a]">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <Card className="max-w-md w-full bg-surface border-border">
           <CardContent className="flex flex-col items-center justify-center p-12 text-center">
-            <Trophy className="w-12 h-12 text-gray-500 mb-4 opacity-50" />
-            <h2 className="text-xl font-bold text-white mb-2">No Live Match</h2>
-            <p className="text-gray-400 mb-6">There is no active match right now.</p>
-            <Button onClick={() => router.push('/dashboard')} variant="outline" className="text-white">
+            <Trophy className="w-12 h-12 text-slate-500 mb-4 opacity-50" />
+            <h2 className="text-xl font-bold text-foreground mb-2">No Live Match</h2>
+            <p className="text-slate-500 mb-6">There is no active match right now.</p>
+            <Button onClick={() => router.push('/dashboard')} variant="outline" className="text-foreground">
               <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
             </Button>
           </CardContent>
@@ -119,11 +119,11 @@ export default function ParticipantLiveMatchPage() {
   const canLock = !isLocked && team.role === 'INVESTOR' && match.status === 'LIVE'
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white flex flex-col pb-20">
+    <div className="min-h-screen bg-background text-foreground flex flex-col pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-[#16161f]/80 backdrop-blur-xl border-b border-[#2a2a3a] px-4 py-4">
+      <div className="sticky top-0 z-40 bg-surface/80 backdrop-blur-xl border-b border-border px-4 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Button onClick={() => router.push('/dashboard')} variant="ghost" size="sm" className="text-gray-400 hover:text-white">
+          <Button onClick={() => router.push('/dashboard')} variant="ghost" size="sm" className="text-slate-500 hover:text-foreground">
             <ArrowLeft className="w-4 h-4 mr-2" /> DASHBOARD
           </Button>
           <div className="flex items-center gap-2">
@@ -131,7 +131,7 @@ export default function ParticipantLiveMatchPage() {
             <span className="text-sm font-bold tracking-widest text-red-500">LIVE MATCH</span>
           </div>
           <div className="w-24 text-right">
-            <span className="text-xs font-mono text-gray-500">ROUND</span>
+            <span className="text-xs font-mono text-slate-500">ROUND</span>
             <span className="ml-2 font-mono font-bold">{String(match.round_number).padStart(2, '0')}</span>
           </div>
         </div>
@@ -149,8 +149,8 @@ export default function ParticipantLiveMatchPage() {
         {team.role === 'INVESTOR' && (
           <div className="mb-8 p-4 rounded-xl bg-purple-900/10 border border-purple-500/20 flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
-              <div className="text-xs font-bold text-gray-500 tracking-widest mb-1">CURRENT BALANCE</div>
-              <div className="text-2xl font-mono font-bold text-white">₹{team.current_balance.toLocaleString()}</div>
+              <div className="text-xs font-bold text-slate-500 tracking-widest mb-1">CURRENT BALANCE</div>
+              <div className="text-2xl font-mono font-bold text-foreground">₹{team.current_balance.toLocaleString()}</div>
             </div>
             {isLocked && (
               <Badge variant="outline" className="bg-green-500/10 text-green-400 border-green-500/30 py-1.5 px-4">
@@ -170,7 +170,7 @@ export default function ParticipantLiveMatchPage() {
               relative p-6 rounded-2xl border-2 transition-all text-left flex flex-col h-full
               ${(isLocked ? gambit.selected_team_id === match.red_team.id : selectedTeamId === match.red_team.id)
                 ? 'border-red-500 bg-red-500/10 shadow-[0_0_30px_rgba(239,68,68,0.15)] scale-[1.02] z-10'
-                : 'border-[#2a2a3a] bg-[#16161f] hover:border-red-500/30'
+                : 'border-border bg-surface hover:border-red-500/30'
               }
               ${!canLock && !isLocked ? 'opacity-50 cursor-not-allowed' : ''}
             `}
@@ -181,7 +181,7 @@ export default function ParticipantLiveMatchPage() {
                 <TrendingUp className="w-5 h-5 text-red-500" />
               )}
             </div>
-            <h3 className="text-2xl font-black text-white font-space-grotesk">{match.red_team.team_name}</h3>
+            <h3 className="text-2xl font-black text-foreground font-space-grotesk">{match.red_team.team_name}</h3>
           </button>
 
           {/* BLUE TEAM */}
@@ -192,7 +192,7 @@ export default function ParticipantLiveMatchPage() {
               relative p-6 rounded-2xl border-2 transition-all text-left flex flex-col h-full
               ${(isLocked ? gambit.selected_team_id === match.blue_team.id : selectedTeamId === match.blue_team.id)
                 ? 'border-blue-500 bg-blue-500/10 shadow-[0_0_30px_rgba(59,130,246,0.15)] scale-[1.02] z-10'
-                : 'border-[#2a2a3a] bg-[#16161f] hover:border-blue-500/30'
+                : 'border-border bg-surface hover:border-blue-500/30'
               }
               ${!canLock && !isLocked ? 'opacity-50 cursor-not-allowed' : ''}
             `}
@@ -203,15 +203,15 @@ export default function ParticipantLiveMatchPage() {
                 <TrendingUp className="w-5 h-5 text-blue-500" />
               )}
             </div>
-            <h3 className="text-2xl font-black text-white font-space-grotesk">{match.blue_team.team_name}</h3>
+            <h3 className="text-2xl font-black text-foreground font-space-grotesk">{match.blue_team.team_name}</h3>
           </button>
         </div>
 
         {/* Investment Input */}
         {team.role === 'INVESTOR' && !isLocked && match.status === 'LIVE' && (
-          <Card className="bg-[#16161f] border-[#2a2a3a]">
+          <Card className="bg-surface border-border">
             <CardContent className="p-6 md:p-8">
-              <h3 className="text-lg font-bold text-white mb-6">Place Your Gambit</h3>
+              <h3 className="text-lg font-bold text-foreground mb-6">Place Your Gambit</h3>
               
               <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-6">
                 {QUICK_AMOUNTS.map((amt, idx) => (
@@ -219,7 +219,7 @@ export default function ParticipantLiveMatchPage() {
                     key={amt}
                     variant="outline"
                     onClick={() => setAmountStr(amt.toString())}
-                    className={`border-[#2a2a3a] hover:bg-white/5 ${amountStr === amt.toString() ? 'bg-purple-500/20 text-purple-400 border-purple-500/50' : 'text-gray-400'}`}
+                    className={`border-border hover:bg-white/5 ${amountStr === amt.toString() ? 'bg-purple-500/20 text-purple-400 border-purple-500/50' : 'text-slate-500'}`}
                     disabled={amt > team.current_balance}
                   >
                     {QUICK_AMOUNT_LABELS[idx]}
@@ -230,13 +230,13 @@ export default function ParticipantLiveMatchPage() {
               <div className="flex items-center gap-4">
                 <div className="relative flex-1">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <span className="text-gray-500 font-mono text-lg">₹</span>
+                    <span className="text-slate-500 font-mono text-lg">₹</span>
                   </div>
                   <input
                     type="number"
                     value={amountStr}
                     onChange={(e) => setAmountStr(e.target.value)}
-                    className="w-full bg-black/50 border border-[#2a2a3a] rounded-lg py-4 pl-10 pr-4 text-white font-mono text-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full bg-black/50 border border-border rounded-lg py-4 pl-10 pr-4 text-white font-mono text-lg focus:outline-none focus:border-purple-500 transition-colors"
                     placeholder="Enter amount..."
                     max={Math.min(MAX_GAMBIT_AMOUNT, team.current_balance)}
                   />
@@ -249,7 +249,7 @@ export default function ParticipantLiveMatchPage() {
                   {isLocking ? <Loader2 className="w-5 h-5 animate-spin" /> : 'LOCK GAMBIT'}
                 </Button>
               </div>
-              <p className="text-gray-500 text-xs mt-3">Maximum gambit: ₹{MAX_GAMBIT_AMOUNT.toLocaleString()}</p>
+              <p className="text-slate-500 text-xs mt-3">Maximum gambit: ₹{MAX_GAMBIT_AMOUNT.toLocaleString()}</p>
             </CardContent>
           </Card>
         )}
@@ -257,9 +257,9 @@ export default function ParticipantLiveMatchPage() {
         {isLocked && (
           <div className="mt-8 text-center p-8 bg-green-500/5 border border-green-500/20 rounded-2xl">
             <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-white mb-2">Gambit Accepted</h3>
-            <p className="text-gray-400">You have invested <span className="text-white font-mono font-bold">₹{gambit.amount?.toLocaleString() || '---'}</span>.</p>
-            <p className="text-gray-500 mt-2 text-sm">Please wait for the live pitch to conclude and the judge to score.</p>
+            <h3 className="text-2xl font-bold text-foreground mb-2">Gambit Accepted</h3>
+            <p className="text-slate-500">You have invested <span className="text-foreground font-mono font-bold">₹{gambit.amount?.toLocaleString() || '---'}</span>.</p>
+            <p className="text-slate-500 mt-2 text-sm">Please wait for the live pitch to conclude and the judge to score.</p>
           </div>
         )}
       </div>

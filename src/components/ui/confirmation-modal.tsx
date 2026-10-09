@@ -82,17 +82,17 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             </div>
           )}
           <div className="flex-1">
-            <h3 className="text-xl font-bold font-display text-white mb-2">{title}</h3>
-            <div className="text-[#9ca3af] text-sm space-y-2">
+            <h3 className="text-xl font-bold font-display text-foreground mb-2">{title}</h3>
+            <div className="text-slate-500 text-sm space-y-2">
               {description}
             </div>
           </div>
         </div>
 
         {requireStringConfirmation && (
-          <div className="mt-4 pt-4 border-t border-[#2a2a3a]">
-            <p className="text-sm text-[#9ca3af] mb-2">
-              Please type <span className="font-mono font-bold text-white select-all">{requireStringConfirmation}</span> to confirm.
+          <div className="mt-4 pt-4 border-t border-border">
+            <p className="text-sm text-slate-500 mb-2">
+              Please type <span className="font-mono font-bold text-foreground select-all">{requireStringConfirmation}</span> to confirm.
             </p>
             <Input
               value={confirmString}

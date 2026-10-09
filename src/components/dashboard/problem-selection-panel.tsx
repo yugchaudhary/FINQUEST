@@ -73,11 +73,11 @@ export function ProblemSelectionPanel({ problems, selections, selectionState, on
   if (problems.length === 0) {
     return (
       <div className="w-full pt-8">
-        <div className="text-xs font-bold text-gray-500 tracking-widest mb-4 ml-1">YOUR CHALLENGE</div>
-        <Card className="w-full bg-[#16161f] border-[#2a2a3a]">
-          <CardContent className="flex flex-col items-center justify-center py-16 text-gray-500">
+        <div className="text-xs font-bold text-slate-500 tracking-widest mb-4 ml-1">YOUR CHALLENGE</div>
+        <Card className="w-full bg-surface border-border">
+          <CardContent className="flex flex-col items-center justify-center py-16 text-slate-500">
             <FileText className="w-10 h-10 mb-4 opacity-50" />
-            <p className="text-lg font-medium text-white mb-2">Problem Statements Not Available</p>
+            <p className="text-lg font-medium text-foreground mb-2">Problem Statements Not Available</p>
             <p>Your category&apos;s problem statements haven&apos;t been published yet.</p>
           </CardContent>
         </Card>
@@ -90,13 +90,13 @@ export function ProblemSelectionPanel({ problems, selections, selectionState, on
 
   return (
     <div className="w-full pt-8 relative" id="problem-selection">
-      <div className="text-xs font-bold text-gray-500 tracking-widest mb-4 ml-1">YOUR CHALLENGE</div>
+      <div className="text-xs font-bold text-slate-500 tracking-widest mb-4 ml-1">YOUR CHALLENGE</div>
       
       {/* Sticky Progress Bar */}
-      <div className="sticky top-16 z-40 bg-[#0a0a0f]/95 backdrop-blur-xl border-b border-t border-[#2a2a3a] -mx-4 px-4 py-4 mb-8 shadow-2xl">
+      <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-xl border-b border-t border-border -mx-4 px-4 py-4 mb-8 shadow-2xl">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h3 className="text-lg font-space-grotesk font-bold text-white flex items-center gap-2">
+            <h3 className="text-lg font-space-grotesk font-bold text-foreground flex items-center gap-2">
               {isFinalized ? (
                 <>
                   <Lock className="w-4 h-4 text-purple-400" />
@@ -106,7 +106,7 @@ export function ProblemSelectionPanel({ problems, selections, selectionState, on
                 'Select Your Problem Statements'
               )}
             </h3>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-slate-500">
               {isFinalized 
                 ? "Your team&apos;s selection is locked."
                 : `Combine at least ${MIN_PROBLEM_SELECTIONS} problems into ONE solution.`}
@@ -115,7 +115,7 @@ export function ProblemSelectionPanel({ problems, selections, selectionState, on
           
           <div className="flex items-center gap-4 w-full md:w-auto">
             <div className="flex-1 md:flex-none">
-              <div className="text-xs text-gray-500 font-bold mb-1">PROBLEMS SELECTED</div>
+              <div className="text-xs text-slate-500 font-bold mb-1">PROBLEMS SELECTED</div>
               {minReached ? (
                 <div className="text-green-400 font-bold flex items-center gap-1">
                   <CheckCircle2 className="w-4 h-4" />
@@ -160,15 +160,15 @@ export function ProblemSelectionPanel({ problems, selections, selectionState, on
                 ${isFinalized 
                   ? isSelected 
                     ? 'bg-purple-900/20 border-purple-500/50 cursor-default' 
-                    : 'bg-black/40 border-[#2a2a3a] opacity-40 cursor-not-allowed'
+                    : 'bg-black/40 border-border opacity-40 cursor-not-allowed'
                   : isSelected 
                     ? 'bg-purple-900/20 border-purple-500 cursor-pointer shadow-[0_0_20px_rgba(139,92,246,0.15)] scale-[1.02]' 
-                    : 'bg-[#16161f] border-[#2a2a3a] hover:border-purple-500/50 hover:bg-[#1a1a24] cursor-pointer'
+                    : 'bg-surface border-border hover:border-purple-500/50 hover:bg-[#1a1a24] cursor-pointer'
                 }
               `}
             >
               <div className="flex justify-between items-start mb-4">
-                <Badge variant="outline" className={`font-mono ${isSelected ? 'bg-purple-500/20 text-purple-300 border-purple-500/30' : 'bg-white/5 text-gray-400 border-white/10'}`}>
+                <Badge variant="outline" className={`font-mono ${isSelected ? 'bg-purple-500/20 text-purple-300 border-purple-500/30' : 'bg-white/5 text-slate-500 border-white/10'}`}>
                   #{String(p.number).padStart(2, '0')}
                 </Badge>
                 {isSelected && (
@@ -178,11 +178,11 @@ export function ProblemSelectionPanel({ problems, selections, selectionState, on
                 )}
               </div>
               
-              <h4 className="font-bold text-white text-lg mb-3 leading-tight">{p.title}</h4>
-              <p className="text-sm text-gray-400 leading-relaxed flex-1">{p.description}</p>
+              <h4 className="font-bold text-foreground text-lg mb-3 leading-tight">{p.title}</h4>
+              <p className="text-sm text-slate-500 leading-relaxed flex-1">{p.description}</p>
               
               {loadingId === p.id && (
-                <div className="absolute inset-0 bg-[#0a0a0f]/60 rounded-xl flex items-center justify-center backdrop-blur-[2px]">
+                <div className="absolute inset-0 bg-background/60 rounded-xl flex items-center justify-center backdrop-blur-[2px]">
                   <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
                 </div>
               )}
@@ -193,28 +193,28 @@ export function ProblemSelectionPanel({ problems, selections, selectionState, on
 
       {/* Selected Problems Summary */}
       {selections.length > 0 && (
-        <Card className="w-full bg-[#16161f] border-[#2a2a3a] overflow-hidden mb-8">
+        <Card className="w-full bg-surface border-border overflow-hidden mb-8">
           <button 
             className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
             onClick={() => setShowSummary(!showSummary)}
           >
             <div className="flex items-center gap-3">
-              <h3 className="font-space-grotesk font-bold text-white">YOUR SELECTED PROBLEMS</h3>
-              <Badge variant="outline" className="bg-white/5 text-gray-400 border-white/10">{selections.length}</Badge>
+              <h3 className="font-space-grotesk font-bold text-foreground">YOUR SELECTED PROBLEMS</h3>
+              <Badge variant="outline" className="bg-white/5 text-slate-500 border-white/10">{selections.length}</Badge>
             </div>
-            {showSummary ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
+            {showSummary ? <ChevronUp className="w-5 h-5 text-slate-500" /> : <ChevronDown className="w-5 h-5 text-slate-500" />}
           </button>
           
           {showSummary && (
-            <div className="p-4 pt-0 border-t border-[#2a2a3a]">
+            <div className="p-4 pt-0 border-t border-border">
               <div className="space-y-2 mt-4">
                 {selectedProblems.map((p, idx) => (
-                  <div key={p.id} className="flex items-start gap-3 p-3 rounded bg-black/30 border border-[#2a2a3a]">
+                  <div key={p.id} className="flex items-start gap-3 p-3 rounded bg-black/30 border border-border">
                     <div className="text-purple-400 mt-0.5"><CheckCircle2 className="w-4 h-4" /></div>
                     <div>
-                      <span className="font-mono text-gray-500 text-xs mr-2">#{String(p.number).padStart(2, '0')}</span>
+                      <span className="font-mono text-slate-500 text-xs mr-2">#{String(p.number).padStart(2, '0')}</span>
                       <span className="font-medium text-gray-200">{p.title}</span>
-                      <p className="text-xs text-gray-500 mt-1">{p.description}</p>
+                      <p className="text-xs text-slate-500 mt-1">{p.description}</p>
                     </div>
                   </div>
                 ))}

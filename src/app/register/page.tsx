@@ -97,10 +97,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-6 text-white relative">
+    <div className="min-h-screen bg-background flex items-center justify-center p-6 text-foreground relative">
       <div className="absolute top-8 left-8">
         <Link href="/">
-          <div className="flex items-center gap-2 font-display text-xl font-bold tracking-widest text-white/80 hover:text-white transition-colors cursor-pointer">
+          <div className="flex items-center gap-2 font-display text-xl font-bold tracking-widest text-foreground/80 hover:text-foreground transition-colors cursor-pointer">
             <Shield className="w-6 h-6 text-purple-500" />
             <span>FG</span>
           </div>
@@ -121,12 +121,12 @@ export default function RegisterPage() {
                   <Users className="w-6 h-6 text-purple-400" />
                 </div>
                 <h1 className="text-2xl font-space-grotesk font-bold tracking-wide">Join the Event</h1>
-                <p className="text-sm text-gray-400 mt-2">Are you creating a new team or joining an existing one?</p>
+                <p className="text-sm text-slate-500 mt-2">Are you creating a new team or joining an existing one?</p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button 
                   variant="outline" 
-                  className="w-full h-16 text-lg justify-start px-6 border-[#2a2a3a] hover:bg-purple-500/10 hover:border-purple-500/30"
+                  className="w-full h-16 text-lg justify-start px-6 border-border hover:bg-purple-500/10 hover:border-purple-500/30"
                   onClick={() => handleSelectRole('leader')}
                 >
                   <Target className="w-5 h-5 mr-4 text-purple-400" />
@@ -134,14 +134,14 @@ export default function RegisterPage() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="w-full h-16 text-lg justify-start px-6 border-[#2a2a3a] hover:bg-blue-500/10 hover:border-blue-500/30"
+                  className="w-full h-16 text-lg justify-start px-6 border-border hover:bg-blue-500/10 hover:border-blue-500/30"
                   onClick={() => handleSelectRole('member')}
                 >
                   <User className="w-5 h-5 mr-4 text-blue-400" />
                   I am a Team Member
                 </Button>
                 
-                <div className="mt-6 text-center text-sm text-gray-400">
+                <div className="mt-6 text-center text-sm text-slate-500">
                   Already have an account?{' '}
                   <Link href="/login" className="text-purple-400 hover:text-purple-300 transition-colors">
                     Sign in
@@ -156,7 +156,7 @@ export default function RegisterPage() {
               <CardHeader className="text-center pb-2 relative">
                 <button 
                   onClick={handleBack}
-                  className="absolute left-6 top-6 text-gray-400 hover:text-white transition-colors"
+                  className="absolute left-6 top-6 text-slate-500 hover:text-foreground transition-colors"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </button>
@@ -166,7 +166,7 @@ export default function RegisterPage() {
                 <h1 className="text-2xl font-space-grotesk font-bold tracking-wide">
                   {role === 'leader' ? 'Create Team' : 'Join Team'}
                 </h1>
-                <p className="text-sm text-gray-400 mt-2">
+                <p className="text-sm text-slate-500 mt-2">
                   {role === 'leader' ? 'Register your team and get an invite code.' : 'Enter the invite code from your team leader.'}
                 </p>
               </CardHeader>
@@ -238,13 +238,13 @@ export default function RegisterPage() {
                   <CheckCircle2 className="w-8 h-8 text-green-400" />
                 </div>
                 <h1 className="text-2xl font-space-grotesk font-bold tracking-wide text-green-400">Team Created!</h1>
-                <p className="text-gray-400 mt-2">Your team has been successfully registered.</p>
+                <p className="text-slate-500 mt-2">Your team has been successfully registered.</p>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="bg-black/50 p-6 rounded-lg border border-purple-500/30 text-center">
-                  <p className="text-sm text-gray-400 mb-3">Share this invite code with your 3 team members:</p>
+                  <p className="text-sm text-slate-500 mb-3">Share this invite code with your 3 team members:</p>
                   <div className="flex items-center justify-center gap-3">
-                    <div className="text-4xl font-space-grotesk font-black tracking-widest text-white">
+                    <div className="text-4xl font-space-grotesk font-black tracking-widest text-foreground">
                       {generatedCode}
                     </div>
                     <Button variant="ghost" size="sm" onClick={copyCode} className="hover:bg-white/10">

@@ -29,16 +29,16 @@ export function DataTable<T>({
   
   if (!data || data.length === 0) {
     return (
-      <div className="w-full rounded-xl border border-[#2a2a3a] bg-[#16161f] p-8 text-center text-[#9ca3af]">
+      <div className="w-full rounded-xl border border-border bg-surface p-8 text-center text-slate-500">
         {emptyMessage}
       </div>
     );
   }
 
   return (
-    <div className="w-full overflow-x-auto rounded-xl border border-[#2a2a3a] bg-[#16161f]">
-      <table className="w-full text-left text-sm text-[#f4f4f5]">
-        <thead className="bg-[#1e1e2d] text-xs uppercase text-[#9ca3af] border-b border-[#2a2a3a]">
+    <div className="w-full overflow-x-auto rounded-xl border border-border bg-surface">
+      <table className="w-full text-left text-sm text-foreground">
+        <thead className="bg-surface-2 text-xs uppercase text-slate-500 border-b border-border">
           <tr>
             {columns.map((col, idx) => (
               <th key={idx} scope="col" className={`px-6 py-4 font-medium ${col.className || ''}`}>
@@ -52,7 +52,7 @@ export function DataTable<T>({
             <tr 
               key={keyExtractor ? keyExtractor(item, rowIdx) : rowIdx} 
               onClick={() => onRowClick?.(item)}
-              className={`border-b border-[#2a2a3a] transition-colors hover:bg-[#1e1e2d]/50 ${
+              className={`border-b border-border transition-colors hover:bg-surface-2/50 ${
                 onRowClick ? 'cursor-pointer' : ''
               } ${striped && rowIdx % 2 !== 0 ? 'bg-[#1a1a24]' : ''}`}
             >

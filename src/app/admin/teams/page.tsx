@@ -118,7 +118,7 @@ export default function AdminTeamsPage() {
   const roleColors: any = {
     INNOVATOR: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     INVESTOR: 'bg-green-500/10 text-green-400 border-green-500/20',
-    PENDING: 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+    PENDING: 'bg-gray-500/10 text-slate-500 border-gray-500/20'
   };
 
   return (
@@ -129,7 +129,7 @@ export default function AdminTeamsPage() {
             <Trophy className="text-purple-500" />
             Teams & Registration
           </h1>
-          <p className="text-gray-400 mt-1">Manage all registered teams and their progress.</p>
+          <p className="text-slate-500 mt-1">Manage all registered teams and their progress.</p>
         </div>
         <Button 
           variant="outline" 
@@ -143,13 +143,13 @@ export default function AdminTeamsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="md:col-span-2 relative">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
             placeholder="Search teams..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-[#16161f] border border-[#2a2a3a] rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:border-purple-500 transition-colors"
+            className="w-full bg-surface border border-border rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:border-purple-500 transition-colors"
           />
         </div>
         <Select 
@@ -201,21 +201,21 @@ export default function AdminTeamsPage() {
                   <div className="flex items-center gap-4 px-6 py-4 hover:bg-white/[0.02] transition-colors">
                     {/* Team Info */}
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-white truncate">{team.team_name}</div>
-                      <div className="text-xs text-gray-500 font-mono mt-0.5">{team.categoryName || 'Unassigned Category'}</div>
+                      <div className="font-semibold text-foreground truncate">{team.team_name}</div>
+                      <div className="text-xs text-slate-500 font-mono mt-0.5">{team.categoryName || 'Unassigned Category'}</div>
                     </div>
 
                     {/* Member Count */}
                     <div className="flex items-center gap-1.5 text-sm">
-                      <Users className="w-3.5 h-3.5 text-gray-500" />
-                      <span className={`font-bold ${team.memberCount >= 4 ? 'text-green-400' : 'text-gray-300'}`}>
+                      <Users className="w-3.5 h-3.5 text-slate-500" />
+                      <span className={`font-bold ${team.memberCount >= 4 ? 'text-green-400' : 'text-slate-600'}`}>
                         {team.memberCount || 0}/4
                       </span>
                     </div>
 
                     {/* Selection Status */}
                     {team.role === 'INNOVATOR' && (
-                      <span className={`inline-flex text-xs font-bold px-2.5 py-1 rounded-full border ${team.selectionStatus === 'FINALIZED' ? 'bg-green-500/10 text-green-400 border-green-500/20' : team.selectionStatus === 'IN_PROGRESS' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
+                      <span className={`inline-flex text-xs font-bold px-2.5 py-1 rounded-full border ${team.selectionStatus === 'FINALIZED' ? 'bg-green-500/10 text-green-400 border-green-500/20' : team.selectionStatus === 'IN_PROGRESS' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-gray-500/10 text-slate-500 border-gray-500/20'}`}>
                         {team.selectionStatus === 'FINALIZED' ? 'Finalized' : team.selectionStatus === 'IN_PROGRESS' ? `${team.selectionsCount} Selected` : 'Not Started'}
                       </span>
                     )}
@@ -228,7 +228,7 @@ export default function AdminTeamsPage() {
 
                     {/* Role — switchable */}
                     <div className="flex items-center gap-2">
-                      <span className={`inline-flex text-xs font-bold px-2.5 py-1 rounded-full border ${roleColors[team.role] || 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
+                      <span className={`inline-flex text-xs font-bold px-2.5 py-1 rounded-full border ${roleColors[team.role] || 'bg-gray-500/10 text-slate-500 border-gray-500/20'}`}>
                         {team.role}
                       </span>
                       <div className="flex gap-1">
@@ -260,7 +260,7 @@ export default function AdminTeamsPage() {
                     {/* More Info Toggle */}
                     <button
                       onClick={() => handleExpandTeam(team.id)}
-                      className="flex items-center gap-1 text-xs text-gray-400 hover:text-white border border-white/10 px-2 py-1 rounded transition-colors"
+                      className="flex items-center gap-1 text-xs text-slate-500 hover:text-foreground border border-white/10 px-2 py-1 rounded transition-colors"
                     >
                       <Info className="w-3 h-3" />
                       {expandedTeam === team.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -273,23 +273,23 @@ export default function AdminTeamsPage() {
                       <div className="pt-4 grid grid-cols-2 gap-6">
                         {/* Team Details */}
                         <div>
-                          <div className="text-xs text-gray-500 uppercase tracking-widest mb-3 font-semibold">Team Details</div>
+                          <div className="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold">Team Details</div>
                           <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
-                              <span className="text-gray-400">Join Code</span>
+                              <span className="text-slate-500">Join Code</span>
                               <span className="font-mono font-bold text-purple-400">{team.join_code || '—'}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-400">Category</span>
-                              <span className="text-white">{team.categoryName || 'Unassigned'}</span>
+                              <span className="text-slate-500">Category</span>
+                              <span className="text-foreground">{team.categoryName || 'Unassigned'}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-400">Balance</span>
-                              <span className="text-white">₹{(team.current_balance || 0).toLocaleString('en-IN')}</span>
+                              <span className="text-slate-500">Balance</span>
+                              <span className="text-foreground">₹{(team.current_balance || 0).toLocaleString('en-IN')}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-400">Finalist</span>
-                              <span className={team.is_finalist ? 'text-yellow-400 font-bold' : 'text-gray-500'}>
+                              <span className="text-slate-500">Finalist</span>
+                              <span className={team.is_finalist ? 'text-yellow-400 font-bold' : 'text-slate-500'}>
                                 {team.is_finalist ? '⭐ Yes' : 'No'}
                               </span>
                             </div>
@@ -298,11 +298,11 @@ export default function AdminTeamsPage() {
 
                         {/* Members List */}
                         <div>
-                          <div className="text-xs text-gray-500 uppercase tracking-widest mb-3 font-semibold">Members & Registration Numbers</div>
+                          <div className="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold">Members & Registration Numbers</div>
                           {teamMembers[team.id] === undefined ? (
-                            <div className="text-xs text-gray-500">Loading...</div>
+                            <div className="text-xs text-slate-500">Loading...</div>
                           ) : teamMembers[team.id].length === 0 ? (
-                            <div className="text-xs text-gray-500">No members joined yet.</div>
+                            <div className="text-xs text-slate-500">No members joined yet.</div>
                           ) : (
                             <div className="space-y-2">
                               {teamMembers[team.id].map((member: any, i: number) => (
@@ -311,8 +311,8 @@ export default function AdminTeamsPage() {
                                     {i + 1}
                                   </div>
                                   <div>
-                                    <div className="font-medium text-white">{member.name}</div>
-                                    <div className="text-xs font-mono text-gray-400">{member.email?.replace('@finfest.com', '')}</div>
+                                    <div className="font-medium text-foreground">{member.name}</div>
+                                    <div className="text-xs font-mono text-slate-500">{member.email?.replace('@finfest.com', '')}</div>
                                   </div>
                                 </div>
                               ))}

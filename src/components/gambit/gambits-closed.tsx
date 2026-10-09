@@ -12,10 +12,10 @@ export function GambitsClosed({ locked }: { locked?: boolean }) {
         className="space-y-4"
       >
         <div className="text-xs uppercase tracking-[0.35em] text-amber-400">GAMBITS CLOSED</div>
-        <h1 className="font-display text-display-sm text-white">
+        <h1 className="font-display text-display-sm text-foreground">
           {locked ? 'Your Gambit is locked.' : 'Submissions are closed.'}
         </h1>
-        <div className="flex items-center justify-center gap-2 text-gray-400">
+        <div className="flex items-center justify-center gap-2 text-slate-500">
           <Clock size={16} className="animate-pulse" />
           <span>Awaiting Judge Decision.</span>
         </div>

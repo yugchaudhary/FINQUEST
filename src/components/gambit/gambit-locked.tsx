@@ -39,7 +39,7 @@ export function GambitLocked({ selectedTeam, selectedColor }: GambitLockedProps)
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="font-display text-display-sm md:text-display-md text-white mb-3"
+          className="font-display text-display-sm md:text-display-md text-foreground mb-3"
         >
           GAMBIT LOCKED
         </motion.h1>
@@ -66,7 +66,7 @@ export function GambitLocked({ selectedTeam, selectedColor }: GambitLockedProps)
           transition={{ delay: 0.8 }}
           className="flex flex-col items-center gap-3"
         >
-          <div className="flex items-center gap-2 text-gray-400">
+          <div className="flex items-center gap-2 text-slate-500">
             <Clock size={16} className="animate-pulse" />
             <span className="text-sm">Awaiting Judge Decision</span>
           </div>

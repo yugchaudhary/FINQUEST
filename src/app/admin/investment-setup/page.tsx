@@ -65,7 +65,7 @@ export default function InvestmentSetupPage() {
           <Input 
             type="number" 
             defaultValue={row.balance}
-            className="w-48 bg-[#16161f]"
+            className="w-48 bg-surface"
             onBlur={(e) => {
               if (e.target.value !== row.balance.toString()) {
                 handleUpdateBalance(row.id, e.target.value);
@@ -87,13 +87,13 @@ export default function InvestmentSetupPage() {
             <PiggyBank className="text-purple-500" />
             Investment Setup
           </h1>
-          <p className="text-gray-400 mt-1">Configure starting balances for INVESTOR teams.</p>
+          <p className="text-slate-500 mt-1">Configure starting balances for INVESTOR teams.</p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <div className="flex flex-col md:flex-row gap-4 items-end bg-[#16161f] p-4 rounded-lg border border-[#2a2a3a]">
+          <div className="flex flex-col md:flex-row gap-4 items-end bg-surface p-4 rounded-lg border border-border">
             <div className="flex-1 max-w-xs">
               <Input
                 label="Bulk Set Balance for ALL Investors"

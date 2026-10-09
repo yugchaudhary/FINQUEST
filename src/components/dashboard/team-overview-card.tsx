@@ -29,23 +29,23 @@ export function TeamOverviewCard({ team, members }: TeamOverviewProps) {
 
   return (
     <div className="w-full">
-      <div className="text-xs font-bold text-gray-500 tracking-widest mb-3 ml-1">YOUR TEAM</div>
-      <Card className="w-full bg-[#16161f] border-[#2a2a3a] overflow-hidden">
+      <div className="text-xs font-bold text-slate-500 tracking-widest mb-3 ml-1">YOUR TEAM</div>
+      <Card className="w-full bg-surface border-border overflow-hidden">
         <CardContent className="p-0">
-          <div className="flex flex-col md:flex-row border-b border-[#2a2a3a]">
+          <div className="flex flex-col md:flex-row border-b border-border">
             {/* Left: Info */}
-            <div className="p-6 md:p-8 flex-1 border-b md:border-b-0 md:border-r border-[#2a2a3a] bg-black/20">
+            <div className="p-6 md:p-8 flex-1 border-b md:border-b-0 md:border-r border-border bg-black/20">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-3xl md:text-4xl font-space-grotesk font-black text-white mb-3">
+                  <h2 className="text-3xl md:text-4xl font-space-grotesk font-black text-foreground mb-3">
                     {team.team_name}
                   </h2>
                   <div className="flex flex-wrap items-center gap-3">
                     <Badge variant="outline" className={team.role === 'INVESTOR' ? 'bg-blue-900/20 text-blue-400 border-blue-500/30 font-mono' : 'bg-purple-900/20 text-purple-400 border-purple-500/30 font-mono'}>
                       {team.role}
                     </Badge>
-                    <span className="text-gray-500 text-sm">/</span>
-                    <span className="text-gray-300 font-medium text-sm px-3 py-1 bg-white/5 rounded-full border border-white/10">
+                    <span className="text-slate-500 text-sm">/</span>
+                    <span className="text-slate-600 font-medium text-sm px-3 py-1 bg-white/5 rounded-full border border-white/10">
                       {team.categoryName || 'Category Not Assigned'}
                     </span>
                   </div>
@@ -56,7 +56,7 @@ export function TeamOverviewCard({ team, members }: TeamOverviewProps) {
             {/* Right: Members Summary */}
             <div className="p-6 md:p-8 md:w-80 flex flex-col justify-center">
               <div className="flex items-center justify-between mb-4">
-                <div className="text-sm text-gray-500 font-medium">TEAM STATUS</div>
+                <div className="text-sm text-slate-500 font-medium">TEAM STATUS</div>
                 {isComplete ? (
                   <span className="text-xs font-bold text-green-400 flex items-center gap-1 bg-green-400/10 px-2 py-0.5 rounded">
                     <CheckCircle2 className="w-3 h-3" /> COMPLETE
@@ -78,8 +78,8 @@ export function TeamOverviewCard({ team, members }: TeamOverviewProps) {
                           {member.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-white truncate">{member.name}</div>
-                          <div className="text-xs text-gray-500 font-mono truncate">{member.email?.split('@')[0]}</div>
+                          <div className="text-sm font-medium text-foreground truncate">{member.name}</div>
+                          <div className="text-xs text-slate-500 font-mono truncate">{member.email?.split('@')[0]}</div>
                         </div>
                       </div>
                     );
@@ -88,9 +88,9 @@ export function TeamOverviewCard({ team, members }: TeamOverviewProps) {
                   return (
                     <div key={i} className="flex items-center gap-3 opacity-40">
                       <div className="w-8 h-8 rounded-full border border-dashed border-gray-500 flex items-center justify-center shrink-0">
-                        <User className="w-4 h-4 text-gray-500" />
+                        <User className="w-4 h-4 text-slate-500" />
                       </div>
-                      <div className="text-sm text-gray-500 italic">Open Slot</div>
+                      <div className="text-sm text-slate-500 italic">Open Slot</div>
                     </div>
                   );
                 })}
@@ -103,10 +103,10 @@ export function TeamOverviewCard({ team, members }: TeamOverviewProps) {
                     className="w-full flex items-center justify-between p-2 rounded bg-black/40 border border-gray-800 hover:border-gray-700 hover:bg-black/60 transition-colors text-left group"
                   >
                     <div>
-                      <div className="text-[10px] text-gray-500 uppercase font-bold mb-0.5">Join Code</div>
-                      <div className="text-sm text-white font-mono">{team.join_code}</div>
+                      <div className="text-[10px] text-slate-500 uppercase font-bold mb-0.5">Join Code</div>
+                      <div className="text-sm text-foreground font-mono">{team.join_code}</div>
                     </div>
-                    {copied ? <CheckCircle2 className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-gray-500 group-hover:text-white" />}
+                    {copied ? <CheckCircle2 className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-slate-500 group-hover:text-foreground" />}
                   </button>
                 </div>
               )}

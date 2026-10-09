@@ -18,7 +18,7 @@ export function FinalsLeaderboard({ data }: FinalsLeaderboardProps) {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1: return <Crown size={20} className="text-yellow-400" />
-      case 2: return <Medal size={20} className="text-gray-300" />
+      case 2: return <Medal size={20} className="text-slate-600" />
       case 3: return <Medal size={20} className="text-amber-600" />
       default: return null
     }
@@ -27,9 +27,9 @@ export function FinalsLeaderboard({ data }: FinalsLeaderboardProps) {
   const getRankStyle = (rank: number) => {
     switch (rank) {
       case 1: return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/30 shadow-glow-gold'
-      case 2: return 'text-gray-300 bg-gray-300/10 border-gray-400/30'
+      case 2: return 'text-slate-600 bg-gray-300/10 border-gray-400/30'
       case 3: return 'text-amber-600 bg-amber-600/10 border-amber-600/30'
-      default: return 'text-gray-500 bg-gambit-surface-2 border-gambit-border'
+      default: return 'text-slate-500 bg-gambit-surface-2 border-gambit-border'
     }
   }
 
@@ -49,7 +49,7 @@ export function FinalsLeaderboard({ data }: FinalsLeaderboardProps) {
         <h1 className="font-display text-display-sm md:text-display-md text-gradient-gold mb-2">
           FINALS LEADERBOARD
         </h1>
-        <p className="text-gray-500 text-sm uppercase tracking-[0.2em] font-display">
+        <p className="text-slate-500 text-sm uppercase tracking-[0.2em] font-display">
           The Champions
         </p>
       </motion.div>
@@ -57,7 +57,7 @@ export function FinalsLeaderboard({ data }: FinalsLeaderboardProps) {
       {/* Leaderboard */}
       <div className="w-full max-w-2xl z-10">
         {/* Header row */}
-        <div className="flex items-center gap-4 px-6 py-3 text-xs text-gray-500 uppercase tracking-wider border-b border-gambit-border/50 font-display">
+        <div className="flex items-center gap-4 px-6 py-3 text-xs text-slate-500 uppercase tracking-wider border-b border-gambit-border/50 font-display">
           <div className="w-14 text-center">Rank</div>
           <div className="flex-1">Finalist</div>
           <div className="w-32 text-right">Total Score</div>
@@ -87,7 +87,7 @@ export function FinalsLeaderboard({ data }: FinalsLeaderboardProps) {
 
             {/* Team */}
             <div className="flex-1">
-              <span className={`font-display text-lg ${entry.rank === 1 ? 'text-gambit-gold' : entry.rank <= 3 ? 'text-white' : 'text-gray-300'}`}>
+              <span className={`font-display text-lg ${entry.rank === 1 ? 'text-gambit-gold' : entry.rank <= 3 ? 'text-white' : 'text-slate-600'}`}>
                 {entry.team_name}
               </span>
             </div>
@@ -104,7 +104,7 @@ export function FinalsLeaderboard({ data }: FinalsLeaderboardProps) {
         ))}
 
         {data.length === 0 && (
-          <div className="text-center py-20 text-gray-500">
+          <div className="text-center py-20 text-slate-500">
             Scores will appear as finalists are evaluated
           </div>
         )}

@@ -6,17 +6,18 @@
 
 @layer base {
   :root {
-    --background: #0a0a0f;
-    --foreground: #f4f4f5;
-    --surface: #16161f;
-    --surface-2: #1e1e2d;
-    --border: #2a2a3a;
-    --muted: #9ca3af;
-    --accent: #8b5cf6;
+    --background: #ffffff;
+    --foreground: #111827;
+    --surface: #f8fafc;
+    --surface-2: #f1f5f9;
+    --border: #e2e8f0;
+    --border-light: #cbd5e1;
+    --muted: #64748b;
+    --accent: #5eb3d1;
   }
 
   * {
-    @apply border-gambit-border;
+    @apply border-border;
   }
 
   html {
@@ -26,10 +27,10 @@
   }
 
   body {
-    @apply bg-gambit-bg text-white font-sans;
+    @apply bg-background text-foreground font-sans;
     background-image: 
-      radial-gradient(ellipse at 20% 0%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 100%, rgba(59, 130, 246, 0.03) 0%, transparent 50%);
+      radial-gradient(ellipse at 20% 0%, rgba(94, 179, 209, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(0, 0, 0, 0.02) 0%, transparent 50%);
     min-height: 100vh;
   }
 
@@ -40,71 +41,55 @@
   }
   
   ::-webkit-scrollbar-track {
-    background: #0a0a0f;
+    background: #f8fafc;
   }
   
   ::-webkit-scrollbar-thumb {
-    background: #2a2a3a;
+    background: #cbd5e1;
     border-radius: 4px;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    background: #3a3a4f;
+    background: #94a3b8;
   }
 }
 
 @layer components {
-  /* Glass card */
+  /* Glass card -> Polished Card */
   .glass-card {
-    @apply bg-gambit-surface/80 backdrop-blur-xl border border-gambit-border rounded-xl;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+    @apply bg-white border border-border rounded-xl shadow-sm;
   }
 
   .glass-card-elevated {
-    @apply glass-card;
-    box-shadow: 
-      0 10px 25px -3px rgba(0, 0, 0, 0.4),
-      0 4px 6px -4px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+    @apply glass-card shadow-md;
   }
 
   /* Red team card */
   .team-card-red {
     @apply glass-card border-gambit-red/30 hover:border-gambit-red/60;
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(22, 22, 31, 0.8) 100%);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.02) 0%, #ffffff 100%);
   }
 
   .team-card-red.selected {
-    @apply border-gambit-red animate-glow-red;
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(22, 22, 31, 0.9) 100%);
+    @apply border-gambit-red shadow-[0_0_15px_rgba(239,68,68,0.1)];
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, #ffffff 100%);
   }
 
   /* Blue team card */
   .team-card-blue {
     @apply glass-card border-gambit-blue/30 hover:border-gambit-blue/60;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(22, 22, 31, 0.8) 100%);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.02) 0%, #ffffff 100%);
   }
 
   .team-card-blue.selected {
-    @apply border-gambit-blue animate-glow-blue;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(22, 22, 31, 0.9) 100%);
-  }
-
-  /* Gold highlight */
-  .gold-highlight {
-    @apply border-gambit-gold/30;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(22, 22, 31, 0.8) 100%);
+    @apply border-gambit-blue shadow-[0_0_15px_rgba(59,130,246,0.1)];
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, #ffffff 100%);
   }
 
   /* Gradient text */
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #f4f4f5 0%, #8b5cf6 50%, #3b82f6 100%);
-  }
-
-  .text-gradient-gold {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%);
+    background-image: linear-gradient(135deg, #111827 0%, #5eb3d1 100%);
   }
 
   /* Live indicator */
@@ -112,70 +97,27 @@
     @apply w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse-live;
   }
 
-  /* Shimmer loading */
-  .shimmer {
-    @apply bg-gambit-surface;
-    background-image: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(139, 92, 246, 0.05) 50%,
-      transparent 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 2s linear infinite;
-  }
-
   /* Admin sidebar */
   .sidebar-link {
-    @apply flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 rounded-lg transition-all duration-200 hover:bg-gambit-surface-2 hover:text-white;
+    @apply flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-600 rounded-lg transition-all duration-200 hover:bg-slate-100 hover:text-slate-900;
   }
 
   .sidebar-link.active {
-    @apply bg-gambit-purple/10 text-gambit-purple border-l-2 border-gambit-purple;
-  }
-
-  /* Leaderboard row */
-  .leaderboard-row {
-    @apply flex items-center gap-4 px-6 py-4 border-b border-gambit-border/50 transition-all duration-300;
-  }
-
-  .leaderboard-row:hover {
-    @apply bg-gambit-surface-2/50;
+    @apply bg-blue-50 text-accent border-l-2 border-accent;
   }
 
   /* Range slider custom styling */
   input[type='range'] {
-    @apply appearance-none w-full h-2 rounded-full bg-gambit-surface-2 outline-none;
+    @apply appearance-none w-full h-2 rounded-full bg-slate-200 outline-none;
   }
 
   input[type='range']::-webkit-slider-thumb {
-    @apply appearance-none w-6 h-6 rounded-full bg-gambit-purple cursor-pointer shadow-glow-sm;
+    @apply appearance-none w-6 h-6 rounded-full bg-accent cursor-pointer shadow-md;
     transition: all 0.15s ease;
   }
 
   input[type='range']::-webkit-slider-thumb:hover {
-    @apply bg-gambit-purple-hover shadow-glow-md;
+    @apply bg-[#4ea2c0] shadow-lg;
     transform: scale(1.15);
-  }
-
-  input[type='range']::-moz-range-thumb {
-    @apply w-6 h-6 rounded-full bg-gambit-purple cursor-pointer border-0 shadow-glow-sm;
-  }
-
-  /* Number input - remove spinners */
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-  input[type='number'] {
-    -moz-appearance: textfield;
-  }
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
   }
 }

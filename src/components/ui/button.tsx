@@ -14,10 +14,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 focus:ring-offset-[#0a0a0f] disabled:opacity-50 disabled:pointer-events-none';
     
     const variants = {
-      default: 'bg-violet-600 text-white hover:bg-violet-700',
+      default: 'bg-accent text-white hover:bg-[#4ea2c0]',
       destructive: 'bg-red-600 text-white hover:bg-red-700',
-      outline: 'border border-[#2a2a3a] bg-transparent hover:bg-[#1e1e2d] text-white',
-      ghost: 'bg-transparent hover:bg-[#1e1e2d] text-white',
+      outline: 'border border-border bg-transparent hover:bg-surface-2 text-foreground',
+      ghost: 'bg-transparent hover:bg-surface-2 text-foreground',
       'gambit-red': 'bg-[#ef4444] text-white hover:bg-[#dc2626] shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:shadow-[0_0_20px_rgba(239,68,68,0.5)]',
       'gambit-blue': 'bg-[#3b82f6] text-white hover:bg-[#2563eb] shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]',
       success: 'bg-[#22c55e] text-white hover:bg-[#16a34a]',

@@ -12,7 +12,7 @@ interface LeaderboardSectionProps {
 export function LeaderboardSection({ isPublished, leaderboardData }: LeaderboardSectionProps) {
   return (
     <div className="w-full pt-8">
-      <div className="text-xs font-bold text-gray-500 tracking-widest mb-4 ml-1">PHASE 1 LEADERBOARD</div>
+      <div className="text-xs font-bold text-slate-500 tracking-widest mb-4 ml-1">PHASE 1 LEADERBOARD</div>
       
       <AnimatePresence mode="wait">
         {!isPublished ? (
@@ -22,8 +22,8 @@ export function LeaderboardSection({ isPublished, leaderboardData }: Leaderboard
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <Card className="w-full bg-[#16161f]/50 border-[#2a2a3a] border-dashed">
-              <CardContent className="flex flex-col items-center justify-center py-16 text-gray-500">
+            <Card className="w-full bg-surface/50 border-border border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-16 text-slate-500">
                 <div className="w-12 h-12 rounded-full bg-black/40 flex items-center justify-center mb-4">
                   <Lock className="w-5 h-5 text-gray-600" />
                 </div>
@@ -38,7 +38,7 @@ export function LeaderboardSection({ isPublished, leaderboardData }: Leaderboard
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="w-full overflow-hidden bg-[#0a0a0f] rounded-2xl border border-gambit-gold/20"
+            className="w-full overflow-hidden bg-background rounded-2xl border border-gambit-gold/20"
           >
             <div className="scale-[0.95] md:scale-100 origin-top">
               <Phase1Leaderboard leaderboardData={leaderboardData} />

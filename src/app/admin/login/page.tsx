@@ -38,7 +38,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white flex flex-col justify-center py-12 sm:px-6 lg:px-8 selection:bg-red-500/30">
+    <div className="min-h-screen bg-background text-white flex flex-col justify-center py-12 sm:px-6 lg:px-8 selection:bg-red-500/30">
       {/* Background Effect */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-red-600/10 rounded-full blur-[120px] opacity-50"></div>
@@ -46,7 +46,7 @@ export default function AdminLoginPage() {
       </div>
 
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
-        <Link href="/" className="inline-flex items-center text-sm font-medium text-gray-400 hover:text-white mb-8 group transition-colors">
+        <Link href="/" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-foreground mb-8 group transition-colors">
           <ChevronLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
           Back to Event
         </Link>
@@ -60,16 +60,16 @@ export default function AdminLoginPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-500/10 mb-4 border border-red-500/20">
               <ShieldAlert className="w-8 h-8 text-red-500" />
             </div>
-            <h2 className="text-3xl font-display font-black tracking-tight text-white mb-2">
+            <h2 className="text-3xl font-display font-black tracking-tight text-foreground mb-2">
               ADMIN CONTROL CENTER
             </h2>
-            <p className="text-gray-400 uppercase tracking-widest text-sm font-semibold">Authorized Personnel Only</p>
+            <p className="text-slate-500 uppercase tracking-widest text-sm font-semibold">Authorized Personnel Only</p>
           </div>
 
           <Card className="bg-white/5 border-red-500/20 backdrop-blur-xl shadow-2xl">
             <CardHeader>
               <CardTitle className="text-xl text-red-100">System Access</CardTitle>
-              <CardDescription className="text-gray-400">Enter administrator credentials to proceed.</CardDescription>
+              <CardDescription className="text-slate-500">Enter administrator credentials to proceed.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -80,7 +80,7 @@ export default function AdminLoginPage() {
                 )}
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <label className="text-sm font-medium text-slate-600 flex items-center gap-2">
                     <Mail className="w-4 h-4 text-red-400" />
                     Admin Email
                   </label>
@@ -95,7 +95,7 @@ export default function AdminLoginPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <label className="text-sm font-medium text-slate-600 flex items-center gap-2">
                     <Key className="w-4 h-4 text-red-400" />
                     Access Key
                   </label>

@@ -53,7 +53,7 @@ export default function AnnouncementsPage() {
             <Megaphone className="text-purple-500" />
             Announcements
           </h1>
-          <p className="text-gray-400 mt-1">Broadcast realtime announcements to all participant dashboards.</p>
+          <p className="text-slate-500 mt-1">Broadcast realtime announcements to all participant dashboards.</p>
         </div>
       </div>
 
@@ -78,16 +78,16 @@ export default function AnnouncementsPage() {
               <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
             </div>
           ) : announcements.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-slate-500">
               No announcements published yet.
             </div>
           ) : (
             <div className="space-y-4">
               {announcements.map((a) => (
-                <div key={a.id} className="p-4 rounded-lg bg-[#16161f] border border-[#2a2a3a] flex justify-between items-start">
+                <div key={a.id} className="p-4 rounded-lg bg-surface border border-border flex justify-between items-start">
                   <div>
-                    <p className="text-white text-lg mb-2">{a.content}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-foreground text-lg mb-2">{a.content}</p>
+                    <p className="text-xs text-slate-500">
                       Published on {new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(a.published_at))}
                     </p>
                   </div>

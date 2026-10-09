@@ -51,8 +51,8 @@ export function LiveStatusCard({ eventState, team }: LiveStatusCardProps) {
             <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mb-4">
               <CheckCircle2 className="w-8 h-8 text-green-400" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">Gambit Locked</h3>
-            <p className="text-gray-400">Awaiting judge decision for Round {eventState.current_round}.</p>
+            <h3 className="text-xl font-bold text-foreground mb-2">Gambit Locked</h3>
+            <p className="text-slate-500">Awaiting judge decision for Round {eventState.current_round}.</p>
           </div>
         )
       }
@@ -65,12 +65,12 @@ export function LiveStatusCard({ eventState, team }: LiveStatusCardProps) {
                 <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                 LIVE NOW
               </span>
-              <span className="text-gray-400 font-mono text-sm">ROUND 0{eventState.current_round}</span>
+              <span className="text-slate-500 font-mono text-sm">ROUND 0{eventState.current_round}</span>
             </div>
             
             <div className="flex items-center gap-4 text-lg md:text-xl font-bold">
               <span className="text-red-400">{matchInfo.red_team?.team_name}</span>
-              <span className="text-gray-500 text-sm">VS</span>
+              <span className="text-slate-500 text-sm">VS</span>
               <span className="text-blue-400">{matchInfo.blue_team?.team_name}</span>
             </div>
           </div>
@@ -92,9 +92,9 @@ export function LiveStatusCard({ eventState, team }: LiveStatusCardProps) {
     // Default: Waiting
     return (
       <div className="flex flex-col items-center justify-center py-6 text-center opacity-70">
-        <Activity className="w-8 h-8 text-gray-500 mb-4" />
-        <h3 className="text-lg font-medium text-gray-300">Awaiting Next Round</h3>
-        <p className="text-gray-500 text-sm mt-1">The Admin will start the next phase shortly.</p>
+        <Activity className="w-8 h-8 text-slate-500 mb-4" />
+        <h3 className="text-lg font-medium text-slate-600">Awaiting Next Round</h3>
+        <p className="text-slate-500 text-sm mt-1">The Admin will start the next phase shortly.</p>
       </div>
     )
   }
@@ -105,8 +105,8 @@ export function LiveStatusCard({ eventState, team }: LiveStatusCardProps) {
       animate={{ opacity: 1, y: 0 }}
       className="w-full"
     >
-      <div className="text-xs font-bold text-gray-500 tracking-widest mb-3 ml-1">WHAT&apos;S HAPPENING NOW</div>
-      <Card className="w-full bg-[#16161f] border-[#2a2a3a] overflow-hidden relative group">
+      <div className="text-xs font-bold text-slate-500 tracking-widest mb-3 ml-1">WHAT&apos;S HAPPENING NOW</div>
+      <Card className="w-full bg-surface border-border overflow-hidden relative group">
         {screen === 'MATCH_LIVE' && !gambitLocked && (
           <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-transparent to-blue-500/5 pointer-events-none" />
         )}

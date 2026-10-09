@@ -30,7 +30,7 @@ export function AwaitingMatch({ teamName }: AwaitingMatchProps) {
           animate={{ opacity: 1, y: 0 }}
           className="absolute top-6 right-6"
         >
-          <div className="glass-card px-4 py-2 text-sm text-gray-400">
+          <div className="glass-card px-4 py-2 text-sm text-slate-500">
             <span className="text-gambit-purple font-medium">{teamName}</span>
           </div>
         </motion.div>
@@ -44,7 +44,7 @@ export function AwaitingMatch({ teamName }: AwaitingMatchProps) {
         className="absolute top-6 left-6 flex items-center gap-2"
       >
         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-        <span className="text-xs text-gray-500 uppercase tracking-wider">Connected</span>
+        <span className="text-xs text-slate-500 uppercase tracking-wider">Connected</span>
       </motion.div>
 
       {/* Main content */}
@@ -72,21 +72,21 @@ export function AwaitingMatch({ teamName }: AwaitingMatchProps) {
           </svg>
         </motion.div>
 
-        <h1 className="font-display text-display-sm md:text-display-md text-white mb-4">
+        <h1 className="font-display text-display-sm md:text-display-md text-foreground mb-4">
           AWAITING NEXT MATCH
         </h1>
         
         <motion.div
           animate={{ opacity: [0.4, 0.8, 0.4] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="flex items-center justify-center gap-1 text-gray-500"
+          className="flex items-center justify-center gap-1 text-slate-500"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-gambit-purple/60" />
           <span className="w-1.5 h-1.5 rounded-full bg-gambit-purple/40" />
           <span className="w-1.5 h-1.5 rounded-full bg-gambit-purple/20" />
         </motion.div>
 
-        <p className="text-gray-500 text-sm mt-6 max-w-md mx-auto">
+        <p className="text-slate-500 text-sm mt-6 max-w-md mx-auto">
           The next match will appear here automatically when the admin broadcasts it.
         </p>
       </motion.div>

@@ -60,7 +60,7 @@ function StatusBadge({ status }: { status: string }) {
     GAMBITS_CLOSED: { label: 'GAMBITS CLOSED', className: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
     AWAITING_JUDGE_RESULT: { label: 'AWAITING RESULT', className: 'bg-purple-500/10 text-purple-400 border-purple-500/30' },
   }
-  const s = map[status] || { label: status, className: 'bg-white/5 text-gray-400 border-white/10' }
+  const s = map[status] || { label: status, className: 'bg-white/5 text-slate-500 border-white/10' }
   return (
     <span className={`text-xs font-bold px-3 py-1 rounded-full border uppercase tracking-wider ${s.className}`}>
       {s.label}
@@ -70,7 +70,7 @@ function StatusBadge({ status }: { status: string }) {
 
 function SectionCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-[#16161f] border border-[#2a2a3a] rounded-2xl p-6 ${className}`}>
+    <div className={`bg-surface border border-border rounded-2xl p-6 ${className}`}>
       {children}
     </div>
   )
@@ -85,7 +85,7 @@ function ErrorBox({ message, onDismiss }: { message: string; onDismiss: () => vo
       className="flex items-center justify-between gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm"
     >
       <span>⚠ {message}</span>
-      <button onClick={onDismiss} className="text-red-300 hover:text-white text-lg leading-none">×</button>
+      <button onClick={onDismiss} className="text-red-300 hover:text-foreground text-lg leading-none">×</button>
     </motion.div>
   )
 }
@@ -244,19 +244,19 @@ export default function AdminLiveMatchPage() {
       {/* ── Header ─────────────────────────────────────────────── */}
       <div className="flex items-center justify-between pt-2">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-[#8b5cf6] font-medium mb-1">
+          <p className="text-xs uppercase tracking-[0.3em] text-accent font-medium mb-1">
             The Founder&apos;s Gambit
           </p>
           <h1 className="text-3xl font-bold font-space-grotesk">Live Match Control</h1>
         </div>
         <div className="flex items-center gap-3 text-sm">
           {currentRound > 0 && (
-            <span className="text-gray-400 font-mono font-bold">
+            <span className="text-slate-500 font-mono font-bold">
               {formatRoundLabel(currentRound, PHASE_1_ROUNDS)}
             </span>
           )}
           {currentMatch ? <LivePulse /> : (
-            <span className="text-gray-500 text-xs uppercase tracking-widest">Standby</span>
+            <span className="text-slate-500 text-xs uppercase tracking-widest">Standby</span>
           )}
         </div>
       </div>
@@ -271,15 +271,15 @@ export default function AdminLiveMatchPage() {
       ══════════════════════════════════════════════════════════ */}
       {(phase === 'NO_MATCH' || phase === 'CONFIGURING') && (
         <SectionCard>
-          <h2 className="text-lg font-bold mb-6 text-white">Create Live Match</h2>
+          <h2 className="text-lg font-bold mb-6 text-foreground">Create Live Match</h2>
 
           {/* Category */}
           <div className="mb-6">
-            <label className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-3 block">
+            <label className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-3 block">
               Select Category
             </label>
             {categories.length === 0 ? (
-              <p className="text-gray-500 text-sm italic">No categories found. Register teams first.</p>
+              <p className="text-slate-500 text-sm italic">No categories found. Register teams first.</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {categories.map(cat => (
@@ -288,8 +288,8 @@ export default function AdminLiveMatchPage() {
                     onClick={() => setSelectedCategory(cat)}
                     className={`px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
                       selectedCategory === cat
-                        ? 'bg-[#8b5cf6]/20 border-[#8b5cf6]/60 text-[#8b5cf6]'
-                        : 'bg-white/[0.03] border-white/10 text-gray-400 hover:border-[#8b5cf6]/30 hover:text-gray-200'
+                        ? 'bg-accent/20 border-accent/60 text-accent'
+                        : 'bg-white/[0.03] border-white/10 text-slate-500 hover:border-accent/30 hover:text-gray-200'
                     }`}
                   >
                     {cat}
@@ -313,7 +313,7 @@ export default function AdminLiveMatchPage() {
                 </label>
                 <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
                   {teamsInCategory.length === 0 && (
-                    <p className="text-gray-500 text-sm italic">No active teams in this category</p>
+                    <p className="text-slate-500 text-sm italic">No active teams in this category</p>
                   )}
                   {teamsInCategory.map(team => {
                     const isSelected = redTeam?.id === team.id
@@ -327,12 +327,12 @@ export default function AdminLiveMatchPage() {
                           isSelected
                             ? 'bg-red-500/20 border-red-500/50 text-white font-semibold shadow-[0_0_20px_rgba(239,68,68,0.1)]'
                             : isDisabled
-                            ? 'opacity-25 cursor-not-allowed bg-white/[0.02] border-white/5 text-gray-500'
-                            : 'bg-white/[0.03] border-white/8 text-gray-300 hover:border-red-500/30 hover:bg-red-500/5'
+                            ? 'opacity-25 cursor-not-allowed bg-white/[0.02] border-white/5 text-slate-500'
+                            : 'bg-white/[0.03] border-white/8 text-slate-600 hover:border-red-500/30 hover:bg-red-500/5'
                         }`}
                       >
                         <div className="font-medium">{team.team_name}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">{team.role}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">{team.role}</div>
                       </button>
                     )
                   })}
@@ -346,7 +346,7 @@ export default function AdminLiveMatchPage() {
                 </label>
                 <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
                   {teamsInCategory.length === 0 && (
-                    <p className="text-gray-500 text-sm italic">No active teams in this category</p>
+                    <p className="text-slate-500 text-sm italic">No active teams in this category</p>
                   )}
                   {teamsInCategory.map(team => {
                     const isSelected = blueTeam?.id === team.id
@@ -360,12 +360,12 @@ export default function AdminLiveMatchPage() {
                           isSelected
                             ? 'bg-blue-500/20 border-blue-500/50 text-white font-semibold shadow-[0_0_20px_rgba(59,130,246,0.1)]'
                             : isDisabled
-                            ? 'opacity-25 cursor-not-allowed bg-white/[0.02] border-white/5 text-gray-500'
-                            : 'bg-white/[0.03] border-white/8 text-gray-300 hover:border-blue-500/30 hover:bg-blue-500/5'
+                            ? 'opacity-25 cursor-not-allowed bg-white/[0.02] border-white/5 text-slate-500'
+                            : 'bg-white/[0.03] border-white/8 text-slate-600 hover:border-blue-500/30 hover:bg-blue-500/5'
                         }`}
                       >
                         <div className="font-medium">{team.team_name}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">{team.role}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">{team.role}</div>
                       </button>
                     )
                   })}
@@ -380,7 +380,7 @@ export default function AdminLiveMatchPage() {
             onClick={() => setPhase('CONFIRM_BROADCAST')}
             className={`w-full h-14 rounded-xl font-bold text-base tracking-wider transition-all ${
               isReady
-                ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-[0_0_30px_rgba(139,92,246,0.2)] hover:shadow-[0_0_40px_rgba(139,92,246,0.35)]'
+                ? 'bg-accent hover:bg-[#7c3aed] text-white shadow-[0_0_30px_rgba(139,92,246,0.2)] hover:shadow-[0_0_40px_rgba(139,92,246,0.35)]'
                 : 'bg-white/5 text-gray-600 cursor-not-allowed border border-white/5'
             }`}
           >
@@ -398,35 +398,35 @@ export default function AdminLiveMatchPage() {
       ══════════════════════════════════════════════════════════ */}
       {phase === 'CONFIRM_BROADCAST' && redTeam && blueTeam && (
         <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}>
-          <SectionCard className="border-[#8b5cf6]/30">
+          <SectionCard className="border-accent/30">
             <h2 className="text-lg font-bold mb-2">Broadcast this match?</h2>
-            <p className="text-gray-400 text-sm mb-6">
+            <p className="text-slate-500 text-sm mb-6">
               This will immediately open Gambits for all eligible Investors.
             </p>
             <div className="grid grid-cols-3 gap-4 mb-8">
               <div className="bg-white/[0.03] rounded-xl p-4 text-center">
-                <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Category</div>
-                <div className="font-bold text-white">{selectedCategory}</div>
+                <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">Category</div>
+                <div className="font-bold text-foreground">{selectedCategory}</div>
               </div>
               <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-center">
                 <div className="text-xs text-red-400/70 uppercase tracking-wider mb-1">Red</div>
-                <div className="font-bold text-white">{redTeam.team_name}</div>
+                <div className="font-bold text-foreground">{redTeam.team_name}</div>
               </div>
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-center">
                 <div className="text-xs text-blue-400/70 uppercase tracking-wider mb-1">Blue</div>
-                <div className="font-bold text-white">{blueTeam.team_name}</div>
+                <div className="font-bold text-foreground">{blueTeam.team_name}</div>
               </div>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={() => setPhase('NO_MATCH')}
-                className="flex-1 h-12 rounded-xl border border-white/10 text-gray-400 hover:text-white hover:border-white/20 transition-colors font-semibold"
+                className="flex-1 h-12 rounded-xl border border-white/10 text-slate-500 hover:text-foreground hover:border-white/20 transition-colors font-semibold"
               >
                 Cancel
               </button>
               <button
                 onClick={handleBroadcast}
-                className="flex-1 h-12 rounded-xl bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold tracking-wide transition-all shadow-[0_0_30px_rgba(139,92,246,0.25)]"
+                className="flex-1 h-12 rounded-xl bg-accent hover:bg-[#7c3aed] text-white font-bold tracking-wide transition-all shadow-[0_0_30px_rgba(139,92,246,0.25)]"
               >
                 Broadcast Now →
               </button>
@@ -443,10 +443,10 @@ export default function AdminLiveMatchPage() {
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-            className="w-12 h-12 rounded-full border-2 border-[#8b5cf6] border-t-transparent mx-auto mb-4"
+            className="w-12 h-12 rounded-full border-2 border-accent border-t-transparent mx-auto mb-4"
           />
-          <p className="text-white font-bold text-lg">Broadcasting...</p>
-          <p className="text-gray-400 text-sm mt-1">Notifying all investors in real-time</p>
+          <p className="text-foreground font-bold text-lg">Broadcasting...</p>
+          <p className="text-slate-500 text-sm mt-1">Notifying all investors in real-time</p>
         </SectionCard>
       )}
 
@@ -456,7 +456,7 @@ export default function AdminLiveMatchPage() {
       {(phase === 'MATCH_LIVE' || phase === 'CLOSING_GAMBITS') && currentMatch && (
         <div className="space-y-4">
           {/* Live Card */}
-          <SectionCard className="border-[#8b5cf6]/20">
+          <SectionCard className="border-accent/20">
             {/* Top bar */}
             <div className="flex items-center justify-between mb-6">
               <LivePulse />
@@ -464,35 +464,35 @@ export default function AdminLiveMatchPage() {
             </div>
 
             <div className="text-center mb-8">
-              <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-1">
+              <div className="text-xs uppercase tracking-[0.3em] text-slate-500 mb-1">
                 {formatRoundLabel(currentMatch.round_number, PHASE_1_ROUNDS)}
               </div>
-              <div className="text-xs uppercase tracking-[0.25em] text-[#8b5cf6] mb-6">
+              <div className="text-xs uppercase tracking-[0.25em] text-accent mb-6">
                 {currentMatch.category}
               </div>
 
               <div className="flex items-center justify-center gap-6 md:gap-10">
                 <div className="flex-1 max-w-[220px] bg-red-500/8 border border-red-500/20 rounded-2xl p-6 text-center">
                   <div className="text-[10px] text-red-400/60 uppercase tracking-[0.3em] mb-2">Red Team</div>
-                  <div className="text-xl font-bold text-white leading-tight">{currentMatch.red_team.team_name}</div>
+                  <div className="text-xl font-bold text-foreground leading-tight">{currentMatch.red_team.team_name}</div>
                 </div>
                 <div className="text-2xl font-bold text-gray-600">VS</div>
                 <div className="flex-1 max-w-[220px] bg-blue-500/8 border border-blue-500/20 rounded-2xl p-6 text-center">
                   <div className="text-[10px] text-blue-400/60 uppercase tracking-[0.3em] mb-2">Blue Team</div>
-                  <div className="text-xl font-bold text-white leading-tight">{currentMatch.blue_team.team_name}</div>
+                  <div className="text-xl font-bold text-foreground leading-tight">{currentMatch.blue_team.team_name}</div>
                 </div>
               </div>
             </div>
 
             {/* Activity */}
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-[#0a0a0f] rounded-xl p-4 text-center">
+              <div className="bg-background rounded-xl p-4 text-center">
                 <div className="text-2xl font-black text-green-400">{gambitsLocked}</div>
-                <div className="text-xs text-gray-500 mt-1 uppercase tracking-wider">Gambits Locked</div>
+                <div className="text-xs text-slate-500 mt-1 uppercase tracking-wider">Gambits Locked</div>
               </div>
-              <div className="bg-[#0a0a0f] rounded-xl p-4 text-center">
-                <div className="text-2xl font-black text-[#8b5cf6]">{currentMatch.round_number}</div>
-                <div className="text-xs text-gray-500 mt-1 uppercase tracking-wider">Round</div>
+              <div className="bg-background rounded-xl p-4 text-center">
+                <div className="text-2xl font-black text-accent">{currentMatch.round_number}</div>
+                <div className="text-xs text-slate-500 mt-1 uppercase tracking-wider">Round</div>
               </div>
             </div>
 
@@ -532,30 +532,30 @@ export default function AdminLiveMatchPage() {
             </div>
 
             <div className="text-center mb-8">
-              <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-1">
+              <div className="text-xs uppercase tracking-[0.3em] text-slate-500 mb-1">
                 {formatRoundLabel(currentMatch.round_number, PHASE_1_ROUNDS)}
               </div>
               <div className="flex items-center justify-center gap-6 mt-4">
                 <div className="flex-1 max-w-[200px] text-center">
                   <div className="text-[10px] text-red-400/60 uppercase tracking-[0.3em] mb-2">Red</div>
-                  <div className="text-lg font-bold text-white">{currentMatch.red_team.team_name}</div>
+                  <div className="text-lg font-bold text-foreground">{currentMatch.red_team.team_name}</div>
                 </div>
                 <div className="text-xl font-bold text-gray-600">VS</div>
                 <div className="flex-1 max-w-[200px] text-center">
                   <div className="text-[10px] text-blue-400/60 uppercase tracking-[0.3em] mb-2">Blue</div>
-                  <div className="text-lg font-bold text-white">{currentMatch.blue_team.team_name}</div>
+                  <div className="text-lg font-bold text-foreground">{currentMatch.blue_team.team_name}</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-[#0a0a0f] rounded-xl p-4 text-center mb-6">
+            <div className="bg-background rounded-xl p-4 text-center mb-6">
               <div className="text-3xl font-black text-green-400">{gambitsLocked}</div>
-              <div className="text-xs text-gray-500 mt-1 uppercase tracking-wider">Total Gambits Locked</div>
+              <div className="text-xs text-slate-500 mt-1 uppercase tracking-wider">Total Gambits Locked</div>
             </div>
 
             <button
               onClick={() => setPhase('ENTER_RESULT')}
-              className="w-full h-14 rounded-xl bg-emerald-600/90 hover:bg-emerald-600 text-white font-bold text-base tracking-wide transition-all shadow-[0_0_25px_rgba(16,185,129,0.15)]"
+              className="w-full h-14 rounded-xl bg-emerald-600/90 hover:bg-emerald-600 text-foreground font-bold text-base tracking-wide transition-all shadow-[0_0_25px_rgba(16,185,129,0.15)]"
             >
               📊 Enter Match Result
             </button>
@@ -572,22 +572,22 @@ export default function AdminLiveMatchPage() {
             <h2 className="text-lg font-bold">Enter Match Result</h2>
             <button
               onClick={() => setPhase('GAMBITS_CLOSED')}
-              className="text-gray-500 hover:text-white text-sm"
+              className="text-slate-500 hover:text-foreground text-sm"
             >← Back</button>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-6 text-center text-sm">
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
               <div className="text-red-400/70 text-xs mb-1">Red Team</div>
-              <div className="font-bold text-white">{currentMatch.red_team.team_name}</div>
+              <div className="font-bold text-foreground">{currentMatch.red_team.team_name}</div>
             </div>
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3">
               <div className="text-blue-400/70 text-xs mb-1">Blue Team</div>
-              <div className="font-bold text-white">{currentMatch.blue_team.team_name}</div>
+              <div className="font-bold text-foreground">{currentMatch.blue_team.team_name}</div>
             </div>
           </div>
 
-          <div className="text-xs text-gray-500 uppercase tracking-wider mb-3 font-semibold">
+          <div className="text-xs text-slate-500 uppercase tracking-wider mb-3 font-semibold">
             Judges&apos; Vote Distribution (Red – Blue)
           </div>
           <div className="space-y-2 mb-6">
@@ -599,7 +599,7 @@ export default function AdminLiveMatchPage() {
                   key={key}
                   className={`flex items-center gap-4 px-4 py-3.5 border rounded-xl cursor-pointer transition-all ${
                     isSelected
-                      ? 'border-[#8b5cf6]/60 bg-[#8b5cf6]/10'
+                      ? 'border-accent/60 bg-accent/10'
                       : 'border-white/8 hover:border-white/20 hover:bg-white/[0.02]'
                   }`}
                 >
@@ -613,11 +613,11 @@ export default function AdminLiveMatchPage() {
                   />
                   <div className="flex-1 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <span className={`font-black text-lg ${isSelected ? 'text-red-400' : 'text-gray-400'}`}>{dist.red}</span>
+                      <span className={`font-black text-lg ${isSelected ? 'text-red-400' : 'text-slate-500'}`}>{dist.red}</span>
                       <span className="text-gray-600 text-sm">–</span>
-                      <span className={`font-black text-lg ${isSelected ? 'text-blue-400' : 'text-gray-400'}`}>{dist.blue}</span>
+                      <span className={`font-black text-lg ${isSelected ? 'text-blue-400' : 'text-slate-500'}`}>{dist.blue}</span>
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-slate-500">
                       {dist.red > dist.blue
                         ? `Red wins · ${['5-0:3×','4-1:2.2×','3-2:1.6×'][Math.floor((dist.red - 3))]?.split(':')[1] || ''}`
                         : dist.blue > dist.red
@@ -625,7 +625,7 @@ export default function AdminLiveMatchPage() {
                         : ''}
                     </div>
                   </div>
-                  {isSelected && <span className="text-[#8b5cf6] text-lg">✓</span>}
+                  {isSelected && <span className="text-accent text-lg">✓</span>}
                 </label>
               )
             })}
@@ -655,8 +655,8 @@ export default function AdminLiveMatchPage() {
             transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
             className="w-14 h-14 rounded-full border-2 border-emerald-500 border-t-transparent mx-auto mb-5"
           />
-          <p className="text-white font-bold text-xl">Settling Gambits</p>
-          <p className="text-gray-400 text-sm mt-2">Calculating multipliers · Updating all balances</p>
+          <p className="text-foreground font-bold text-xl">Settling Gambits</p>
+          <p className="text-slate-500 text-sm mt-2">Calculating multipliers · Updating all balances</p>
         </SectionCard>
       )}
 
@@ -667,8 +667,8 @@ export default function AdminLiveMatchPage() {
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
           <SectionCard className="text-center py-16 border-green-500/20">
             <div className="text-5xl mb-4">✅</div>
-            <h2 className="text-2xl font-black text-white mb-2">Match Complete</h2>
-            <p className="text-gray-400 text-sm">All Gambits settled. Returning to standby in a moment...</p>
+            <h2 className="text-2xl font-black text-foreground mb-2">Match Complete</h2>
+            <p className="text-slate-500 text-sm">All Gambits settled. Returning to standby in a moment...</p>
           </SectionCard>
         </motion.div>
       )}

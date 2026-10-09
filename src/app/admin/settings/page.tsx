@@ -22,7 +22,7 @@ export default function SettingsPage() {
         <CardContent className="space-y-4">
           <div>
             <h3 className="text-lg font-bold">Multipliers</h3>
-            <pre className="bg-[#16161f] p-4 rounded-lg text-sm text-gray-300 mt-2 border border-[#2a2a3a]">
+            <pre className="bg-surface p-4 rounded-lg text-sm text-slate-600 mt-2 border border-border">
               {JSON.stringify({ RED_WIN: 1.5, BLUE_WIN: 1.5, DRAW: 1.0 }, null, 2)}
             </pre>
           </div>
@@ -35,7 +35,7 @@ export default function SettingsPage() {
       <Card variant="red" className="border-red-500/30">
         <CardHeader className="text-red-500">Danger Zone</CardHeader>
         <CardContent>
-          <p className="text-gray-400 mb-4">Resetting the event state will wipe all current progress, matches, and balances. This cannot be undone.</p>
+          <p className="text-slate-500 mb-4">Resetting the event state will wipe all current progress, matches, and balances. This cannot be undone.</p>
           <Button variant="destructive" onClick={() => setIsResetModalOpen(true)}>RESET EVENT STATE</Button>
         </CardContent>
       </Card>
