@@ -1,21 +1,29 @@
-'use client'
+import 'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { getDashboardData } from '@/app/actions/dashboard'
-import { TeamSetup } from '@/components/dashboard/team-setup'
-import { TeamOverviewCard } from '@/components/dashboard/team-overview-card'
-import { ProblemSelectionPanel } from '@/components/dashboard/problem-selection-panel'
-import { InvestmentBalanceCard } from '@/components/dashboard/investment-balance-card'
-import { AnnouncementsBanner } from '@/components/dashboard/announcements-banner'
-import { Phase1Leaderboard } from '@/components/leaderboard/phase1-leaderboard'
-import { FinalsLeaderboard } from '@/components/leaderboard/finals-leaderboard'
-import { FinalistBroadcast } from '@/components/finals/finalist-broadcast'
 import { submitScore } from '@/app/actions/finals'
 import { getPhase1Leaderboard, getFinalsLeaderboard } from '@/app/actions/leaderboard'
 import { EVENT_CHANNEL } from '@/lib/constants'
+
+// Components
+import { DashboardNav } from '@/components/dashboard/dashboard-nav'
+import { DashboardHero } from '@/components/dashboard/dashboard-hero'
+import { TeamOverviewCard } from '@/components/dashboard/team-overview-card'
+import { LiveStatusCard } from '@/components/dashboard/live-status-card'
+import { ProblemSelectionPanel } from '@/components/dashboard/problem-selection-panel'
+import { InvestmentBalanceCard } from '@/components/dashboard/investment-balance-card'
+import { AnnouncementsBanner } from '@/components/dashboard/announcements-banner'
+import { LeaderboardSection } from '@/components/dashboard/leaderboard-section'
+import { FinalistCard } from '@/components/dashboard/finalist-card'
+import { TeamSetup } from '@/components/dashboard/team-setup'
+
+// Fullscreen Overrides
+import { FinalsLeaderboard } from '@/components/leaderboard/finals-leaderboard'
+import { FinalistBroadcast } from '@/components/finals/finalist-broadcast'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -119,52 +127,95 @@ export default function DashboardPage() {
     )
   }
 
-  if (data.eventState?.phase_1_leaderboard_published) {
-    return <div className="min-h-screen bg-[#0a0a0f] text-white"><Phase1Leaderboard leaderboardData={phase1Data} /></div>
-  }
-
   if (screen === 'SETUP') {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] text-white px-4 py-12">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl font-black mb-2">Welcome, {data.team.team_name}</h1>
-          <p className="text-gray-400 mb-8">The event has not started yet. Configure your team roster below.</p>
+      <div className="min-h-screen bg-[#0a0a0f] text-white flex flex-col">
+        <DashboardNav user={data.user} team={data.team} eventState={data.eventState} />
+        <div className="flex-1 px-4 py-8 mt-16 max-w-5xl mx-auto w-full">
+          <DashboardHero 
+            user={data.user} 
+            team={data.team} 
+            eventState={data.eventState} 
+            selectionState={data.selectionState} 
+            problemsPublished={data.problems?.length > 0} 
+          />
           <TeamSetup joinCode={data.team.join_code} />
+          
+          <div className="mt-8">
+            <TeamOverviewCard team={data.team} members={data.members} />
+          </div>
         </div>
       </div>
     )
   }
 
+  const isFinalsPhase = screen === 'FINALS_TRANSITION' || screen === 'FINALS_READY' || screen === 'FINALS_SCORE_CALCULATED'
+
   // Active Dashboard
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white px-4 py-12 pb-32">
-      <div className="max-w-5xl mx-auto space-y-6 relative z-10">
-        <AnnouncementsBanner announcements={data.announcements} />
-        
+    <div className="min-h-screen bg-[#0a0a0f] text-white pb-32 flex flex-col relative overflow-x-hidden">
+      <DashboardNav user={data.user} team={data.team} eventState={data.eventState} />
+
+      <main className="flex-1 px-4 max-w-5xl mx-auto w-full relative z-10 flex flex-col gap-6">
+        <DashboardHero 
+          user={data.user} 
+          team={data.team} 
+          eventState={data.eventState} 
+          selectionState={data.selectionState} 
+          problemsPublished={data.problems?.length > 0} 
+        />
+
         <TeamOverviewCard team={data.team} members={data.members} />
+
+        <LiveStatusCard 
+          eventState={data.eventState} 
+          team={data.team} 
+          selectionState={data.selectionState} 
+          problemsPublished={data.problems?.length > 0} 
+        />
+
+        {(!data.eventState?.phase_1_leaderboard_published || !isFinalsPhase) && (
+          <ProblemSelectionPanel 
+            problems={data.problems}
+            selections={data.selections}
+            selectionState={data.selectionState}
+            onUpdate={loadData}
+          />
+        )}
 
         {data.team.role === 'INVESTOR' && (
           <InvestmentBalanceCard 
             startingBalance={data.team.starting_balance} 
             currentBalance={data.team.current_balance} 
+            isPhase1LeaderboardPublished={data.eventState?.phase_1_leaderboard_published}
           />
         )}
 
-        <ProblemSelectionPanel 
-          problems={data.problems}
-          selections={data.selections}
-          selectionState={data.selectionState}
-          onUpdate={loadData}
-        />
-      </div>
+        <AnnouncementsBanner announcements={data.announcements} />
 
-      {/* Ambient grid */}
-      <div className="fixed inset-0 opacity-[0.025] pointer-events-none z-0"
+        <LeaderboardSection 
+          isPublished={data.eventState?.phase_1_leaderboard_published} 
+          leaderboardData={phase1Data} 
+        />
+
+        {isFinalsPhase && (
+          <FinalistCard 
+            isFinalist={data.team.is_finalist} 
+            teamName={data.team.team_name} 
+          />
+        )}
+      </main>
+
+      {/* Ambient Grid Background */}
+      <div 
+        className="fixed inset-0 opacity-[0.025] pointer-events-none z-0"
         style={{
           backgroundImage: `linear-gradient(rgba(139,92,246,0.4) 1px, transparent 1px), linear-gradient(90deg,rgba(139,92,246,0.4) 1px,transparent 1px)`,
           backgroundSize: '60px 60px',
-        }} />
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#8b5cf6]/5 blur-[140px] pointer-events-none z-0" />
+        }} 
+      />
+      <div className="fixed top-1/3 right-0 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-blue-600/5 blur-[120px] pointer-events-none z-0" />
+      <div className="fixed bottom-0 left-0 w-[600px] h-[600px] rounded-full bg-purple-600/5 blur-[120px] pointer-events-none z-0" />
     </div>
   )
 }

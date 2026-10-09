@@ -1,45 +1,54 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Wallet, Info } from 'lucide-react';
 import { formatIndianNumber } from '@/lib/format';
-import { PiggyBank } from 'lucide-react';
 
 interface InvestmentBalanceCardProps {
   startingBalance: number;
   currentBalance: number;
+  isPhase1LeaderboardPublished: boolean;
 }
 
-export function InvestmentBalanceCard({ startingBalance, currentBalance }: InvestmentBalanceCardProps) {
-  return (
-    <Card className="w-full bg-[#16161f] border-[#2a2a3a]">
-      <CardContent className="p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
-            <PiggyBank className="w-5 h-5 text-green-400" />
-          </div>
-          <h2 className="text-xl font-space-grotesk font-bold text-white">Investment Portfolio</h2>
-        </div>
+export function InvestmentBalanceCard({ startingBalance, currentBalance, isPhase1LeaderboardPublished }: InvestmentBalanceCardProps) {
+  // If phase 1 leaderboard is not published, we don't show the P&L difference, 
+  // we just show the remaining balance.
+  const displayBalance = isPhase1LeaderboardPublished ? currentBalance : startingBalance;
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 rounded-lg bg-black/30 border border-white/5">
-            <div className="text-sm text-gray-500 mb-1 font-medium">ASSIGNED FUNDING</div>
-            <div className="text-3xl font-mono font-bold text-gray-300">
-              ₹{formatIndianNumber(startingBalance)}
+  return (
+    <div className="w-full pt-8">
+      <div className="text-xs font-bold text-gray-500 tracking-widest mb-4 ml-1">INVESTMENT WALLET</div>
+      <Card className="w-full bg-[#16161f] border-[#2a2a3a] overflow-hidden relative group">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/3" />
+        <CardContent className="p-6 md:p-8 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center shrink-0 border border-blue-500/30">
+              <Wallet className="w-6 h-6 text-blue-400" />
+            </div>
+            <div>
+              <div className="text-sm font-medium text-gray-400 mb-1">REMAINING BALANCE</div>
+              <div className="text-3xl md:text-5xl font-mono font-bold text-white tracking-tight">
+                <span className="text-blue-500 mr-1">₹</span>
+                {formatIndianNumber(displayBalance)}
+              </div>
             </div>
           </div>
           
-          <div className="p-4 rounded-lg bg-green-500/5 border border-green-500/20">
-            <div className="text-sm text-green-500/70 mb-1 font-medium">REMAINING BALANCE</div>
-            <div className="text-3xl font-mono font-bold text-green-400">
-              ₹{formatIndianNumber(currentBalance)}
+          <div className="flex flex-col items-start md:items-end gap-2">
+            <div className="text-sm text-gray-500">
+              Assigned Funding: <span className="font-mono text-gray-300">₹{formatIndianNumber(startingBalance)}</span>
             </div>
+            
+            {!isPhase1LeaderboardPublished && (
+              <div className="flex items-start gap-2 bg-black/30 border border-[#2a2a3a] p-3 rounded-lg max-w-xs">
+                <Info className="w-4 h-4 text-gray-500 shrink-0 mt-0.5" />
+                <p className="text-xs text-gray-400">
+                  Profit/Loss from live match outcomes will remain hidden until the Phase 1 Leaderboard is published.
+                </p>
+              </div>
+            )}
           </div>
-        </div>
-
-        <div className="mt-4 p-3 rounded bg-blue-500/10 border border-blue-500/20 text-sm text-blue-400 flex items-start gap-2">
-          <span className="text-lg">ℹ️</span>
-          <p>Profits and losses from your investments will be revealed when the Phase 1 Leaderboard is published. Invest wisely.</p>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
