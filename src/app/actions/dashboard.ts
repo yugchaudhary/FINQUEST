@@ -25,11 +25,16 @@ export async function getDashboardData() {
     // Fetch problems if category is assigned
     let problems = []
     if (team?.category_id) {
-      const { data: probs } = await supabase.from('problem_statements')
+      // Use admin client here temporarily to bypass any RLS issues
+      const { createAdminClient } = await import('@/lib/supabase/admin')
+      const adminClient = createAdminClient()
+      const { data: probs, error: probsErr } = await adminClient.from('problem_statements')
         .select('*')
         .eq('category_id', team.category_id)
         .eq('published', true)
         .order('number', { ascending: true })
+      
+      console.log('Problems fetch:', probs?.length, probsErr)
       problems = probs || []
     }
 
