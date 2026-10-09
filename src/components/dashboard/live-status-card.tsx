@@ -10,11 +10,9 @@ import { hasSubmittedGambit } from '@/app/actions/gambits'
 interface LiveStatusCardProps {
   eventState: any
   team: any
-  selectionState: any
-  problemsPublished: boolean
 }
 
-export function LiveStatusCard({ eventState, team, selectionState, problemsPublished }: LiveStatusCardProps) {
+export function LiveStatusCard({ eventState, team }: LiveStatusCardProps) {
   const router = useRouter()
   const screen = eventState?.current_screen_state
   const [matchInfo, setMatchInfo] = useState<any>(null)
@@ -89,25 +87,7 @@ export function LiveStatusCard({ eventState, team, selectionState, problemsPubli
       )
     }
 
-    // Priority 2: Problem Selection Needed
-    if (team.category_id && problemsPublished && selectionState?.status !== 'FINALIZED') {
-      return (
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <h3 className="text-xl font-bold text-white mb-1">Select Your Problems</h3>
-            <p className="text-gray-400">You must finalize your problem selection before proceeding.</p>
-          </div>
-          <Button 
-            onClick={() => document.getElementById('problem-selection')?.scrollIntoView({ behavior: 'smooth' })}
-            variant="outline" 
-            className="w-full md:w-auto border-purple-500/50 text-purple-400 hover:bg-purple-500/10"
-          >
-            View Problem Statements
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-        </div>
-      )
-    }
+
 
     // Default: Waiting
     return (

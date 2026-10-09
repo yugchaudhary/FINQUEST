@@ -14,7 +14,6 @@ import { DashboardNav } from '@/components/dashboard/dashboard-nav'
 import { DashboardHero } from '@/components/dashboard/dashboard-hero'
 import { TeamOverviewCard } from '@/components/dashboard/team-overview-card'
 import { LiveStatusCard } from '@/components/dashboard/live-status-card'
-import { ProblemSelectionPanel } from '@/components/dashboard/problem-selection-panel'
 import { InvestmentBalanceCard } from '@/components/dashboard/investment-balance-card'
 import { AnnouncementsBanner } from '@/components/dashboard/announcements-banner'
 import { LeaderboardSection } from '@/components/dashboard/leaderboard-section'
@@ -80,8 +79,6 @@ export default function DashboardPage() {
     const ch = supabase.channel(EVENT_CHANNEL)
       // Broadcast events (Fallback / Custom payload events)
       .on('broadcast', { event: 'CATEGORY_ASSIGNED' }, throttledLoadData)
-      .on('broadcast', { event: 'PROBLEM_PUBLISHED' }, throttledLoadData)
-      .on('broadcast', { event: 'PROBLEM_SELECTION_UPDATE' }, throttledLoadData)
       .on('broadcast', { event: 'ANNOUNCEMENT' }, throttledLoadData)
       .on('broadcast', { event: 'ANNOUNCEMENT_DELETED' }, throttledLoadData)
       .on('broadcast', { event: 'PHASE_CHANGE' }, throttledLoadData)
@@ -95,8 +92,6 @@ export default function DashboardPage() {
       // Database changes (Highly reliable, bypasses Serverless edge issues)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'event_state' }, throttledLoadData)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, throttledLoadData)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'problem_statements' }, throttledLoadData)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'team_problem_selections' }, throttledLoadData)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, throttledLoadData)
       .subscribe()
 
@@ -155,8 +150,6 @@ export default function DashboardPage() {
             user={data.user} 
             team={data.team} 
             eventState={data.eventState} 
-            selectionState={data.selectionState} 
-            problemsPublished={data.problems?.length > 0} 
           />
           <TeamSetup joinCode={data.team.join_code} />
           
@@ -180,8 +173,6 @@ export default function DashboardPage() {
           user={data.user} 
           team={data.team} 
           eventState={data.eventState} 
-          selectionState={data.selectionState} 
-          problemsPublished={data.problems?.length > 0} 
         />
 
         <TeamOverviewCard team={data.team} members={data.members} />
@@ -189,18 +180,9 @@ export default function DashboardPage() {
         <LiveStatusCard 
           eventState={data.eventState} 
           team={data.team} 
-          selectionState={data.selectionState} 
-          problemsPublished={data.problems?.length > 0} 
         />
 
-        {(!data.eventState?.phase_1_leaderboard_published || !isFinalsPhase) && (
-          <ProblemSelectionPanel 
-            problems={data.problems}
-            selections={data.selections}
-            selectionState={data.selectionState}
-            onUpdate={loadData}
-          />
-        )}
+
 
         {data.team.role === 'INVESTOR' && (
           <InvestmentBalanceCard 

@@ -6,14 +6,12 @@ interface DashboardHeroProps {
   user: any
   team: any
   eventState: any
-  selectionState: any
-  problemsPublished: boolean
 }
 
-export function DashboardHero({ user, team, eventState, selectionState, problemsPublished }: DashboardHeroProps) {
+export function DashboardHero({ user, team, eventState }: DashboardHeroProps) {
   const getHeroContent = () => {
     const screen = eventState?.current_screen_state
-    const isSelected = selectionState?.status === 'FINALIZED'
+    
     
     if (screen === 'SETUP') {
       return {
@@ -31,24 +29,10 @@ export function DashboardHero({ user, team, eventState, selectionState, problems
           subtitle: 'The Admin will assign your team a category shortly.'
         }
       }
-      if (!problemsPublished) {
-        return {
-          tag: 'AWAITING PROBLEMS',
-          title: 'Problem Statements',
-          subtitle: 'Problems for your category have not been published yet.'
-        }
-      }
-      if (!isSelected) {
-        return {
-          tag: 'ACTION REQUIRED',
-          title: 'Your Challenge Is Open',
-          subtitle: 'Select at least 4 problem statements from your category.'
-        }
-      }
       
       return {
         tag: 'PREPARATION',
-        title: 'Problem Set Locked',
+        title: 'Event Ready',
         subtitle: 'Your team is ready. Prepare your integrated pitch.'
       }
     }

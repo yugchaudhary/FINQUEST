@@ -30,7 +30,6 @@ const NAV_LINKS = [
   { href: '/admin/setup', label: 'Setup', icon: Upload },
   { href: '/admin/teams', label: 'Teams & Registration', icon: Trophy },
   { href: '/admin/categories', label: 'Category Assignment', icon: Tags },
-  { href: '/admin/problem-statements', label: 'Problem Statements', icon: FileText },
   { href: '/admin/investment-setup', label: 'Investment Setup', icon: PiggyBank },
   { href: '/admin/announcements', label: 'Announcements', icon: Megaphone },
   { href: '/admin/live-match', label: 'Live Match', icon: Radio },
