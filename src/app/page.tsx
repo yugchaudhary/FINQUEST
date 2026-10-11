@@ -109,10 +109,10 @@ export default function LandingPage() {
               initial="hidden"
               animate="visible"
               variants={fadeIn}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-purple-500/20 text-accent text-sm font-medium mb-8"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-bold mb-8"
             >
               <span className="w-2 h-2 rounded-full bg-accent animate-pulse-live"></span>
-              Live Event Registration Open
+              Live Event Portal Active
             </motion.div>
             
             <motion.h1
@@ -138,16 +138,11 @@ export default function LandingPage() {
               initial="hidden"
               animate="visible"
               variants={fadeIn}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+              className="flex items-center justify-center gap-4"
             >
-              <Link href="/register">
-                <Button size="lg" className="h-14 px-8 text-lg bg-gradient-to-r from-[#5eb3d1] to-blue-500 hover:from-[#4ea2c0] hover:to-blue-600 text-foreground border-0 shadow-[0_0_30px_-5px_rgba(94,179,209,0.4)]">
-                  REGISTER TEAM <ChevronRight className="ml-2 w-5 h-5" />
-                </Button>
-              </Link>
               <Link href="/login">
-                <Button size="lg" variant="outline" className="h-14 px-8 text-lg">
-                  PARTICIPANT LOGIN
+                <Button size="xl" className="h-16 px-10 text-lg bg-accent hover:bg-[#4ea2c0] text-black border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-black uppercase tracking-wider">
+                  PARTICIPANT LOGIN <ChevronRight className="ml-2 w-6 h-6" />
                 </Button>
               </Link>
             </motion.div>

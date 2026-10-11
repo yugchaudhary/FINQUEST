@@ -207,26 +207,91 @@ const signInAdminSchema = z.object({
   password: z.string().min(6)
 })
 
-export async function signIn(registrationInput: string) {
+export async function signIn(teamNameInput: string, passwordInput: string) {
   try {
-    const { registration_number } = signInSchema.parse({ registration_number: registrationInput })
-    const supabase = await createClient()
-    const pseudoEmail = `${registration_number}@finfest.com`;
-    const { data, error } = await supabase.auth.signInWithPassword({ email: pseudoEmail, password: HARDCODED_PASSWORD })
-    if (error) return { success: false, error: error.message }
-    if (!data.user) return { success: false, error: 'User not found' }
+    const teamName = (teamNameInput || '').trim()
+    const password = (passwordInput || '').trim()
+
+    if (!teamName || !password) {
+      return { success: false, error: 'Please enter both Team Name and Password' }
+    }
 
     const adminClient = createAdminClient()
-    const { data: userData } = await adminClient.from('users').select('auth_role, team_id').eq('id', data.user.id).single()
+    const supabase = await createClient()
+
+    // Sign out any active session first to ensure a clean login
+    await supabase.auth.signOut()
+
+    // 1. Locate team by Team Name (case-insensitive)
+    let targetEmail: string | null = null
+    let targetTeamId: string | null = null
+
+    const { data: team } = await adminClient
+      .from('teams')
+      .select('id, team_name')
+      .ilike('team_name', teamName)
+      .maybeSingle()
+
+    if (team) {
+      targetTeamId = team.id
+      const { data: userRec } = await adminClient
+        .from('users')
+        .select('id, email, auth_role')
+        .eq('team_id', team.id)
+        .maybeSingle()
+
+      if (userRec) {
+        targetEmail = userRec.email
+      } else {
+        const slug = team.team_name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+        targetEmail = `${slug}@finquest.com`
+      }
+    } else {
+      // Also check if entered directly as email or user name
+      const { data: userRec } = await adminClient
+        .from('users')
+        .select('id, email, team_id, auth_role')
+        .or(`email.ilike.${teamName},name.ilike.${teamName}`)
+        .maybeSingle()
+
+      if (userRec) {
+        targetEmail = userRec.email
+        targetTeamId = userRec.team_id
+      }
+    }
+
+    if (!targetEmail) {
+      return { success: false, error: 'Team Name not found. Please verify your team name with organizers.' }
+    }
+
+    // 2. Sign in to Supabase Auth with target email and password
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: targetEmail,
+      password: password
+    })
+
+    if (error) {
+      return { success: false, error: 'Invalid password. Please check your credentials and try again.' }
+    }
+
+    if (!data.user) {
+      return { success: false, error: 'User account not found' }
+    }
+
+    const { data: userData } = await adminClient
+      .from('users')
+      .select('auth_role, team_id')
+      .eq('id', data.user.id)
+      .single()
 
     return { 
       success: true, 
       user: data.user, 
-      role: userData?.auth_role, 
-      teamId: userData?.team_id 
+      role: userData?.auth_role || 'PARTICIPANT', 
+      teamId: userData?.team_id || targetTeamId 
     }
   } catch (error: any) {
-    return { success: false, error: error.message || 'Unknown error' }
+    return { success: false, error: error.message || 'Unknown authentication error' }
   }
 }
 
