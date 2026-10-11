@@ -43,6 +43,13 @@ export async function assignTeamCategory(teamId: string, categoryId: string) {
     const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
     if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
 
+    // Check team role: Investors cannot have a category assigned
+    const { data: team } = await adminClient.from('teams').select('role').eq('id', teamId).single()
+    if (!team) return { success: false, error: 'Team not found' }
+    if (team.role === 'INVESTOR') {
+      return { success: false, error: 'Investors cannot be assigned a category. Categories are only assigned to Innovators.' }
+    }
+
     // Check if category exists
     const { data: category } = await adminClient.from('categories').select('name').eq('id', categoryId).single()
     if (!category) return { success: false, error: 'Category not found' }

@@ -22,7 +22,7 @@ export function DashboardHero({ user, team, eventState }: DashboardHeroProps) {
     }
     
     if (screen === 'WAITING_FOR_MATCH' || screen === 'MATCH_COMPLETE' || screen === 'RESULT_PROCESSING' || screen === 'AWAITING_RESULT') {
-      if (!team.category_id) {
+      if (!team.category_id && team.role !== 'INVESTOR') {
         return {
           tag: 'AWAITING ASSIGNMENT',
           title: 'Waiting for Category',
@@ -33,7 +33,9 @@ export function DashboardHero({ user, team, eventState }: DashboardHeroProps) {
       return {
         tag: 'PREPARATION',
         title: 'Event Ready',
-        subtitle: 'Your team is ready. Prepare your integrated pitch.'
+        subtitle: team.role === 'INVESTOR' 
+          ? 'Your investor balance is funded. Stand by for the match broadcast.' 
+          : 'Your team is ready. Prepare your integrated pitch.'
       }
     }
 

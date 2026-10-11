@@ -50,7 +50,7 @@ export default function AdminTeamsPage() {
     setError(null);
     const result = await updateTeamRole(teamId, role);
     if (!result?.success) setError(result?.error || 'Failed to update role');
-    else setSuccess(`Role updated to ${role}`);
+    else setSuccess(role === 'INVESTOR' ? 'Role updated to Investor (category cleared)' : `Role updated to ${role}`);
     await fetchTeams();
     setUpdatingRole(null);
   };
@@ -202,7 +202,9 @@ export default function AdminTeamsPage() {
                     {/* Team Info */}
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold text-foreground truncate">{team.team_name}</div>
-                      <div className="text-xs text-slate-500 font-mono mt-0.5">{team.categoryName || 'Unassigned Category'}</div>
+                      <div className="text-xs text-slate-500 font-mono mt-0.5">
+                        {team.role === 'INVESTOR' ? 'No Category (Investor)' : (team.categoryName || 'Unassigned Category')}
+                      </div>
                     </div>
 
                     {/* Member Count */}
@@ -281,7 +283,9 @@ export default function AdminTeamsPage() {
                             </div>
                             <div className="flex justify-between">
                               <span className="text-slate-500">Category</span>
-                              <span className="text-foreground">{team.categoryName || 'Unassigned'}</span>
+                              <span className="text-foreground">
+                                {team.role === 'INVESTOR' ? 'N/A (Investor)' : (team.categoryName || 'Unassigned')}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-slate-500">Balance</span>

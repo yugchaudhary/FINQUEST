@@ -109,10 +109,16 @@ export async function updateTeamRole(teamId: string, role: 'INNOVATOR'|'INVESTOR
     const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
     if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
 
-    const { error } = await adminClient.from('teams').update({ role }).eq('id', teamId)
+    const updatePayload: any = { role }
+    if (role === 'INVESTOR') {
+      updatePayload.category_id = null
+      updatePayload.category = null
+    }
+
+    const { error } = await adminClient.from('teams').update(updatePayload).eq('id', teamId)
     if (error) return { success: false, error: error.message }
 
-    await logAdminAction(user.id, 'UPDATE_TEAM_ROLE', 'team', teamId, { role })
+    await logAdminAction(user.id, 'UPDATE_TEAM_ROLE', 'team', teamId, { role, categoryCleared: role === 'INVESTOR' })
     revalidatePath('/admin/teams')
     return { success: true }
   } catch (error: any) {
@@ -260,6 +266,12 @@ export async function updateTeamCategory(teamId: string, categoryId: string | nu
 
     let categoryName = null
     if (categoryId) {
+      // Check team role: Investors cannot have a category assigned
+      const { data: team } = await adminClient.from('teams').select('role').eq('id', teamId).single()
+      if (team?.role === 'INVESTOR') {
+        return { success: false, error: 'Investors cannot be assigned a category. Categories are only assigned to Innovators.' }
+      }
+
       const { data: cat } = await adminClient.from('categories').select('name').eq('id', categoryId).single()
       if (cat) categoryName = cat.name
     }

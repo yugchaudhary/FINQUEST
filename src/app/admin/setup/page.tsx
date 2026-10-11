@@ -305,7 +305,7 @@ export default function SetupPage() {
                     </td>
                     <td className="py-3 px-6">
                       <Badge variant="outline" className="text-xs">
-                        {team.category || 'Unassigned'}
+                        {team.role === 'INVESTOR' ? 'N/A (Investor)' : (team.category || 'Unassigned')}
                       </Badge>
                     </td>
                     <td className="py-3 px-6">
