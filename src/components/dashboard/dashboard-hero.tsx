@@ -15,9 +15,9 @@ export function DashboardHero({ user, team, eventState }: DashboardHeroProps) {
     
     if (screen === 'SETUP') {
       return {
-        tag: 'REGISTRATION',
-        title: 'Get Your Team Ready',
-        subtitle: 'Configure your roster before the event begins.'
+        tag: 'EVENT PREPARATION',
+        title: 'Welcome to the Event',
+        subtitle: 'Your team is registered and ready. Stand by for the opening round.'
       }
     }
     

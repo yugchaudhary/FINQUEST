@@ -37,8 +37,8 @@ export function LiveStatusCard({ eventState, team }: LiveStatusCardProps) {
     loadMatch()
   }, [screen, eventState?.current_match_id])
 
-  // Don't show in finals or setup
-  if (screen === 'SETUP' || screen === 'FINALS_READY' || screen === 'FINALIST_LIVE' || screen === 'RATINGS_OPEN' || screen === 'FINALS_SCORE_CALCULATED' || screen === 'FINALS_LEADERBOARD') {
+  // Don't show in finals
+  if (screen === 'FINALS_READY' || screen === 'FINALIST_LIVE' || screen === 'RATINGS_OPEN' || screen === 'FINALS_SCORE_CALCULATED' || screen === 'FINALS_LEADERBOARD') {
     return null
   }
 
@@ -88,6 +88,16 @@ export function LiveStatusCard({ eventState, team }: LiveStatusCardProps) {
     }
 
 
+
+    if (screen === 'SETUP') {
+      return (
+        <div className="flex flex-col items-center justify-center py-6 text-center opacity-80">
+          <Activity className="w-8 h-8 text-purple-400 mb-4 animate-pulse" />
+          <h3 className="text-lg font-medium text-foreground">Event Setup in Progress</h3>
+          <p className="text-slate-500 text-sm mt-1">Teams are registered and confirmed. The administrator will broadcast Round 1 shortly.</p>
+        </div>
+      )
+    }
 
     // Default: Waiting
     return (

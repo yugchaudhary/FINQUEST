@@ -18,7 +18,6 @@ import { InvestmentBalanceCard } from '@/components/dashboard/investment-balance
 import { AnnouncementsBanner } from '@/components/dashboard/announcements-banner'
 import { LeaderboardSection } from '@/components/dashboard/leaderboard-section'
 import { FinalistCard } from '@/components/dashboard/finalist-card'
-import { TeamSetup } from '@/components/dashboard/team-setup'
 
 // Fullscreen Overrides
 import { FinalsLeaderboard } from '@/components/leaderboard/finals-leaderboard'
@@ -141,26 +140,6 @@ export default function DashboardPage() {
     )
   }
 
-  if (screen === 'SETUP') {
-    return (
-      <div className="min-h-screen bg-background text-foreground flex flex-col">
-        <DashboardNav user={data.user} team={data.team} eventState={data.eventState} />
-        <div className="flex-1 px-4 py-8 mt-16 max-w-5xl mx-auto w-full">
-          <DashboardHero 
-            user={data.user} 
-            team={data.team} 
-            eventState={data.eventState} 
-          />
-          <TeamSetup joinCode={data.team.join_code} />
-          
-          <div className="mt-8">
-            <TeamOverviewCard team={data.team} members={data.members} />
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   const isFinalsPhase = screen === 'FINALS_TRANSITION' || screen === 'FINALS_READY' || screen === 'FINALS_SCORE_CALCULATED'
 
   // Active Dashboard
@@ -175,7 +154,7 @@ export default function DashboardPage() {
           eventState={data.eventState} 
         />
 
-        <TeamOverviewCard team={data.team} members={data.members} />
+        <TeamOverviewCard team={data.team} />
 
         <LiveStatusCard 
           eventState={data.eventState} 
