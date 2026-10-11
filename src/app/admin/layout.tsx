@@ -19,7 +19,8 @@ import {
   Tags,
   FileText,
   PiggyBank,
-  Megaphone
+  Megaphone,
+  RotateCcw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +39,7 @@ const NAV_LINKS = [
   { href: '/admin/finals-broadcast', label: 'Finals Broadcast', icon: Tv },
   { href: '/admin/finals-scoring', label: 'Finals Scoring', icon: Calculator },
   { href: '/admin/audit', label: 'Audit Log', icon: ScrollText },
+  { href: '/admin/reset', label: 'Reset Test Data', icon: RotateCcw },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 

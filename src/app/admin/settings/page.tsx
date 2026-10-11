@@ -1,18 +1,9 @@
-'use client';
-
-import React, { useState } from 'react';
+import React from 'react';
+import Link from 'next/link';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 
 export default function SettingsPage() {
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-
-  const handleReset = async () => {
-    // call reset action
-    setIsResetModalOpen(false);
-  };
-
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-space-grotesk font-bold">Settings</h1>
@@ -33,21 +24,16 @@ export default function SettingsPage() {
       </Card>
 
       <Card variant="red" className="border-red-500/30">
-        <CardHeader className="text-red-500">Danger Zone</CardHeader>
+        <CardHeader className="text-red-500">Danger Zone: Reset Test Environment</CardHeader>
         <CardContent>
-          <p className="text-slate-500 mb-4">Resetting the event state will wipe all current progress, matches, and balances. This cannot be undone.</p>
-          <Button variant="destructive" onClick={() => setIsResetModalOpen(true)}>RESET EVENT STATE</Button>
+          <p className="text-slate-600 mb-4 font-medium">
+            Permanently clear participants, teams, matches, investment ledgers, and trial scores to start a fresh test run.
+          </p>
+          <Link href="/admin/reset">
+            <Button variant="destructive">GO TO RESET TEST DATA →</Button>
+          </Link>
         </CardContent>
       </Card>
-
-      <ConfirmationModal
-        isOpen={isResetModalOpen}
-        onClose={() => setIsResetModalOpen(false)}
-        onConfirm={handleReset}
-        title="DANGER: Reset Event State"
-        description="Are you absolutely sure? This will wipe ALL data for the current event."
-        confirmText="YES, RESET EVERYTHING"
-      />
     </div>
   );
 }

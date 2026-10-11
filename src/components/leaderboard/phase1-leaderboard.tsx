@@ -86,7 +86,7 @@ export function Phase1Leaderboard({ leaderboardData }: Phase1LeaderboardProps) {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.08, duration: 0.4 }}
-              className={`leaderboard-row ${entry.rank <= 3 ? 'bg-gambit-surface/30' : ''}`}
+              className={`flex items-center gap-4 px-6 py-4 border-b border-border transition-colors hover:bg-surface-2 ${entry.rank <= 3 ? 'bg-surface-2/30' : ''}`}
             >
               {/* Rank */}
               <div className="w-14 flex justify-center">
