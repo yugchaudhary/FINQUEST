@@ -5,7 +5,7 @@ import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { getTeamsWithDetails, updateTeamCategory } from '@/app/actions/teams';
+import { getTeamsWithDetails, updateTeamCategory, updateTeamRole } from '@/app/actions/teams';
 import { getCategories } from '@/app/actions/categories';
 import { Tags, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ export default function CategoryAssignmentPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
+  const [updatingRole, setUpdatingRole] = useState<string | null>(null);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -33,6 +34,13 @@ export default function CategoryAssignmentPage() {
   }, []);
 
   const [roleFilter, setRoleFilter] = useState<'ALL' | 'INNOVATOR' | 'INVESTOR'>('ALL');
+
+  const handleRoleChange = async (teamId: string, newRole: 'INNOVATOR' | 'INVESTOR') => {
+    setUpdatingRole(teamId);
+    await updateTeamRole(teamId, newRole);
+    await fetchData();
+    setUpdatingRole(null);
+  };
 
   const handleCategoryChange = async (teamId: string, categoryId: string) => {
     const target = teams.find(t => t.id === teamId);
@@ -55,12 +63,33 @@ export default function CategoryAssignmentPage() {
   const columns = [
     { header: 'Team Name', accessorKey: 'team_name' },
     { 
-      header: 'Role', 
+      header: 'Role (Select)', 
       accessorKey: 'role',
       cell: (row: any) => (
-        <Badge variant="outline" className={row.role === 'INVESTOR' ? 'text-blue-400 border-blue-400 bg-blue-500/10' : row.role === 'INNOVATOR' ? 'text-purple-400 border-purple-400 bg-purple-500/10' : 'text-slate-500 border-gray-400'}>
-          {row.role}
-        </Badge>
+        <div className="flex items-center gap-1.5">
+          <button
+            disabled={updatingRole === row.id || row.role === 'INNOVATOR'}
+            onClick={() => handleRoleChange(row.id, 'INNOVATOR')}
+            className={`text-xs px-2.5 py-1 rounded font-bold font-mono border transition-all ${
+              row.role === 'INNOVATOR'
+                ? 'bg-purple-600 text-white border-purple-500 shadow-sm cursor-default'
+                : 'border-purple-500/30 text-purple-400 hover:bg-purple-500/15'
+            }`}
+          >
+            Innovator
+          </button>
+          <button
+            disabled={updatingRole === row.id || row.role === 'INVESTOR'}
+            onClick={() => handleRoleChange(row.id, 'INVESTOR')}
+            className={`text-xs px-2.5 py-1 rounded font-bold font-mono border transition-all ${
+              row.role === 'INVESTOR'
+                ? 'bg-blue-600 text-white border-blue-500 shadow-sm cursor-default'
+                : 'border-blue-500/30 text-blue-400 hover:bg-blue-500/15'
+            }`}
+          >
+            Investor
+          </button>
+        </div>
       )
     },
     { header: 'Members', accessorKey: 'memberCount', cell: (row: any) => `${row.memberCount}/4` },

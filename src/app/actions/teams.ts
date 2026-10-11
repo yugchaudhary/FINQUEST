@@ -101,8 +101,16 @@ export async function updateTeamRole(teamId: string, role: 'INNOVATOR'|'INVESTOR
     z.string().uuid().parse(teamId)
     roleSchema.parse(role)
     const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
+    
+    let user = null
+    const { data: authData } = await supabase.auth.getUser()
+    if (authData?.user) {
+      user = authData.user
+    } else {
+      const { data: sessData } = await supabase.auth.getSession()
+      user = sessData?.session?.user || null
+    }
+
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
@@ -112,14 +120,22 @@ export async function updateTeamRole(teamId: string, role: 'INNOVATOR'|'INVESTOR
     const updatePayload: any = { role }
     if (role === 'INVESTOR') {
       updatePayload.category_id = null
-      updatePayload.category = null
+      updatePayload.category = 'N/A'
+    } else if (role === 'INNOVATOR') {
+      const { data: currentTeam } = await adminClient.from('teams').select('category, category_id').eq('id', teamId).single()
+      if (!currentTeam?.category_id || currentTeam?.category === 'N/A') {
+        updatePayload.category = 'Unassigned'
+        updatePayload.category_id = null
+      }
     }
 
     const { error } = await adminClient.from('teams').update(updatePayload).eq('id', teamId)
     if (error) return { success: false, error: error.message }
 
-    await logAdminAction(user.id, 'UPDATE_TEAM_ROLE', 'team', teamId, { role, categoryCleared: role === 'INVESTOR' })
+    await logAdminAction(user.id, 'UPDATE_TEAM_ROLE', 'team', teamId, { role, category: updatePayload.category })
     revalidatePath('/admin/teams')
+    revalidatePath('/admin/categories')
+    revalidatePath('/admin/setup')
     return { success: true }
   } catch (error: any) {
     return { success: false, error: error.message }

@@ -25,6 +25,7 @@ import {
   getExistingTeamsRoster,
   TeamRosterRow 
 } from '@/app/actions/setup';
+import { updateTeamRole } from '@/app/actions/teams';
 
 export default function SetupPage() {
   const [previewData, setPreviewData] = useState<TeamRosterRow[]>([]);
@@ -34,6 +35,20 @@ export default function SetupPage() {
   const [loadingExisting, setLoadingExisting] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [updatingRole, setUpdatingRole] = useState<string | null>(null);
+
+  const handleRoleChange = async (teamId: string, newRole: 'INNOVATOR' | 'INVESTOR') => {
+    setUpdatingRole(teamId);
+    setError(null);
+    const result = await updateTeamRole(teamId, newRole);
+    if (!result?.success) {
+      setError(result?.error || 'Failed to update role');
+    } else {
+      setSuccess(`Role updated to ${newRole}`);
+      await loadExisting();
+    }
+    setUpdatingRole(null);
+  };
 
   const loadExisting = async () => {
     setLoadingExisting(true);
@@ -309,12 +324,30 @@ export default function SetupPage() {
                       </Badge>
                     </td>
                     <td className="py-3 px-6">
-                      <Badge 
-                        variant={team.role === 'INVESTOR' ? 'live' : team.role === 'INNOVATOR' ? 'complete' : 'pending'}
-                        className="text-xs"
-                      >
-                        {team.role}
-                      </Badge>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          disabled={updatingRole === team.id || team.role === 'INNOVATOR'}
+                          onClick={() => handleRoleChange(team.id, 'INNOVATOR')}
+                          className={`text-xs px-2.5 py-1 rounded font-bold font-mono border transition-all ${
+                            team.role === 'INNOVATOR'
+                              ? 'bg-purple-600 text-white border-purple-500 shadow-sm cursor-default'
+                              : 'border-purple-500/30 text-purple-700 bg-purple-50 hover:bg-purple-100'
+                          }`}
+                        >
+                          Innovator
+                        </button>
+                        <button
+                          disabled={updatingRole === team.id || team.role === 'INVESTOR'}
+                          onClick={() => handleRoleChange(team.id, 'INVESTOR')}
+                          className={`text-xs px-2.5 py-1 rounded font-bold font-mono border transition-all ${
+                            team.role === 'INVESTOR'
+                              ? 'bg-blue-600 text-white border-blue-500 shadow-sm cursor-default'
+                              : 'border-blue-500/30 text-blue-700 bg-blue-50 hover:bg-blue-100'
+                          }`}
+                        >
+                          Investor
+                        </button>
+                      </div>
                     </td>
                     <td className="py-3 px-6 text-right text-xs text-slate-500 font-mono">
                       {team.created_at ? new Date(team.created_at).toLocaleDateString() : '—'}
