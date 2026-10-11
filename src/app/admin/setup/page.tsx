@@ -60,11 +60,12 @@ export default function SetupPage() {
       const response = await importTeamsFromExcel(formData);
       if (response?.success && response?.data) {
         setPreviewData(response.data);
+        setSuccess(`Successfully extracted ${response.data.length} teams from ${selectedFile.name} (Format: Team No. | Team Name | Password). Click below to create accounts.`);
       } else {
-        setError(response?.error || 'Failed to parse file. Please verify column headers.');
+        setError(response?.error || 'Failed to extract team data. Please ensure the Excel file has columns: Team No. | Team Name | Password');
       }
     } catch (e: any) {
-      setError(e.message || 'Error uploading file');
+      setError(e.message || 'Error processing uploaded file');
     }
   };
 

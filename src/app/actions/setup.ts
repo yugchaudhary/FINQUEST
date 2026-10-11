@@ -25,57 +25,125 @@ export async function importTeamsFromExcel(formData: FormData) {
     
     const buffer = await file.arrayBuffer()
     const workbook = xlsx.read(buffer, { type: 'buffer' })
-    const sheetName = workbook.SheetNames[0]
-    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]) as any[]
-
-    if (!data || data.length === 0) {
-      return { success: false, error: 'Excel sheet appears to be empty.' }
+    
+    if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+      return { success: false, error: 'The uploaded file contains no sheets.' }
     }
 
-    const parsedTeams: TeamRosterRow[] = []
+    let parsedTeams: TeamRosterRow[] = []
+    let detectedSheet = ''
 
-    for (let i = 0; i < data.length; i++) {
-      const row = data[i]
-      const keys = Object.keys(row)
+    // Loop through sheets to find the one with team data
+    for (const sheetName of workbook.SheetNames) {
+      const sheet = workbook.Sheets[sheetName]
+      if (!sheet) continue
 
-      // Find Team No. key
-      const noKey = keys.find(k => {
-        const norm = k.toLowerCase().replace(/[^a-z0-9]/g, '')
-        return norm.includes('teamno') || norm.includes('teamnumber') || norm === 'no' || norm === 'id' || norm === 'number'
-      })
-      const teamNoVal = noKey ? row[noKey] : (row['Team No.'] || row['Team No'] || row['Team Number'] || row.team_no || row['No.'] || (i + 1))
+      // Strategy 1: Raw 2D grid scanning (resilient to title banners & merged rows)
+      const rawGrid = xlsx.utils.sheet_to_json(sheet, { header: 1, defval: '' }) as any[][]
+      if (rawGrid && rawGrid.length > 0) {
+        let headerRowIdx = -1
+        let colMap = { teamNo: -1, teamName: -1, password: -1 }
 
-      // Find Team Name key
-      const nameKey = keys.find(k => {
-        const norm = k.toLowerCase().replace(/[^a-z0-9]/g, '')
-        return norm.includes('teamname') || norm === 'name' || norm === 'team'
-      })
-      const teamNameVal = nameKey ? row[nameKey] : (row['Team Name'] || row.TeamName || row.team_name || row.Name || row.team)
+        for (let r = 0; r < Math.min(rawGrid.length, 10); r++) {
+          const rowVals = rawGrid[r].map(c => String(c || '').toLowerCase().trim().replace(/[^a-z0-9]/g, ''))
+          const nameIdx = rowVals.findIndex(c => c.includes('teamname') || c === 'name' || c === 'team')
+          const passIdx = rowVals.findIndex(c => c.includes('password') || c.includes('pass') || c.includes('pwd'))
+          const noIdx = rowVals.findIndex(c => c.includes('teamno') || c.includes('teamnumber') || c.includes('sno') || c.includes('srno') || c === 'no' || c === 'number' || c === 'id')
 
-      // Find Password key
-      const passKey = keys.find(k => {
-        const norm = k.toLowerCase().replace(/[^a-z0-9]/g, '')
-        return norm.includes('password') || norm.includes('pass')
-      })
-      const passVal = passKey ? row[passKey] : (row.Password || row.password || row.Pass || row.pass)
+          if (nameIdx !== -1 && passIdx !== -1) {
+            headerRowIdx = r
+            colMap.teamName = nameIdx
+            colMap.password = passIdx
+            colMap.teamNo = noIdx !== -1 ? noIdx : (nameIdx === 1 ? 0 : -1)
+            break
+          }
+        }
 
-      if (teamNameVal && passVal) {
-        parsedTeams.push({
-          team_no: String(teamNoVal ?? (i + 1)).trim(),
-          team_name: String(teamNameVal).trim(),
-          password: String(passVal).trim()
-        })
+        // If header row found in raw grid
+        if (headerRowIdx !== -1 && colMap.teamName !== -1 && colMap.password !== -1) {
+          const sheetTeams: TeamRosterRow[] = []
+          for (let r = headerRowIdx + 1; r < rawGrid.length; r++) {
+            const row = rawGrid[r]
+            if (!row || row.length === 0) continue
+
+            const teamNo = colMap.teamNo !== -1 ? String(row[colMap.teamNo] || '').trim() : String(sheetTeams.length + 1)
+            const teamName = String(row[colMap.teamName] || '').trim()
+            const password = String(row[colMap.password] || '').trim()
+
+            if (teamName && password) {
+              sheetTeams.push({
+                team_no: teamNo || String(sheetTeams.length + 1),
+                team_name: teamName,
+                password: password
+              })
+            }
+          }
+
+          if (sheetTeams.length > 0) {
+            parsedTeams = sheetTeams
+            detectedSheet = sheetName
+            break
+          }
+        }
+      }
+
+      // Strategy 2: Standard JSON object mapping
+      const objData = xlsx.utils.sheet_to_json(sheet) as any[]
+      if (objData && objData.length > 0) {
+        const sheetTeams: TeamRosterRow[] = []
+
+        for (let i = 0; i < objData.length; i++) {
+          const row = objData[i]
+          const keys = Object.keys(row)
+
+          const noKey = keys.find(k => {
+            const norm = k.toLowerCase().replace(/[^a-z0-9]/g, '')
+            return norm.includes('teamno') || norm.includes('teamnumber') || norm === 'no' || norm === 'id' || norm === 'number'
+          })
+          const teamNoVal = noKey ? row[noKey] : (row['Team No.'] || row['Team No'] || row['Team Number'] || row.team_no || (i + 1))
+
+          const nameKey = keys.find(k => {
+            const norm = k.toLowerCase().replace(/[^a-z0-9]/g, '')
+            return norm.includes('teamname') || norm === 'name' || norm === 'team'
+          })
+          const teamNameVal = nameKey ? row[nameKey] : (row['Team Name'] || row.TeamName || row.team_name || row.Name || row.team)
+
+          const passKey = keys.find(k => {
+            const norm = k.toLowerCase().replace(/[^a-z0-9]/g, '')
+            return norm.includes('password') || norm.includes('pass')
+          })
+          const passVal = passKey ? row[passKey] : (row.Password || row.password || row.Pass || row.pass)
+
+          if (teamNameVal && passVal) {
+            sheetTeams.push({
+              team_no: String(teamNoVal ?? (i + 1)).trim(),
+              team_name: String(teamNameVal).trim(),
+              password: String(passVal).trim()
+            })
+          }
+        }
+
+        if (sheetTeams.length > 0) {
+          parsedTeams = sheetTeams
+          detectedSheet = sheetName
+          break
+        }
       }
     }
 
     if (parsedTeams.length === 0) {
       return { 
         success: false, 
-        error: 'No valid team entries found. Please ensure your Excel file includes columns: Team No. | Team Name | Password' 
+        error: 'No valid team rows extracted. Please ensure the Excel file contains columns: Team No. | Team Name | Password' 
       }
     }
 
-    return { success: true, data: parsedTeams }
+    return { 
+      success: true, 
+      data: parsedTeams,
+      count: parsedTeams.length,
+      sheetName: detectedSheet
+    }
   } catch (error: any) {
     return { success: false, error: error.message || 'Error processing Excel file' }
   }
