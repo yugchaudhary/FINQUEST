@@ -119,10 +119,17 @@ export default function SetupPage() {
               Create a spreadsheet with three columns: <strong>Team No.</strong>, <strong>Team Name</strong>, and <strong>Password</strong>.
             </p>
           </div>
-          <div className="bg-white border-2 border-black px-4 py-2 rounded-lg font-mono text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex gap-4">
-            <div><span className="text-slate-400">Col A:</span> <strong>Team No.</strong></div>
-            <div><span className="text-slate-400">Col B:</span> <strong>Team Name</strong></div>
-            <div><span className="text-slate-400">Col C:</span> <strong>Password</strong></div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div className="bg-white border-2 border-black px-4 py-2 rounded-lg font-mono text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex gap-4">
+              <div><span className="text-slate-400">Col A:</span> <strong>Team No.</strong></div>
+              <div><span className="text-slate-400">Col B:</span> <strong>Team Name</strong></div>
+              <div><span className="text-slate-400">Col C:</span> <strong>Password</strong></div>
+            </div>
+            <a href="/sample_teams_roster.xlsx" download="sample_teams_roster.xlsx">
+              <Button variant="outline" size="sm" className="border-2 border-black font-bold whitespace-nowrap bg-white hover:bg-slate-100">
+                Download Sample .xlsx
+              </Button>
+            </a>
           </div>
         </CardContent>
       </Card>
