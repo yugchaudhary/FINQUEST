@@ -129,9 +129,27 @@ export default function AdminLiveMatchPage() {
         setPhase(prev => (prev === 'ENTER_RESULT' || prev === 'PROCESSING' ? prev : 'GAMBITS_CLOSED'))
       }
     } else {
-      setCurrentMatch(null)
-      setCurrentRound(res.currentRound || 0)
-      setPhase(prev => (['CONFIGURING', 'CONFIRM_BROADCAST', 'BROADCASTING', 'MATCH_COMPLETE'].includes(prev) ? prev : 'NO_MATCH'))
+      // No active match returned from server
+      setPhase(prev => {
+        if ([
+          'MATCH_LIVE',
+          'CLOSING_GAMBITS',
+          'GAMBITS_CLOSED',
+          'ENTER_RESULT',
+          'PROCESSING',
+          'BROADCASTING',
+          'CONFIRM_BROADCAST',
+          'MATCH_COMPLETE',
+          'CONFIGURING',
+        ].includes(prev)) {
+          return prev
+        }
+        setCurrentMatch(null)
+        return 'NO_MATCH'
+      })
+      if (res.currentRound !== undefined) {
+        setCurrentRound(res.currentRound)
+      }
     }
   }, [])
 
@@ -190,20 +208,36 @@ export default function AdminLiveMatchPage() {
     if (!redTeam || !blueTeam || !selectedCategory) return
     setPhase('BROADCASTING')
     clearError()
-    const res = await broadcastMatch({
-      category: selectedCategory,
-      red_team_id: redTeam.id,
-      blue_team_id: blueTeam.id,
-    })
-    if (res?.success && res.data) {
-      await fetchState()
-      setGambitsLocked(0)
-      setPhase('MATCH_LIVE')
-      setSelectedCategory('')
-      setRedTeam(null)
-      setBlueTeam(null)
-    } else {
-      setError(res?.error || 'Broadcast failed')
+    try {
+      const res = await broadcastMatch({
+        category: selectedCategory,
+        red_team_id: redTeam.id,
+        blue_team_id: blueTeam.id,
+      })
+      if (res?.success && (res.payload || res.data)) {
+        const matchData: Match = {
+          id: res.data?.id || res.payload?.matchId,
+          round_number: res.data?.round_number || res.payload?.roundNumber || currentRound,
+          category: selectedCategory,
+          red_team: redTeam,
+          blue_team: blueTeam,
+          status: res.data?.status || 'GAMBITS_OPEN',
+        }
+
+        setCurrentMatch(matchData)
+        setCurrentRound(matchData.round_number)
+        setGambitsLocked(0)
+        setPhase('MATCH_LIVE')
+        setSelectedCategory('')
+        setRedTeam(null)
+        setBlueTeam(null)
+        fetchState()
+      } else {
+        setError(res?.error || 'Broadcast failed')
+        setPhase('CONFIRM_BROADCAST')
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Broadcast failed')
       setPhase('CONFIRM_BROADCAST')
     }
   }

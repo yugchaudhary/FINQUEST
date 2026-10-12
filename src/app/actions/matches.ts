@@ -204,7 +204,24 @@ export async function getCurrentMatch() {
       .limit(1)
       .maybeSingle()
 
-    const matchId = activeMatch?.id || eventState?.current_match_id
+    if (activeMatch) {
+      if (activeMatch.status === MATCH_STATUS.MATCH_COMPLETE || activeMatch.status === 'COMPLETED') {
+        return {
+          success: true,
+          data: null,
+          currentRound: eventState?.current_round || activeMatch.round_number,
+          maxRounds: PHASE_1_ROUNDS,
+        }
+      }
+      return {
+        success: true,
+        data: activeMatch,
+        currentRound: activeMatch.round_number || eventState?.current_round || 0,
+        maxRounds: PHASE_1_ROUNDS,
+      }
+    }
+
+    const matchId = eventState?.current_match_id
     if (!matchId) {
       return {
         success: true,
