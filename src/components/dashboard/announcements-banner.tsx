@@ -36,8 +36,10 @@ export function AnnouncementsBanner({ announcements }: AnnouncementsBannerProps)
       <div className="w-full flex flex-col gap-3">
         <AnimatePresence initial={false}>
           {announcements.map((a) => {
-            const createdAt = new Date(a.created_at).getTime();
-            const isNew = now - createdAt < 60000; // less than 60s old
+            const rawDate = a.published_at || a.created_at;
+            const dateObj = rawDate ? new Date(rawDate) : new Date();
+            const timestamp = isNaN(dateObj.getTime()) ? Date.now() : dateObj.getTime();
+            const isNew = now - timestamp < 60000; // less than 60s old
             
             return (
               <motion.div
@@ -67,7 +69,7 @@ export function AnnouncementsBanner({ announcements }: AnnouncementsBannerProps)
                         </Badge>
                       )}
                       <span className="text-xs text-slate-500 font-mono">
-                        {new Date(a.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
                     <p className={`text-base ${isNew ? 'text-blue-50 font-medium' : 'text-slate-600'}`}>
