@@ -122,15 +122,18 @@ export default function AdminLiveMatchPage() {
       setCurrentMatch(res.data as Match)
       setCurrentRound(res.currentRound || res.data.round_number)
       const status = res.data.status
-      if (['GAMBITS_OPEN', 'MATCH_LIVE', 'LIVE'].includes(status)) setPhase('MATCH_LIVE')
-      else if (status === 'GAMBITS_CLOSED') setPhase('GAMBITS_CLOSED')
-      else if (status === 'AWAITING_JUDGE_RESULT') setPhase('GAMBITS_CLOSED')
+      if (['GAMBITS_OPEN', 'MATCH_LIVE', 'LIVE'].includes(status)) {
+        setPhase(prev => (prev === 'CLOSING_GAMBITS' ? prev : 'MATCH_LIVE'))
+      } else if (status === 'GAMBITS_CLOSED' || status === 'AWAITING_JUDGE_RESULT') {
+        // Do not reset back to GAMBITS_CLOSED if admin is currently entering result or settling
+        setPhase(prev => (prev === 'ENTER_RESULT' || prev === 'PROCESSING' ? prev : 'GAMBITS_CLOSED'))
+      }
     } else {
       setCurrentMatch(null)
       setCurrentRound(res.currentRound || 0)
-      if (phase !== 'MATCH_COMPLETE') setPhase('NO_MATCH')
+      setPhase(prev => (['CONFIGURING', 'CONFIRM_BROADCAST', 'BROADCASTING', 'MATCH_COMPLETE'].includes(prev) ? prev : 'NO_MATCH'))
     }
-  }, [phase])
+  }, [])
 
   // ── Fetch activity count ─────────────────────────────────────────────────
   const fetchActivity = useCallback(async () => {
