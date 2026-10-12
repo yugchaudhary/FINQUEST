@@ -51,9 +51,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     const checkAuth = async () => {
-      const session = await getSession();
-      if (!session || (!session.success && (session.error === 'Not authenticated' || session.error === 'Unauthorized'))) {
-        router.push('/admin/login');
+      try {
+        const session = await getSession();
+        if (session && !session.success && (session.error === 'Not authenticated' || session.error === 'Unauthorized')) {
+          router.push('/admin/login');
+        } else if (session?.success && session.data?.userData?.auth_role && session.data.userData.auth_role !== 'ADMIN') {
+          router.push('/admin/login');
+        }
+      } catch (err) {
+        console.error('Session check error:', err);
       }
     };
     checkAuth();

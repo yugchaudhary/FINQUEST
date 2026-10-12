@@ -29,7 +29,9 @@ export default function ParticipantLiveMatchPage() {
     try {
       const dashRes = await getDashboardData()
       if (!dashRes.success || !dashRes.data?.team) {
-        router.push('/login')
+        if (dashRes.error === 'Not authenticated') {
+          router.push('/login')
+        }
         return
       }
       setTeam(dashRes.data.team)

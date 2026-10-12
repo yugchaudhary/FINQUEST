@@ -219,9 +219,6 @@ export async function signIn(teamNameInput: string, passwordInput: string) {
     const adminClient = createAdminClient()
     const supabase = await createClient()
 
-    // Sign out any active session first to ensure a clean login
-    await supabase.auth.signOut()
-
     // 1. Locate team by Team Name (case-insensitive)
     let targetEmail: string | null = null
     let targetTeamId: string | null = null
@@ -300,9 +297,6 @@ export async function signInAdmin(emailInput: string, passwordInput: string) {
     const { email, password } = signInAdminSchema.parse({ email: emailInput, password: passwordInput })
     const supabase = await createClient()
 
-    // Sign out any existing session first (e.g. a participant session)
-    await supabase.auth.signOut()
-
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) return { success: false, error: error.message }
     if (!data.user) return { success: false, error: 'User not found' }
@@ -336,10 +330,15 @@ export async function signOut() {
 export async function getSession() {
   try {
     const supabase = await createClient()
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-    if (sessionError) return { success: false, error: 'Network error connecting to auth server' }
-    
-    const user = session?.user
+    let user = null
+    const { data: authData } = await supabase.auth.getUser()
+    if (authData?.user) {
+      user = authData.user
+    } else {
+      const { data: sessData } = await supabase.auth.getSession()
+      user = sessData?.session?.user || null
+    }
+
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()

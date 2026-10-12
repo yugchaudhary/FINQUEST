@@ -22,27 +22,27 @@ export async function updateSession(request: NextRequest) {
             request,
           })
           cookiesToSet.forEach(({ name, value, options }) => {
-            const persistentOptions = {
-              ...options,
-              maxAge: options.maxAge ?? 60 * 60 * 24 * 7,
-            }
-            supabaseResponse.cookies.set(name, value, persistentOptions)
+            supabaseResponse.cookies.set(name, value, options)
           })
         },
       },
     }
   )
 
-  // Use getSession instead of getUser in middleware to prevent Supabase Auth API rate limits 
-  // from logging out all active users when there is high traffic.
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  const user = session?.user
+  // IMPORTANT: Do not run code between createServerClient and
+  // supabase.auth.getUser(). getUser() validates and refreshes the auth token
+  // from cookies on each request, ensuring users do not randomly sign out.
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {
+    user = null
+  }
 
   const pathname = request.nextUrl.pathname
 
-  // Unauthenticated: redirect to appropriate login page
+  // Protected routes check: redirect to appropriate login page if not authenticated
   if (!user) {
     if (pathname.startsWith('/dashboard')) {
       const url = request.nextUrl.clone()
@@ -52,23 +52,6 @@ export async function updateSession(request: NextRequest) {
       return redirectResponse
     }
     if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/admin/login'
-      const redirectResponse = NextResponse.redirect(url)
-      supabaseResponse.cookies.getAll().forEach(c => redirectResponse.cookies.set(c.name, c.value, c))
-      return redirectResponse
-    }
-  }
-
-  // Authenticated: check admin role (skip /admin/login so they can re-auth)
-  if (user && pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
-    const { data: userData } = await supabase
-      .from('users')
-      .select('auth_role')
-      .eq('id', user.id)
-      .single()
-
-    if (userData?.auth_role !== 'ADMIN') {
       const url = request.nextUrl.clone()
       url.pathname = '/admin/login'
       const redirectResponse = NextResponse.redirect(url)
