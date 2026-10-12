@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
@@ -31,35 +31,42 @@ export default function DashboardPage() {
   const [finalsData, setFinalsData] = useState<any[]>([])
   const [hasRated, setHasRated] = useState(false)
   const [currentFinalist, setCurrentFinalist] = useState<any>(null)
+  const isInitialLoadRef = useRef(true)
 
   const loadData = async () => {
-    const res = await getDashboardData()
-    if (res.success && res.data) {
-      setData(res.data)
-      
-      const { eventState } = res.data
+    try {
+      const res = await getDashboardData()
+      if (res.success && res.data) {
+        setData(res.data)
+        isInitialLoadRef.current = false
+        
+        const { eventState } = res.data
 
-      if (eventState?.phase_1_leaderboard_published) {
-        const lb1 = await getPhase1Leaderboard()
-        setPhase1Data(lb1?.data || [])
-      }
-      
-      if (eventState?.final_leaderboard_active) {
-        const lbf = await getFinalsLeaderboard()
-        setFinalsData(lbf?.data || [])
-      }
+        if (eventState?.phase_1_leaderboard_published) {
+          const lb1 = await getPhase1Leaderboard()
+          setPhase1Data(lb1?.data || [])
+        }
+        
+        if (eventState?.final_leaderboard_active) {
+          const lbf = await getFinalsLeaderboard()
+          setFinalsData(lbf?.data || [])
+        }
 
-      if (eventState?.current_screen_state === 'FINALIST_LIVE') {
-        setCurrentFinalist({ id: eventState.current_finalist_id })
-      }
-    } else {
-      if (res.error === 'Not authenticated' || res.error === 'Team not found') {
-        router.push('/login')
+        if (eventState?.current_screen_state === 'FINALIST_LIVE') {
+          setCurrentFinalist({ id: eventState.current_finalist_id })
+        }
       } else {
-        console.error('Failed to load dashboard:', res.error)
+        if (isInitialLoadRef.current && (res.error === 'Not authenticated' || res.error === 'Team not found')) {
+          router.push('/login')
+        } else {
+          console.warn('Dashboard sync skipped:', res?.error)
+        }
       }
+    } catch (err) {
+      console.warn('Dashboard sync error:', err)
+    } finally {
+      setIsLoading(false)
     }
-    setIsLoading(false)
   }
 
   useEffect(() => {

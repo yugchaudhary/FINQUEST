@@ -50,6 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [currentPhase, setCurrentPhase] = useState('SETUP');
 
   useEffect(() => {
+    if (pathname === '/admin/login') return;
     const checkAuth = async () => {
       try {
         const session = await getSession();
@@ -63,7 +64,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
     };
     checkAuth();
-  }, []);
+  }, [pathname, router]);
+
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
 
   const handleSignOut = async () => {
     await signOut();
@@ -102,6 +107,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <li key={link.href}>
                   <Link 
                     href={link.href}
+                    prefetch={false}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                       isActive 

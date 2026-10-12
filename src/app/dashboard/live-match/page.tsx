@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
@@ -35,6 +35,7 @@ export default function ParticipantLiveMatchPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isLocking, setIsLocking] = useState(false)
+  const isInitialLoadRef = useRef(true)
 
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null)
   const [amountStr, setAmountStr] = useState<string>('')
@@ -43,11 +44,12 @@ export default function ParticipantLiveMatchPage() {
     try {
       const dashRes = await getDashboardData()
       if (!dashRes.success || !dashRes.data?.team) {
-        if (dashRes.error === 'Not authenticated') {
+        if (isInitialLoadRef.current && dashRes.error === 'Not authenticated') {
           router.push('/login')
         }
         return
       }
+      isInitialLoadRef.current = false
       setTeam(dashRes.data.team)
 
       const matchRes = await getCurrentMatch()

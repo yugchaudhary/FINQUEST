@@ -104,12 +104,15 @@ export async function updateTeamRole(teamId: string, role: 'INNOVATOR'|'INVESTOR
     const supabase = await createClient()
     
     let user = null
-    const { data: authData } = await supabase.auth.getUser()
-    if (authData?.user) {
-      user = authData.user
-    } else {
-      const { data: sessData } = await supabase.auth.getSession()
-      user = sessData?.session?.user || null
+    const { data: sessData } = await supabase.auth.getSession()
+    user = sessData?.session?.user || null
+    if (!user) {
+      try {
+        const { data: authData } = await supabase.auth.getUser()
+        user = authData?.user || null
+      } catch {
+        user = null
+      }
     }
 
     if (!user) return { success: false, error: 'Not authenticated' }
@@ -160,12 +163,15 @@ export async function updateStartingBalance(teamId: string, balance: number) {
     z.number().nonnegative().parse(balance)
     const supabase = await createClient()
     let user = null
-    const { data: authData } = await supabase.auth.getUser()
-    if (authData?.user) {
-      user = authData.user
-    } else {
-      const { data: sessData } = await supabase.auth.getSession()
-      user = sessData?.session?.user || null
+    const { data: sessData } = await supabase.auth.getSession()
+    user = sessData?.session?.user || null
+    if (!user) {
+      try {
+        const { data: authData } = await supabase.auth.getUser()
+        user = authData?.user || null
+      } catch {
+        user = null
+      }
     }
     if (!user) return { success: false, error: 'Not authenticated' }
     
@@ -304,12 +310,15 @@ export async function updateTeamCategory(teamId: string, categoryId: string | nu
 
     const supabase = await createClient()
     let user = null
-    const { data: authData } = await supabase.auth.getUser()
-    if (authData?.user) {
-      user = authData.user
-    } else {
-      const { data: sessData } = await supabase.auth.getSession()
-      user = sessData?.session?.user || null
+    const { data: sessData } = await supabase.auth.getSession()
+    user = sessData?.session?.user || null
+    if (!user) {
+      try {
+        const { data: authData } = await supabase.auth.getUser()
+        user = authData?.user || null
+      } catch {
+        user = null
+      }
     }
 
     if (!user) return { success: false, error: 'Not authenticated' }

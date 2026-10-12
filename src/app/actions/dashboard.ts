@@ -6,16 +6,18 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export async function getDashboardData() {
   try {
     const supabase = await createClient()
-    const now = Math.floor(Date.now() / 1000)
     let user = null
 
     const { data: sessData } = await supabase.auth.getSession()
-    const session = sessData?.session
-    if (session?.user && session.expires_at && session.expires_at > now) {
-      user = session.user
-    } else {
-      const { data: authData } = await supabase.auth.getUser()
-      user = authData?.user || null
+    user = sessData?.session?.user || null
+
+    if (!user) {
+      try {
+        const { data: authData } = await supabase.auth.getUser()
+        user = authData?.user || null
+      } catch {
+        user = null
+      }
     }
     
     if (!user) return { success: false, error: 'Not authenticated' }
@@ -23,11 +25,11 @@ export async function getDashboardData() {
     const adminClient = createAdminClient()
 
     // Get User and Team info
-    const { data: userData } = await adminClient.from('users').select('team_id, auth_role').eq('id', user.id).single()
+    const { data: userData } = await adminClient.from('users').select('team_id, auth_role').eq('id', user.id).maybeSingle()
     if (!userData?.team_id) return { success: false, error: 'Team not found' }
 
     // Fetch team with category and balance
-    const { data: team } = await adminClient.from('teams').select('*, categories(name)').eq('id', userData.team_id).single()
+    const { data: team } = await adminClient.from('teams').select('*, categories(name)').eq('id', userData.team_id).maybeSingle()
     
     // Fetch members
     const { data: members } = await adminClient.from('team_members').select('*').eq('team_id', userData.team_id)
@@ -39,7 +41,7 @@ export async function getDashboardData() {
     }
 
     // Fetch event state to know what screen to show globally (e.g. Phase 1 Leaderboard)
-    const { data: eventState } = await adminClient.from('event_state').select('*').single()
+    const { data: eventState } = await adminClient.from('event_state').select('*').maybeSingle()
 
     return {
       success: true,

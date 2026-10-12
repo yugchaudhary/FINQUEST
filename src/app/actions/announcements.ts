@@ -27,12 +27,15 @@ export async function publishAnnouncement(content: string) {
 
     const supabase = await createClient()
     let user = null
-    const { data: authData } = await supabase.auth.getUser()
-    if (authData?.user) {
-      user = authData.user
-    } else {
-      const { data: sessData } = await supabase.auth.getSession()
-      user = sessData?.session?.user || null
+    const { data: sessData } = await supabase.auth.getSession()
+    user = sessData?.session?.user || null
+    if (!user) {
+      try {
+        const { data: authData } = await supabase.auth.getUser()
+        user = authData?.user || null
+      } catch {
+        user = null
+      }
     }
 
     if (!user) return { success: false, error: 'Not authenticated. Please log in as admin.' }
@@ -79,12 +82,15 @@ export async function deleteAnnouncement(id: string) {
 
     const supabase = await createClient()
     let user = null
-    const { data: authData } = await supabase.auth.getUser()
-    if (authData?.user) {
-      user = authData.user
-    } else {
-      const { data: sessData } = await supabase.auth.getSession()
-      user = sessData?.session?.user || null
+    const { data: sessData } = await supabase.auth.getSession()
+    user = sessData?.session?.user || null
+    if (!user) {
+      try {
+        const { data: authData } = await supabase.auth.getUser()
+        user = authData?.user || null
+      } catch {
+        user = null
+      }
     }
 
     if (!user) return { success: false, error: 'Not authenticated. Please log in as admin.' }

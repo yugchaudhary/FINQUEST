@@ -330,22 +330,28 @@ export async function signOut() {
 export async function getSession() {
   try {
     const supabase = await createClient()
-    const now = Math.floor(Date.now() / 1000)
     let user = null
 
     const { data: sessData } = await supabase.auth.getSession()
-    const session = sessData?.session
-    if (session?.user && session.expires_at && session.expires_at > now) {
-      user = session.user
-    } else {
-      const { data: authData } = await supabase.auth.getUser()
-      user = authData?.user || null
+    user = sessData?.session?.user || null
+
+    if (!user) {
+      try {
+        const { data: authData } = await supabase.auth.getUser()
+        user = authData?.user || null
+      } catch {
+        user = null
+      }
     }
 
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()
-    const { data: userData } = await adminClient.from('users').select('*, teams(*)').eq('id', user.id).single()
+    const { data: userData } = await adminClient
+      .from('users')
+      .select('*, teams(*)')
+      .eq('id', user.id)
+      .maybeSingle()
 
     return { success: true, data: { user, userData } }
   } catch (error: any) {

@@ -29,62 +29,66 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
+  const pathname = request.nextUrl.pathname
+  const method = request.method
+  const isServerAction = request.headers.has('next-action') || method === 'POST'
   const isPrefetch =
     request.headers.get('next-router-prefetch') === '1' ||
-    request.headers.get('purpose') === 'prefetch'
+    request.headers.get('purpose') === 'prefetch' ||
+    request.headers.get('x-nextjs-data') === '1'
+
+  // Server Actions, POST requests, and background prefetch requests must NEVER trigger auth redirects
+  if (isServerAction || isPrefetch) {
+    return supabaseResponse
+  }
+
+  // Fast cookie check for supabase auth tokens
+  const allCookies = request.cookies.getAll()
+  const hasAuthCookie = allCookies.some(c => c.name.includes('-auth-token'))
 
   let user = null
   const now = Math.floor(Date.now() / 1000)
 
-  // 1. Check local session from cookies first (instant 1ms check, no remote API rate limits)
-  const { data: sessData } = await supabase.auth.getSession()
-  const session = sessData?.session
+  try {
+    const { data: sessData } = await supabase.auth.getSession()
+    const session = sessData?.session
 
-  if (session?.user && session.expires_at && session.expires_at > now) {
-    user = session.user
-    // If token is expiring within 5 minutes, proactively refresh in background
-    if (session.expires_at - now < 300 && !isPrefetch) {
-      try {
-        const { data: refreshData } = await supabase.auth.getUser()
-        if (refreshData?.user) {
-          user = refreshData.user
+    if (session?.user) {
+      user = session.user
+      // Only attempt refresh if token expires in under 2 minutes
+      if (session.expires_at && session.expires_at - now < 120) {
+        try {
+          const { data: refreshData } = await supabase.auth.getUser()
+          if (refreshData?.user) {
+            user = refreshData.user
+          }
+        } catch {
+          // Keep existing valid user
         }
+      }
+    } else if (hasAuthCookie) {
+      try {
+        const { data: authData } = await supabase.auth.getUser()
+        user = authData?.user || null
       } catch {
-        // Keep existing valid user if refresh hits transient network issue
+        user = null
       }
     }
-  } else {
-    // Session is missing or expired, attempt getUser() to trigger refresh token exchange
-    try {
-      const { data: authData } = await supabase.auth.getUser()
-      user = authData?.user || null
-    } catch {
-      user = null
-    }
+  } catch {
+    user = null
   }
 
-  const pathname = request.nextUrl.pathname
-
-  // Do not redirect prefetch requests
-  if (isPrefetch) {
-    return supabaseResponse
-  }
-
-  // Protected routes check: redirect to appropriate login page if not authenticated
-  if (!user) {
+  // Strictly redirect only on direct GET browser navigations where NO auth cookie exists
+  if (!user && !hasAuthCookie) {
     if (pathname.startsWith('/dashboard')) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
-      const redirectResponse = NextResponse.redirect(url)
-      supabaseResponse.cookies.getAll().forEach(c => redirectResponse.cookies.set(c.name, c.value, c))
-      return redirectResponse
+      return NextResponse.redirect(url)
     }
     if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
       const url = request.nextUrl.clone()
       url.pathname = '/admin/login'
-      const redirectResponse = NextResponse.redirect(url)
-      supabaseResponse.cookies.getAll().forEach(c => redirectResponse.cookies.set(c.name, c.value, c))
-      return redirectResponse
+      return NextResponse.redirect(url)
     }
   }
 
