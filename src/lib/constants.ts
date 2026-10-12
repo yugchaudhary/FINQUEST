@@ -5,7 +5,7 @@ export const MULTIPLIER_MAP: Record<string, { winner: number; loser: number }> =
 }
 
 export const MAX_GAMBIT_AMOUNT = 250000
-export const DEFAULT_STARTING_BALANCE = 1000000
+export const DEFAULT_STARTING_BALANCE = 0
 
 export const SCORE_DISTRIBUTIONS = [
   { red: 5, blue: 0 },

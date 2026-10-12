@@ -146,7 +146,6 @@ export default function CategoryAssignmentPage() {
         </div>
       )
     },
-    { header: 'Members', accessorKey: 'memberCount', cell: (row: any) => `${row.memberCount}/4` },
     {
       header: 'Category Assignment',
       accessorKey: 'category_id',

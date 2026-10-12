@@ -71,7 +71,8 @@ export async function confirmImport(teams: Array<{category: string, team_name: s
         team_name: team.team_name,
         category: team.category,
         role: team.role,
-        balance: DEFAULT_STARTING_BALANCE
+        starting_balance: 0,
+        current_balance: 0
       }).select().single()
 
       if (teamError) {
@@ -122,6 +123,9 @@ export async function updateTeamRole(teamId: string, role: 'INNOVATOR'|'INVESTOR
       updatePayload.category_id = null
       updatePayload.category = 'N/A'
     } else if (role === 'INNOVATOR') {
+      // Innovators have 0 balance
+      updatePayload.starting_balance = 0
+      updatePayload.current_balance = 0
       const { data: currentTeam } = await adminClient.from('teams').select('category, category_id').eq('id', teamId).single()
       if (!currentTeam?.category_id || currentTeam?.category === 'N/A') {
         updatePayload.category = 'Unassigned'
@@ -153,21 +157,38 @@ export async function updateTeamRole(teamId: string, role: 'INNOVATOR'|'INVESTOR
 export async function updateStartingBalance(teamId: string, balance: number) {
   try {
     z.string().uuid().parse(teamId)
-    z.number().positive().parse(balance)
+    z.number().nonnegative().parse(balance)
     const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
+    let user = null
+    const { data: authData } = await supabase.auth.getUser()
+    if (authData?.user) {
+      user = authData.user
+    } else {
+      const { data: sessData } = await supabase.auth.getSession()
+      user = sessData?.session?.user || null
+    }
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
     const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
     if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
 
-    const { error } = await adminClient.from('teams').update({ balance }).eq('id', teamId)
+    // Only investors can have balance assigned
+    const { data: team } = await adminClient.from('teams').select('role').eq('id', teamId).single()
+    if (team?.role !== 'INVESTOR') {
+      return { success: false, error: 'Balance can only be assigned to Investor teams.' }
+    }
+
+    const { error } = await adminClient.from('teams').update({ 
+      starting_balance: balance,
+      current_balance: balance
+    }).eq('id', teamId)
     if (error) return { success: false, error: error.message }
 
     await logAdminAction(user.id, 'UPDATE_TEAM_BALANCE', 'team', teamId, { balance })
     revalidatePath('/admin/teams')
+    revalidatePath('/admin/investment-setup')
+    revalidatePath('/dashboard')
     return { success: true }
   } catch (error: any) {
     return { success: false, error: error.message }
@@ -262,6 +283,8 @@ export async function getTeamsWithDetails() {
 
     const formattedData = data.map((team: any) => ({
       ...team,
+      current_balance: team.role === 'INVESTOR' ? (team.current_balance || 0) : 0,
+      starting_balance: team.role === 'INVESTOR' ? (team.starting_balance || 0) : 0,
       memberCount: team.team_members?.[0]?.count || 0,
       categoryName: team.categories?.name || null,
       selectionStatus: team.team_problem_selection_state?.status || 'NOT_STARTED',

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { getTeamsWithDetails, updateTeamRole, getTeamMembers, clearAllTeams } from '@/app/actions/teams';
+import { getTeamsWithDetails, updateTeamRole, clearAllTeams } from '@/app/actions/teams';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
@@ -22,14 +22,12 @@ export default function AdminTeamsPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
-  const [teamMembers, setTeamMembers] = useState<Record<string, any[]>>({});
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
 
   // Filters
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [memberFilter, setMemberFilter] = useState('ALL');
   const [selectionFilter, setSelectionFilter] = useState('ALL');
 
   const fetchTeams = async () => {
@@ -79,18 +77,8 @@ export default function AdminTeamsPage() {
     fetchTeams();
   };
 
-  const handleExpandTeam = async (teamId: string) => {
-    if (expandedTeam === teamId) {
-      setExpandedTeam(null);
-      return;
-    }
-    setExpandedTeam(teamId);
-    if (!teamMembers[teamId]) {
-      const result = await getTeamMembers(teamId);
-      if (result?.success && result.data) {
-        setTeamMembers(prev => ({ ...prev, [teamId]: result.data! }));
-      }
-    }
+  const handleExpandTeam = (teamId: string) => {
+    setExpandedTeam(prev => (prev === teamId ? null : teamId));
   };
 
   const handleClearAll = async () => {
@@ -119,11 +107,6 @@ export default function AdminTeamsPage() {
       if (statusFilter === 'ACTIVE' && !t.is_active) return false;
       if (statusFilter === 'ELIMINATED' && t.is_active) return false;
 
-      // Members
-      if (memberFilter === 'FULL' && t.memberCount !== 4) return false;
-      if (memberFilter === 'PARTIAL' && (t.memberCount === 4 || t.memberCount === 0)) return false;
-      if (memberFilter === 'EMPTY' && t.memberCount !== 0) return false;
-
       // Selection
       if (selectionFilter === 'FINALIZED' && t.selectionStatus !== 'FINALIZED') return false;
       if (selectionFilter === 'IN_PROGRESS' && t.selectionStatus !== 'IN_PROGRESS') return false;
@@ -131,7 +114,7 @@ export default function AdminTeamsPage() {
 
       return true;
     });
-  }, [teams, search, roleFilter, statusFilter, memberFilter, selectionFilter]);
+  }, [teams, search, roleFilter, statusFilter, selectionFilter]);
 
   const roleColors: any = {
     INNOVATOR: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -159,7 +142,7 @@ export default function AdminTeamsPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="md:col-span-2 relative">
           <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
@@ -180,17 +163,6 @@ export default function AdminTeamsPage() {
           ]}
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
-        />
-        <Select 
-          label="Members"
-          options={[
-            { label: 'All Members', value: 'ALL' },
-            { label: 'Full (4/4)', value: 'FULL' },
-            { label: 'Partial (1-3)', value: 'PARTIAL' },
-            { label: 'Empty (0/4)', value: 'EMPTY' }
-          ]}
-          value={memberFilter}
-          onChange={(e) => setMemberFilter(e.target.value)}
         />
         <Select 
           label="Selection"
@@ -223,14 +195,6 @@ export default function AdminTeamsPage() {
                       <div className="text-xs text-slate-500 font-mono mt-0.5">
                         {team.role === 'INVESTOR' ? 'No Category (Investor)' : (team.categoryName || 'Unassigned Category')}
                       </div>
-                    </div>
-
-                    {/* Member Count */}
-                    <div className="flex items-center gap-1.5 text-sm">
-                      <Users className="w-3.5 h-3.5 text-slate-500" />
-                      <span className={`font-bold ${team.memberCount >= 4 ? 'text-green-400' : 'text-slate-600'}`}>
-                        {team.memberCount || 0}/4
-                      </span>
                     </div>
 
                     {/* Selection Status */}
@@ -287,10 +251,10 @@ export default function AdminTeamsPage() {
                     </button>
                   </div>
 
-                  {/* Expanded Members Info */}
+                  {/* Expanded Team Info */}
                   {expandedTeam === team.id && (
                     <div className="px-6 pb-5 bg-black/20 border-t border-white/5">
-                      <div className="pt-4 grid grid-cols-2 gap-6">
+                      <div className="pt-4 max-w-md">
                         {/* Team Details */}
                         <div>
                           <div className="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold">Team Details</div>
@@ -305,10 +269,12 @@ export default function AdminTeamsPage() {
                                 {team.role === 'INVESTOR' ? 'N/A (Investor)' : (team.categoryName || 'Unassigned')}
                               </span>
                             </div>
-                            <div className="flex justify-between">
-                              <span className="text-slate-500">Balance</span>
-                              <span className="text-foreground">₹{(team.current_balance || 0).toLocaleString('en-IN')}</span>
-                            </div>
+                            {team.role === 'INVESTOR' && (
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">Balance</span>
+                                <span className="text-foreground">₹{(team.current_balance || 0).toLocaleString('en-IN')}</span>
+                              </div>
+                            )}
                             <div className="flex justify-between">
                               <span className="text-slate-500">Finalist</span>
                               <span className={team.is_finalist ? 'text-yellow-400 font-bold' : 'text-slate-500'}>
@@ -316,30 +282,6 @@ export default function AdminTeamsPage() {
                               </span>
                             </div>
                           </div>
-                        </div>
-
-                        {/* Members List */}
-                        <div>
-                          <div className="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold">Members & Registration Numbers</div>
-                          {teamMembers[team.id] === undefined ? (
-                            <div className="text-xs text-slate-500">Loading...</div>
-                          ) : teamMembers[team.id].length === 0 ? (
-                            <div className="text-xs text-slate-500">No members joined yet.</div>
-                          ) : (
-                            <div className="space-y-2">
-                              {teamMembers[team.id].map((member: any, i: number) => (
-                                <div key={i} className="flex items-center gap-3 text-sm">
-                                  <div className="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center text-xs text-purple-400 font-bold flex-shrink-0">
-                                    {i + 1}
-                                  </div>
-                                  <div>
-                                    <div className="font-medium text-foreground">{member.name}</div>
-                                    <div className="text-xs font-mono text-slate-500">{member.email?.replace('@finfest.com', '')}</div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
                         </div>
                       </div>
                     </div>

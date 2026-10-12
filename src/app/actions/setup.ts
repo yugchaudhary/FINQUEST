@@ -220,8 +220,8 @@ export async function confirmTeamExcelImport(teams: TeamRosterRow[]) {
           category: 'Unassigned',
           role: 'PENDING',
           join_code: String(item.team_no || ''),
-          starting_balance: 1000000,
-          current_balance: 1000000,
+          starting_balance: 0,
+          current_balance: 0,
           is_active: true
         }).select().single()
 
