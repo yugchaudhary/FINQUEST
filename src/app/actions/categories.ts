@@ -35,8 +35,15 @@ export async function assignTeamCategory(teamId: string, categoryId: string) {
     z.string().uuid().parse(categoryId)
 
     const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
+    let user = null
+    const { data: authData } = await supabase.auth.getUser()
+    if (authData?.user) {
+      user = authData.user
+    } else {
+      const { data: sessData } = await supabase.auth.getSession()
+      user = sessData?.session?.user || null
+    }
+
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
@@ -54,10 +61,15 @@ export async function assignTeamCategory(teamId: string, categoryId: string) {
     const { data: category } = await adminClient.from('categories').select('name').eq('id', categoryId).single()
     if (!category) return { success: false, error: 'Category not found' }
 
-    const { error } = await adminClient.from('teams').update({
+    const updateData: any = {
       category_id: categoryId,
-      category: category.name // Update the text category column as well for backward compatibility
-    }).eq('id', teamId)
+      category: category.name
+    }
+    if (team.role === 'PENDING') {
+      updateData.role = 'INNOVATOR'
+    }
+
+    const { error } = await adminClient.from('teams').update(updateData).eq('id', teamId)
 
     if (error) return { success: false, error: error.message }
 

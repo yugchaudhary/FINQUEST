@@ -48,10 +48,28 @@ export default function AdminTeamsPage() {
   const handleUpdateRole = async (teamId: string, role: 'INNOVATOR' | 'INVESTOR') => {
     setUpdatingRole(teamId);
     setError(null);
+    setSuccess(null);
+    const prevTeams = [...teams];
+    setTeams(prev => prev.map(t => {
+      if (t.id !== teamId) return t;
+      return {
+        ...t,
+        role: role,
+        category: role === 'INVESTOR' ? 'N/A' : (t.category === 'N/A' ? 'Unassigned' : t.category),
+        category_id: role === 'INVESTOR' ? null : t.category_id,
+        categoryName: role === 'INVESTOR' ? null : (t.category === 'N/A' ? null : t.categoryName)
+      };
+    }));
+
     const result = await updateTeamRole(teamId, role);
-    if (!result?.success) setError(result?.error || 'Failed to update role');
-    else setSuccess(role === 'INVESTOR' ? 'Role updated to Investor (category cleared)' : `Role updated to ${role}`);
-    await fetchTeams();
+    if (!result?.success) {
+      setTeams(prevTeams);
+      setError(result?.error || 'Failed to update role');
+    } else {
+      setSuccess(role === 'INVESTOR' ? 'Role updated to Investor (category cleared)' : `Role updated to ${role}`);
+      const refreshed = await getTeamsWithDetails();
+      if (refreshed?.success && refreshed.data) setTeams(refreshed.data);
+    }
     setUpdatingRole(null);
   };
 

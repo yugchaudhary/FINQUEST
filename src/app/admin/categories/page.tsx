@@ -7,7 +7,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { getTeamsWithDetails, updateTeamCategory, updateTeamRole } from '@/app/actions/teams';
 import { getCategories } from '@/app/actions/categories';
-import { Tags, Search } from 'lucide-react';
+import { Tags, Search, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 export default function CategoryAssignmentPage() {
@@ -17,6 +17,8 @@ export default function CategoryAssignmentPage() {
   const [search, setSearch] = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -37,18 +39,70 @@ export default function CategoryAssignmentPage() {
 
   const handleRoleChange = async (teamId: string, newRole: 'INNOVATOR' | 'INVESTOR') => {
     setUpdatingRole(teamId);
-    await updateTeamRole(teamId, newRole);
-    await fetchData();
+    setError(null);
+    setSuccess(null);
+
+    const prevTeams = [...teams];
+    // Optimistic update
+    setTeams(prev => prev.map(t => {
+      if (t.id !== teamId) return t;
+      return {
+        ...t,
+        role: newRole,
+        category: newRole === 'INVESTOR' ? 'N/A' : (t.category === 'N/A' ? 'Unassigned' : t.category),
+        category_id: newRole === 'INVESTOR' ? null : t.category_id,
+        categoryName: newRole === 'INVESTOR' ? null : (t.category === 'N/A' ? null : t.categoryName)
+      };
+    }));
+
+    const res = await updateTeamRole(teamId, newRole);
+    if (!res?.success) {
+      setTeams(prevTeams);
+      setError(res?.error || 'Failed to update role');
+    } else {
+      setSuccess(newRole === 'INVESTOR' ? 'Role set to Investor (category cleared)' : 'Role set to Innovator');
+      const teamsRes = await getTeamsWithDetails();
+      if (teamsRes.success && teamsRes.data) setTeams(teamsRes.data);
+    }
     setUpdatingRole(null);
   };
 
   const handleCategoryChange = async (teamId: string, categoryId: string) => {
     const target = teams.find(t => t.id === teamId);
-    if (target?.role === 'INVESTOR') return;
+    if (target?.role === 'INVESTOR') {
+      setError('Investors cannot be assigned a category. Change role to Innovator first.');
+      return;
+    }
 
     setUpdating(teamId);
-    await updateTeamCategory(teamId, categoryId === 'none' ? null : categoryId);
-    await fetchData();
+    setError(null);
+    setSuccess(null);
+
+    const prevTeams = [...teams];
+    const catId = categoryId === 'none' ? null : categoryId;
+    const selectedCat = categories.find(c => c.id === catId);
+
+    // Optimistic update
+    setTeams(prev => prev.map(t => {
+      if (t.id !== teamId) return t;
+      return {
+        ...t,
+        role: t.role === 'PENDING' ? 'INNOVATOR' : t.role,
+        category_id: catId,
+        category: selectedCat ? selectedCat.name : 'Unassigned',
+        categoryName: selectedCat ? selectedCat.name : null
+      };
+    }));
+
+    const res = await updateTeamCategory(teamId, catId);
+    if (!res?.success) {
+      setTeams(prevTeams);
+      setError(res?.error || 'Failed to update category');
+    } else {
+      setSuccess(selectedCat ? `Category set to ${selectedCat.name}` : 'Category cleared to Unassigned');
+      const teamsRes = await getTeamsWithDetails();
+      if (teamsRes.success && teamsRes.data) setTeams(teamsRes.data);
+    }
     setUpdating(null);
   };
 
@@ -137,6 +191,20 @@ export default function CategoryAssignmentPage() {
         </div>
       </div>
 
+      {error && (
+        <div className="flex items-center gap-2 p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {success && (
+        <div className="flex items-center gap-2 p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
+          <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+          <span>{success}</span>
+        </div>
+      )}
+
       <Card>
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="relative w-72">
@@ -182,7 +250,7 @@ export default function CategoryAssignmentPage() {
               <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
-            <DataTable columns={columns} data={filteredTeams} />
+            <DataTable columns={columns} data={filteredTeams} keyExtractor={(t) => t.id} />
           )}
         </CardContent>
       </Card>

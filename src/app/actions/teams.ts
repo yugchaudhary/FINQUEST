@@ -126,6 +126,9 @@ export async function updateTeamRole(teamId: string, role: 'INNOVATOR'|'INVESTOR
       if (!currentTeam?.category_id || currentTeam?.category === 'N/A') {
         updatePayload.category = 'Unassigned'
         updatePayload.category_id = null
+      } else {
+        updatePayload.category = currentTeam.category || 'Unassigned'
+        updatePayload.category_id = currentTeam.category_id
       }
     }
 
@@ -133,9 +136,14 @@ export async function updateTeamRole(teamId: string, role: 'INNOVATOR'|'INVESTOR
     if (error) return { success: false, error: error.message }
 
     await logAdminAction(user.id, 'UPDATE_TEAM_ROLE', 'team', teamId, { role, category: updatePayload.category })
+    
+    // Touch event_state singleton to trigger realtime updates
+    await adminClient.from('event_state').update({ updated_at: new Date().toISOString() }).eq('id', 1)
+
     revalidatePath('/admin/teams')
     revalidatePath('/admin/categories')
     revalidatePath('/admin/setup')
+    revalidatePath('/dashboard')
     return { success: true }
   } catch (error: any) {
     return { success: false, error: error.message }
@@ -272,36 +280,68 @@ export async function updateTeamCategory(teamId: string, categoryId: string | nu
     if (categoryId) z.string().uuid().parse(categoryId)
 
     const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
+    let user = null
+    const { data: authData } = await supabase.auth.getUser()
+    if (authData?.user) {
+      user = authData.user
+    } else {
+      const { data: sessData } = await supabase.auth.getSession()
+      user = sessData?.session?.user || null
+    }
+
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
     const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
     if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
 
-    let categoryName = null
+    // Check team role: Investors cannot have a category assigned
+    const { data: team } = await adminClient.from('teams').select('role, category, category_id').eq('id', teamId).single()
+    if (!team) return { success: false, error: 'Team not found' }
+
     if (categoryId) {
-      // Check team role: Investors cannot have a category assigned
-      const { data: team } = await adminClient.from('teams').select('role').eq('id', teamId).single()
-      if (team?.role === 'INVESTOR') {
+      if (team.role === 'INVESTOR') {
         return { success: false, error: 'Investors cannot be assigned a category. Categories are only assigned to Innovators.' }
       }
 
       const { data: cat } = await adminClient.from('categories').select('name').eq('id', categoryId).single()
-      if (cat) categoryName = cat.name
+      if (!cat) return { success: false, error: 'Category not found' }
+
+      const updateData: any = {
+        category_id: categoryId,
+        category: cat.name
+      }
+      // If team was PENDING, promote to INNOVATOR
+      if (team.role === 'PENDING') {
+        updateData.role = 'INNOVATOR'
+      }
+
+      const { error } = await adminClient.from('teams').update(updateData).eq('id', teamId)
+      if (error) return { success: false, error: error.message }
+
+      await logAdminAction(user.id, 'UPDATE_TEAM_CATEGORY', 'teams', teamId, { 
+        categoryId, 
+        categoryName: cat.name, 
+        role: updateData.role || team.role 
+      })
+    } else {
+      // Unassign category safely — category column in DB has NOT NULL constraint, so set to 'Unassigned'
+      const { error } = await adminClient.from('teams').update({
+        category_id: null,
+        category: 'Unassigned'
+      }).eq('id', teamId)
+      if (error) return { success: false, error: error.message }
+
+      await logAdminAction(user.id, 'UNASSIGN_TEAM_CATEGORY', 'teams', teamId, { categoryId: null })
     }
 
-    const { error } = await adminClient.from('teams').update({
-      category_id: categoryId,
-      category: categoryName
-    }).eq('id', teamId)
+    // Touch event_state singleton to trigger realtime updates for participant screens
+    await adminClient.from('event_state').update({ updated_at: new Date().toISOString() }).eq('id', 1)
 
-    if (error) return { success: false, error: error.message }
-
-    await logAdminAction(user.id, 'UPDATE_TEAM_CATEGORY', 'teams', teamId, { categoryId, categoryName })
     revalidatePath('/admin/teams')
     revalidatePath('/admin/categories')
+    revalidatePath('/admin/setup')
+    revalidatePath('/dashboard')
     
     return { success: true }
   } catch (error: any) {

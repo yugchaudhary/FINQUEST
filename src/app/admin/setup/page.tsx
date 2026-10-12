@@ -40,8 +40,20 @@ export default function SetupPage() {
   const handleRoleChange = async (teamId: string, newRole: 'INNOVATOR' | 'INVESTOR') => {
     setUpdatingRole(teamId);
     setError(null);
+    setSuccess(null);
+    const prevTeams = [...existingTeams];
+    setExistingTeams(prev => prev.map(t => {
+      if (t.id !== teamId) return t;
+      return {
+        ...t,
+        role: newRole,
+        category: newRole === 'INVESTOR' ? 'N/A' : (t.category === 'N/A' ? 'Unassigned' : t.category)
+      };
+    }));
+
     const result = await updateTeamRole(teamId, newRole);
     if (!result?.success) {
+      setExistingTeams(prevTeams);
       setError(result?.error || 'Failed to update role');
     } else {
       setSuccess(`Role updated to ${newRole}`);
