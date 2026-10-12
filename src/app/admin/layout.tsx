@@ -63,7 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
     };
     checkAuth();
-  }, [router]);
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();

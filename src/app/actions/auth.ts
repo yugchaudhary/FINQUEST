@@ -330,13 +330,16 @@ export async function signOut() {
 export async function getSession() {
   try {
     const supabase = await createClient()
+    const now = Math.floor(Date.now() / 1000)
     let user = null
-    const { data: authData } = await supabase.auth.getUser()
-    if (authData?.user) {
-      user = authData.user
+
+    const { data: sessData } = await supabase.auth.getSession()
+    const session = sessData?.session
+    if (session?.user && session.expires_at && session.expires_at > now) {
+      user = session.user
     } else {
-      const { data: sessData } = await supabase.auth.getSession()
-      user = sessData?.session?.user || null
+      const { data: authData } = await supabase.auth.getUser()
+      user = authData?.user || null
     }
 
     if (!user) return { success: false, error: 'Not authenticated' }

@@ -98,7 +98,7 @@ export default function DashboardPage() {
       clearTimeout(timeoutId)
       supabase.removeChannel(ch) 
     }
-  }, [router])
+  }, [])
 
   if (isLoading) {
     return (

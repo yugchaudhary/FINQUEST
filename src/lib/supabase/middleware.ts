@@ -29,18 +29,46 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // IMPORTANT: Do not run code between createServerClient and
-  // supabase.auth.getUser(). getUser() validates and refreshes the auth token
-  // from cookies on each request, ensuring users do not randomly sign out.
+  const isPrefetch =
+    request.headers.get('next-router-prefetch') === '1' ||
+    request.headers.get('purpose') === 'prefetch'
+
   let user = null
-  try {
-    const { data } = await supabase.auth.getUser()
-    user = data.user
-  } catch {
-    user = null
+  const now = Math.floor(Date.now() / 1000)
+
+  // 1. Check local session from cookies first (instant 1ms check, no remote API rate limits)
+  const { data: sessData } = await supabase.auth.getSession()
+  const session = sessData?.session
+
+  if (session?.user && session.expires_at && session.expires_at > now) {
+    user = session.user
+    // If token is expiring within 5 minutes, proactively refresh in background
+    if (session.expires_at - now < 300 && !isPrefetch) {
+      try {
+        const { data: refreshData } = await supabase.auth.getUser()
+        if (refreshData?.user) {
+          user = refreshData.user
+        }
+      } catch {
+        // Keep existing valid user if refresh hits transient network issue
+      }
+    }
+  } else {
+    // Session is missing or expired, attempt getUser() to trigger refresh token exchange
+    try {
+      const { data: authData } = await supabase.auth.getUser()
+      user = authData?.user || null
+    } catch {
+      user = null
+    }
   }
 
   const pathname = request.nextUrl.pathname
+
+  // Do not redirect prefetch requests
+  if (isPrefetch) {
+    return supabaseResponse
+  }
 
   // Protected routes check: redirect to appropriate login page if not authenticated
   if (!user) {
