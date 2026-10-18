@@ -76,14 +76,34 @@ export default function ParticipantLiveMatchPage() {
     const ch = supabase.channel(EVENT_CHANNEL)
       .on('broadcast', { event: 'MATCH_BROADCAST' }, loadData)
       .on('broadcast', { event: 'MATCH_BROADCASTED' }, loadData)
-      .on('broadcast', { event: 'GAMBITS_CLOSED' }, loadData)
+      .on('broadcast', { event: 'GAMBITS_CLOSED' }, () => {
+        setMatch((prev: any) => (prev ? { ...prev, status: 'GAMBITS_CLOSED' } : null))
+        loadData()
+      })
       .on('broadcast', { event: 'MATCH_RESET' }, loadData)
       .on('broadcast', { event: 'MATCH_COMPLETED' }, loadData)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, loadData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, (payload) => {
+        if (payload.new && (payload.new as any).status === 'GAMBITS_CLOSED') {
+          setMatch((prev: any) => (prev ? { ...prev, status: 'GAMBITS_CLOSED' } : null))
+        }
+        loadData()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_state' }, (payload) => {
+        if (payload.new && (payload.new as any).current_screen_state === 'AWAITING_RESULT') {
+          setMatch((prev: any) => (prev ? { ...prev, status: 'GAMBITS_CLOSED' } : null))
+        }
+        loadData()
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'gambits' }, loadData)
       .subscribe()
 
+    // 3-second heartbeat fallback in case mobile tab sleeps or socket reconnects
+    const heartbeat = setInterval(() => {
+      loadData()
+    }, 3000)
+
     return () => {
+      clearInterval(heartbeat)
       supabase.removeChannel(ch)
     }
   }, [])
@@ -141,6 +161,10 @@ export default function ParticipantLiveMatchPage() {
       : null
 
   const handleLock = async () => {
+    if (!canLock) {
+      setError('Investments are closed for this battle')
+      return
+    }
     if (!selectedTeamId) {
       setError('Please select a team in Step 2.')
       return
@@ -161,7 +185,11 @@ export default function ParticipantLiveMatchPage() {
     if (res.success) {
       await loadData()
     } else {
+      if (res.error?.includes('closed') || res.error?.includes('not LIVE')) {
+        setMatch((prev: any) => (prev ? { ...prev, status: 'GAMBITS_CLOSED' } : null))
+      }
       setError(res.error || 'Failed to submit bet')
+      await loadData()
     }
     setIsLocking(false)
   }

@@ -29,6 +29,35 @@ export async function lockGambit(matchId: string, selectedTeamId: string, amount
     const { adminClient, team } = auth
 
     const gambitAmount = sanitizeGambitAmount(validated.amount)
+    if (gambitAmount <= 0) {
+      return { success: false, error: 'Investment amount must be greater than 0' }
+    }
+
+    // 1. Strictly verify match exists and is currently accepting investments
+    const { data: matchData, error: matchErr } = await adminClient
+      .from('matches')
+      .select('status')
+      .eq('id', validated.match_id)
+      .single()
+
+    if (matchErr || !matchData) {
+      return { success: false, error: 'Match not found' }
+    }
+
+    if (!['GAMBITS_OPEN', 'MATCH_LIVE', 'LIVE'].includes(matchData.status)) {
+      return { success: false, error: 'Investments are closed for this battle' }
+    }
+
+    // 2. Also check event_state to ensure event is currently in MATCH_LIVE screen state
+    const { data: eventState } = await adminClient
+      .from('event_state')
+      .select('current_screen_state')
+      .eq('id', 1)
+      .single()
+
+    if (eventState && eventState.current_screen_state !== 'MATCH_LIVE') {
+      return { success: false, error: 'Investments are closed for this battle' }
+    }
 
     const { data, error } = await adminClient.rpc('lock_gambit', {
       p_match_id: validated.match_id,
@@ -45,9 +74,23 @@ export async function lockGambit(matchId: string, selectedTeamId: string, amount
       if (message.includes('Insufficient balance')) {
         return { success: false, error: 'Insufficient balance' }
       }
+      if (message.includes('not LIVE') || message.includes('closed') || message.includes('GAMBITS_CLOSED')) {
+        return { success: false, error: 'Investments are closed for this battle' }
+      }
 
       // Resilient fallback if RPC encountered match status string mismatch
       try {
+        // Re-verify match status right before fallback insert
+        const { data: freshMatch } = await adminClient
+          .from('matches')
+          .select('status')
+          .eq('id', validated.match_id)
+          .single()
+
+        if (!freshMatch || !['GAMBITS_OPEN', 'MATCH_LIVE', 'LIVE'].includes(freshMatch.status)) {
+          return { success: false, error: 'Investments are closed for this battle' }
+        }
+
         const { data: teamData } = await adminClient.from('teams').select('current_balance').eq('id', team.id).single()
         if (!teamData || (teamData.current_balance || 0) < gambitAmount) {
           return { success: false, error: 'Insufficient balance' }

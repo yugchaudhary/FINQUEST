@@ -246,6 +246,26 @@ export default function AdminLiveMatchPage() {
     if (!currentMatch) return
     setPhase('CLOSING_GAMBITS')
     clearError()
+
+    try {
+      const supabase = createClient()
+      const ch = supabase.channel(EVENT_CHANNEL)
+      ch.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          ch.send({
+            type: 'broadcast',
+            event: LIVE_EVENTS.GAMBITS_CLOSED,
+            payload: { matchId: currentMatch.id, status: 'GAMBITS_CLOSED' },
+          })
+          setTimeout(() => {
+            supabase.removeChannel(ch)
+          }, 1000)
+        }
+      })
+    } catch (e) {
+      console.error('Client broadcast failed', e)
+    }
+
     const res = await closeGambits(currentMatch.id)
     if (res?.success) {
       setCurrentMatch(prev => prev ? { ...prev, status: 'GAMBITS_CLOSED' } : null)

@@ -176,6 +176,7 @@ export async function closeGambits(matchId: string) {
 
     revalidatePath('/admin/live-match')
     revalidatePath('/dashboard')
+    revalidatePath('/dashboard/live-match')
     return { success: true }
   } catch (error: any) {
     return { success: false, error: error.message }
