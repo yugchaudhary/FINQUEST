@@ -78,7 +78,7 @@ export function GambitModal({ isOpen, onClose, selectedTeam, selectedColor, matc
     try {
       await onGambitLocked(amount)
     } catch (err: any) {
-      setError(err?.message || 'Failed to lock gambit. Please try again.')
+      setError(err?.message || 'Failed to lock investment. Please try again.')
       setIsLocking(false)
     }
   }
@@ -127,10 +127,10 @@ export function GambitModal({ isOpen, onClose, selectedTeam, selectedColor, matc
             {/* Title */}
             <div className="text-center mb-6">
               <h2 className="font-display text-xl md:text-2xl text-foreground tracking-wide">
-                PLACE YOUR GAMBIT
+                PLACE YOUR INVESTMENT
               </h2>
               <div className={`mt-2 text-sm ${colorClass}`}>
-                Betting on <span className="font-semibold">{selectedTeam?.team_name}</span>
+                Investing in <span className="font-semibold">{selectedTeam?.team_name}</span>
               </div>
             </div>
 
@@ -226,7 +226,7 @@ export function GambitModal({ isOpen, onClose, selectedTeam, selectedColor, matc
               }`}
             >
               <Lock size={18} className="mr-2" />
-              LOCK GAMBIT
+              LOCK INVESTMENT
             </Button>
           </motion.div>
         </motion.div>

@@ -51,7 +51,7 @@ export function LiveStatusCard({ eventState, team }: LiveStatusCardProps) {
             <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mb-4">
               <CheckCircle2 className="w-8 h-8 text-green-400" />
             </div>
-            <h3 className="text-xl font-bold text-foreground mb-2">Gambit Locked</h3>
+            <h3 className="text-xl font-bold text-foreground mb-2">Investment Locked</h3>
             <p className="text-slate-500">Awaiting judge decision for Battle {eventState.current_round}.</p>
           </div>
         )

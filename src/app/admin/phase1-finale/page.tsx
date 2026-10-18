@@ -55,7 +55,7 @@ export default function Phase1FinalePage() {
           
           <div className="mt-8 flex justify-center">
             <Button size="xl" variant="gold" onClick={() => setIsPublishModalOpen(true)}>
-              PUBLISH GAMBIT LEADERBOARD
+              PUBLISH INVESTMENT LEADERBOARD
             </Button>
           </div>
         </CardContent>

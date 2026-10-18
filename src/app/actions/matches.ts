@@ -141,7 +141,7 @@ export async function closeGambits(matchId: string) {
     const { data: match } = await adminClient.from('matches').select('*').eq('id', matchId).single()
     if (!match) return { success: false, error: 'Match not found' }
     if (!['GAMBITS_OPEN', 'MATCH_LIVE', 'LIVE'].includes(match.status)) {
-      return { success: false, error: 'Gambits cannot be closed in the current state' }
+      return { success: false, error: 'Investments cannot be closed in the current state' }
     }
 
     const now = new Date().toISOString()

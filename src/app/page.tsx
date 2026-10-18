@@ -215,7 +215,7 @@ export default function LandingPage() {
                   <Badge className="bg-blue-500/10 text-blue-400 hover:bg-blue-500/30 mb-6">Phase 1</Badge>
                   <h3 className="text-3xl font-display font-bold mb-4 flex items-center gap-3">
                     <Swords className="text-blue-500" />
-                    The Gambit
+                    The Investment
                   </h3>
                   <p className="text-slate-500 mb-8 leading-relaxed">
                     Investors evaluate innovators across intense rapid-fire pitch sessions. Place strategic bets, build conviction, and secure your position for the final board.

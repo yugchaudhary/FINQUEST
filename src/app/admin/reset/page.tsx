@@ -176,7 +176,7 @@ export default function ResetTestDataPage() {
                 </span>
               </div>
               <div className="bg-white p-3 rounded-lg border-2 border-black">
-                <span className="text-xs text-slate-500 block">Phase 1 Matches & Gambits</span>
+                <span className="text-xs text-slate-500 block">Phase 1 Matches & Investments</span>
                 <span className="text-xl font-mono font-black text-black">
                   {resetResult.deletedCounts.matches + resetResult.deletedCounts.gambits}
                 </span>
@@ -368,7 +368,7 @@ export default function ResetTestDataPage() {
 
                       <tr className="hover:bg-slate-50 transition-colors">
                         <td className="py-3.5 px-6 font-bold text-foreground">
-                          Gambit Investment Submissions
+                          Phase 1 Investment Submissions
                         </td>
                         <td className="py-3.5 px-6 text-xs text-slate-500">
                           Locked and settled investor bets

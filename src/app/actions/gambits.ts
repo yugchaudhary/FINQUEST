@@ -38,9 +38,9 @@ export async function lockGambit(matchId: string, selectedTeamId: string, amount
     })
 
     if (error) {
-      const message = error.message || 'Failed to lock Gambit'
+      const message = error.message || 'Failed to lock Investment'
       if (message.includes('already placed') || error.code === '23505') {
-        return { success: false, error: 'You have already placed a Gambit for this match' }
+        return { success: false, error: 'You have already placed an Investment for this match' }
       }
       if (message.includes('Insufficient balance')) {
         return { success: false, error: 'Insufficient balance' }
@@ -55,7 +55,7 @@ export async function lockGambit(matchId: string, selectedTeamId: string, amount
 
         const { data: existing } = await adminClient.from('gambits').select('id').eq('match_id', validated.match_id).eq('investor_team_id', team.id).maybeSingle()
         if (existing) {
-          return { success: false, error: 'You have already placed a Gambit for this match' }
+          return { success: false, error: 'You have already placed an Investment for this match' }
         }
 
         const { error: balErr } = await adminClient.from('teams').update({

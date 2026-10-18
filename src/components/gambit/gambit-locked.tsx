@@ -41,7 +41,7 @@ export function GambitLocked({ selectedTeam, selectedColor }: GambitLockedProps)
           transition={{ delay: 0.4 }}
           className="font-display text-display-sm md:text-display-md text-foreground mb-3"
         >
-          GAMBIT LOCKED
+          INVESTMENT LOCKED
         </motion.h1>
 
         {/* Selected team */}
@@ -88,7 +88,7 @@ export function GambitLocked({ selectedTeam, selectedColor }: GambitLockedProps)
       {/* Bottom branding */}
       <div className="absolute bottom-6 text-center">
         <p className="text-[10px] text-gray-600 uppercase tracking-[0.3em] font-display">
-          Your gambit has been recorded
+          Your investment has been recorded
         </p>
       </div>
     </div>

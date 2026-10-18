@@ -11,9 +11,9 @@ export function GambitsClosed({ locked }: { locked?: boolean }) {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-4"
       >
-        <div className="text-xs uppercase tracking-[0.35em] text-amber-400">GAMBITS CLOSED</div>
+        <div className="text-xs uppercase tracking-[0.35em] text-amber-400">INVESTMENTS CLOSED</div>
         <h1 className="font-display text-display-sm text-foreground">
-          {locked ? 'Your Gambit is locked.' : 'Submissions are closed.'}
+          {locked ? 'Your Investment is locked.' : 'Submissions are closed.'}
         </h1>
         <div className="flex items-center justify-center gap-2 text-slate-500">
           <Clock size={16} className="animate-pulse" />

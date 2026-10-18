@@ -41,7 +41,7 @@ export async function requireInvestor() {
 
   if (!userData?.teams) return { ok: false as const, error: 'Team not found' }
   if (userData.teams.role !== 'INVESTOR') {
-    return { ok: false as const, error: 'Only INVESTOR teams can place Gambits' }
+    return { ok: false as const, error: 'Only INVESTOR teams can place Investments' }
   }
   if (userData.teams.is_active === false) {
     return { ok: false as const, error: 'Team is not active' }

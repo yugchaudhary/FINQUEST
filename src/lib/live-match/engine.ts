@@ -298,7 +298,7 @@ export class LiveMatchEngine {
   }): SimulatedGambit {
     const match = this.matches.find((m) => m.id === input.matchId)
     if (!match) throw new Error('Match not found')
-    if (!canLockGambit(match.status)) throw new Error('Match is not accepting Gambits')
+    if (!canLockGambit(match.status)) throw new Error('Match is not accepting Investments')
     if (input.selectedTeamId !== match.redTeamId && input.selectedTeamId !== match.blueTeamId) {
       throw new Error('Selected team is not in this match')
     }
@@ -306,15 +306,15 @@ export class LiveMatchEngine {
     const rawAmount = typeof input.amount === 'number' ? input.amount : 
       typeof input.amount === 'string' ? Number.parseInt(input.amount.replace(/[^0-9]/g, ''), 10) : NaN
     if (!Number.isFinite(rawAmount) || rawAmount < 0 || rawAmount > MAX_GAMBIT_AMOUNT) {
-      throw new Error('Invalid Gambit amount')
+      throw new Error('Invalid Investment amount')
     }
     const amount = sanitizeGambitAmount(input.amount)
     if (match.gambits.some((g) => g.investorTeamId === input.investorTeamId)) {
-      throw new Error('You have already placed a Gambit for this match')
+      throw new Error('You have already placed an Investment for this match')
     }
     const team = this.teams[input.investorTeamId]
     if (!team) throw new Error('Investor team not found')
-    if (amount > team.balance) throw new Error('Insufficient balance for this Gambit')
+    if (amount > team.balance) throw new Error('Insufficient balance for this Investment')
 
     team.balance -= amount
     const gambit: SimulatedGambit = {
@@ -329,7 +329,7 @@ export class LiveMatchEngine {
   closeGambits(matchId: string, asAdmin = this.isAdmin) {
     if (!asAdmin) throw new Error('Unauthorized')
     const match = this.requireMatch(matchId)
-    if (!canCloseGambits(match.status)) throw new Error('Gambits cannot be closed in the current state')
+    if (!canCloseGambits(match.status)) throw new Error('Investments cannot be closed in the current state')
     match.status = MATCH_STATUS.GAMBITS_CLOSED
     return match
   }
@@ -346,7 +346,7 @@ export class LiveMatchEngine {
       throw new Error('Match has already been settled')
     }
     if (!canSubmitResult(match.status)) {
-      throw new Error('Gambits must be closed before entering a result')
+      throw new Error('Investments must be closed before entering a result')
     }
 
     match.status = MATCH_STATUS.PROCESSING_RESULT

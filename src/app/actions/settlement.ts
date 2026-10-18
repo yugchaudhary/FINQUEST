@@ -39,7 +39,7 @@ export async function submitMatchResult(data: {
 
     if (!match) return { success: false, error: 'Match not found' }
     if (!['GAMBITS_CLOSED', 'AWAITING_JUDGE_RESULT'].includes(match.status)) {
-      return { success: false, error: 'Gambits must be closed before entering a result' }
+      return { success: false, error: 'Investments must be closed before entering a result' }
     }
 
     const { data: settlementResult, error: rpcError } = await adminClient.rpc('settle_match_gambits', {

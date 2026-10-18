@@ -226,7 +226,7 @@ export default function ParticipantLiveMatchPage() {
               </Badge>
             ) : isGambitsClosed ? (
               <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30 py-2 px-4 text-sm font-bold">
-                <Lock className="w-3.5 h-3.5 mr-2" /> GAMBITS CLOSED
+                <Lock className="w-3.5 h-3.5 mr-2" /> INVESTMENTS CLOSED
               </Badge>
             ) : (
               <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/30 py-2 px-4 text-sm font-bold">
@@ -268,7 +268,7 @@ export default function ParticipantLiveMatchPage() {
         {!isLocked && isGambitsClosed && (
           <div className="mb-8 p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center">
             <Lock className="w-10 h-10 text-amber-500 mx-auto mb-2" />
-            <h3 className="text-xl font-bold text-foreground mb-1">Gambits are Closed</h3>
+            <h3 className="text-xl font-bold text-foreground mb-1">Investments are Closed</h3>
             <p className="text-slate-600 text-sm">
               The betting window for Battle {match.round_number} has ended. The judges are currently evaluating the elevator pitches.
             </p>
@@ -397,7 +397,7 @@ export default function ParticipantLiveMatchPage() {
                     </span>
                   ) : parsedAmount > MAX_GAMBIT_AMOUNT ? (
                     <span className="text-red-500 font-medium">
-                      ⚠ Maximum gambit per battle is ₹{MAX_GAMBIT_AMOUNT.toLocaleString()}
+                      ⚠ Maximum investment per battle is ₹{MAX_GAMBIT_AMOUNT.toLocaleString()}
                     </span>
                   ) : parsedAmount > 0 ? (
                     <span className="text-green-600 font-medium flex items-center gap-1">
@@ -649,7 +649,7 @@ export default function ParticipantLiveMatchPage() {
               </div>
               <h4 className="font-bold text-foreground text-sm mb-1">Submit Your Bet</h4>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Confirm your bet before gambits close. Once locked, your bet is permanently registered for this battle.
+                Confirm your bet before investments close. Once locked, your bet is permanently registered for this battle.
               </p>
             </div>
           </div>

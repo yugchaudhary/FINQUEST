@@ -63,7 +63,7 @@ export function Phase1Leaderboard({ leaderboardData }: Phase1LeaderboardProps) {
           PHASE 1 LEADERBOARD
         </h1>
         <p className="text-slate-500 text-sm uppercase tracking-[0.2em] font-display">
-          The Gambit Standings
+          The Investment Standings
         </p>
       </motion.div>
 

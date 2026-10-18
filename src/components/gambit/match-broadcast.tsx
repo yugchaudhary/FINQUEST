@@ -128,7 +128,7 @@ export function MatchBroadcast({ redTeam, blueTeam, roundNumber, category, onSel
         className="mt-12 text-center"
       >
         <p className="text-[10px] text-gray-600 uppercase tracking-[0.3em] font-display">
-          Place your Gambit wisely
+          Place your Investment wisely
         </p>
       </motion.div>
     </div>

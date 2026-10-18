@@ -55,9 +55,9 @@ function LivePulse() {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; className: string }> = {
-    GAMBITS_OPEN: { label: 'GAMBITS OPEN', className: 'bg-green-500/10 text-green-400 border-green-500/30' },
+    GAMBITS_OPEN: { label: 'INVESTMENTS OPEN', className: 'bg-green-500/10 text-green-400 border-green-500/30' },
     MATCH_LIVE: { label: 'LIVE', className: 'bg-red-500/10 text-red-400 border-red-500/30' },
-    GAMBITS_CLOSED: { label: 'GAMBITS CLOSED', className: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
+    GAMBITS_CLOSED: { label: 'INVESTMENTS CLOSED', className: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
     AWAITING_JUDGE_RESULT: { label: 'AWAITING RESULT', className: 'bg-purple-500/10 text-purple-400 border-purple-500/30' },
   }
   const s = map[status] || { label: status, className: 'bg-surface/5 text-slate-500 border-white/10' }
@@ -251,7 +251,7 @@ export default function AdminLiveMatchPage() {
       setCurrentMatch(prev => prev ? { ...prev, status: 'GAMBITS_CLOSED' } : null)
       setPhase('GAMBITS_CLOSED')
     } else {
-      setError(res?.error || 'Failed to close gambits')
+      setError(res?.error || 'Failed to close investments')
       setPhase('MATCH_LIVE')
     }
   }
@@ -438,7 +438,7 @@ export default function AdminLiveMatchPage() {
           <SectionCard className="border-accent/30">
             <h2 className="text-lg font-bold mb-2">Broadcast this match?</h2>
             <p className="text-slate-500 text-sm mb-6">
-              This will immediately open Gambits for all eligible Investors.
+              This will immediately open Investments for all eligible Investors.
             </p>
             <div className="grid grid-cols-3 gap-4 mb-8">
               <div className="bg-surface/[0.03] rounded-xl p-4 text-center">
@@ -525,7 +525,7 @@ export default function AdminLiveMatchPage() {
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="bg-background rounded-xl p-4 text-center">
                 <div className="text-2xl font-black text-green-400">{gambitsLocked}</div>
-                <div className="text-xs text-slate-500 mt-1 uppercase tracking-wider">Gambits Locked</div>
+                <div className="text-xs text-slate-500 mt-1 uppercase tracking-wider">Investments Locked</div>
               </div>
               <div className="bg-background rounded-xl p-4 text-center">
                 <div className="text-2xl font-black text-accent">{currentMatch.round_number}</div>
@@ -540,12 +540,12 @@ export default function AdminLiveMatchPage() {
                 disabled={phase === 'CLOSING_GAMBITS'}
                 className="flex-1 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 font-bold text-sm tracking-wide transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {phase === 'CLOSING_GAMBITS' ? 'Closing...' : '🔒 Lock Gambits'}
+                {phase === 'CLOSING_GAMBITS' ? 'Closing...' : '🔒 Lock Investments'}
               </button>
               <button
                 disabled
                 className="flex-1 h-12 rounded-xl bg-surface/[0.02] border border-white/5 text-gray-600 cursor-not-allowed font-bold text-sm"
-                title="Lock Gambits first"
+                title="Lock Investments first"
               >
                 Enter Result
               </button>
@@ -563,7 +563,7 @@ export default function AdminLiveMatchPage() {
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rounded-full bg-amber-500" />
-                <span className="text-amber-400 text-sm font-bold uppercase tracking-widest">Gambits Closed</span>
+                <span className="text-amber-400 text-sm font-bold uppercase tracking-widest">Investments Closed</span>
               </div>
               <StatusBadge status="GAMBITS_CLOSED" />
             </div>
@@ -587,7 +587,7 @@ export default function AdminLiveMatchPage() {
 
             <div className="bg-background rounded-xl p-4 text-center mb-6">
               <div className="text-3xl font-black text-green-400">{gambitsLocked}</div>
-              <div className="text-xs text-slate-500 mt-1 uppercase tracking-wider">Total Gambits Locked</div>
+              <div className="text-xs text-slate-500 mt-1 uppercase tracking-wider">Total Investments Locked</div>
             </div>
 
             <button
@@ -677,7 +677,7 @@ export default function AdminLiveMatchPage() {
                 : 'bg-surface/5 text-gray-600 cursor-not-allowed'
             }`}
           >
-            Submit Results & Settle Gambits
+            Submit Results & Settle Investments
           </button>
         </SectionCard>
       )}
@@ -692,7 +692,7 @@ export default function AdminLiveMatchPage() {
             transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
             className="w-14 h-14 rounded-full border-2 border-emerald-500 border-t-transparent mx-auto mb-5"
           />
-          <p className="text-foreground font-bold text-xl">Settling Gambits</p>
+          <p className="text-foreground font-bold text-xl">Settling Investments</p>
           <p className="text-slate-500 text-sm mt-2">Calculating multipliers · Updating all balances</p>
         </SectionCard>
       )}
@@ -705,7 +705,7 @@ export default function AdminLiveMatchPage() {
           <SectionCard className="text-center py-16 border-green-500/20">
             <div className="text-5xl mb-4">✅</div>
             <h2 className="text-2xl font-black text-foreground mb-2">Match Complete</h2>
-            <p className="text-slate-500 text-sm">All Gambits settled. Returning to standby in a moment...</p>
+            <p className="text-slate-500 text-sm">All Investments settled. Returning to standby in a moment...</p>
           </SectionCard>
         </motion.div>
       )}
