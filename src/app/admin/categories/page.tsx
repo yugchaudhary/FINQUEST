@@ -42,7 +42,7 @@ export default function CategoryAssignmentPage() {
     setError(null);
     setSuccess(null);
 
-    const prevTeams = [...teams];
+    const originalTeam = teams.find(t => t.id === teamId);
     // Optimistic update
     setTeams(prev => prev.map(t => {
       if (t.id !== teamId) return t;
@@ -57,28 +57,34 @@ export default function CategoryAssignmentPage() {
 
     const res = await updateTeamRole(teamId, newRole);
     if (!res?.success) {
-      setTeams(prevTeams);
+      if (originalTeam) {
+        setTeams(prev => prev.map(t => t.id === teamId ? originalTeam : t));
+      }
       setError(res?.error || 'Failed to update role');
     } else {
       setSuccess(newRole === 'INVESTOR' ? 'Role set to Investor (category cleared)' : 'Role set to Founder');
-      const teamsRes = await getTeamsWithDetails();
-      if (teamsRes.success && teamsRes.data) setTeams(teamsRes.data);
+      if (res.data) {
+        setTeams(prev => prev.map(t => {
+          if (t.id !== teamId) return t;
+          return {
+            ...t,
+            role: res.data.role,
+            category: res.data.category,
+            category_id: res.data.category_id,
+            categoryName: res.data.categories?.name || (res.data.role === 'INVESTOR' ? null : (res.data.category === 'N/A' ? null : res.data.category))
+          };
+        }));
+      }
     }
     setUpdatingRole(null);
   };
 
   const handleCategoryChange = async (teamId: string, categoryId: string) => {
-    const target = teams.find(t => t.id === teamId);
-    if (target?.role === 'INVESTOR') {
-      setError('Investors cannot be assigned a category. Change role to Founder first.');
-      return;
-    }
-
     setUpdating(teamId);
     setError(null);
     setSuccess(null);
 
-    const prevTeams = [...teams];
+    const originalTeam = teams.find(t => t.id === teamId);
     const catId = categoryId === 'none' ? null : categoryId;
     const selectedCat = categories.find(c => c.id === catId);
 
@@ -87,7 +93,7 @@ export default function CategoryAssignmentPage() {
       if (t.id !== teamId) return t;
       return {
         ...t,
-        role: t.role === 'PENDING' ? 'INNOVATOR' : t.role,
+        role: 'INNOVATOR', // Assigning a category always sets role to Founder
         category_id: catId,
         category: selectedCat ? selectedCat.name : 'Unassigned',
         categoryName: selectedCat ? selectedCat.name : null
@@ -96,12 +102,24 @@ export default function CategoryAssignmentPage() {
 
     const res = await updateTeamCategory(teamId, catId);
     if (!res?.success) {
-      setTeams(prevTeams);
+      if (originalTeam) {
+        setTeams(prev => prev.map(t => t.id === teamId ? originalTeam : t));
+      }
       setError(res?.error || 'Failed to update category');
     } else {
       setSuccess(selectedCat ? `Category set to ${selectedCat.name}` : 'Category cleared to Unassigned');
-      const teamsRes = await getTeamsWithDetails();
-      if (teamsRes.success && teamsRes.data) setTeams(teamsRes.data);
+      if (res.data) {
+        setTeams(prev => prev.map(t => {
+          if (t.id !== teamId) return t;
+          return {
+            ...t,
+            role: res.data.role,
+            category: res.data.category,
+            category_id: res.data.category_id,
+            categoryName: res.data.categories?.name || (res.data.role === 'INVESTOR' ? null : (res.data.category === 'N/A' ? null : res.data.category))
+          };
+        }));
+      }
     }
     setUpdating(null);
   };

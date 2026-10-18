@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logAdminAction } from '@/lib/audit'
 import * as xlsx from 'xlsx'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, unstable_noStore as noStore } from 'next/cache'
 import { z } from 'zod'
 import { DEFAULT_STARTING_BALANCE } from '@/lib/constants'
 
@@ -118,7 +118,7 @@ export async function updateTeamRole(teamId: string, role: 'INNOVATOR'|'INVESTOR
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
+    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).maybeSingle()
     if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
 
     const updatePayload: any = { role }
@@ -129,7 +129,7 @@ export async function updateTeamRole(teamId: string, role: 'INNOVATOR'|'INVESTOR
       // Innovators have 0 balance
       updatePayload.starting_balance = 0
       updatePayload.current_balance = 0
-      const { data: currentTeam } = await adminClient.from('teams').select('category, category_id').eq('id', teamId).single()
+      const { data: currentTeam } = await adminClient.from('teams').select('category, category_id').eq('id', teamId).maybeSingle()
       if (!currentTeam?.category_id || currentTeam?.category === 'N/A') {
         updatePayload.category = 'Unassigned'
         updatePayload.category_id = null
@@ -139,7 +139,16 @@ export async function updateTeamRole(teamId: string, role: 'INNOVATOR'|'INVESTOR
       }
     }
 
-    const { error } = await adminClient.from('teams').update(updatePayload).eq('id', teamId)
+    const { data: updatedTeam, error } = await adminClient
+      .from('teams')
+      .update(updatePayload)
+      .eq('id', teamId)
+      .select(`
+        *,
+        categories(name, slug)
+      `)
+      .single()
+
     if (error) return { success: false, error: error.message }
 
     await logAdminAction(user.id, 'UPDATE_TEAM_ROLE', 'team', teamId, { role, category: updatePayload.category })
@@ -151,7 +160,7 @@ export async function updateTeamRole(teamId: string, role: 'INNOVATOR'|'INVESTOR
     revalidatePath('/admin/categories')
     revalidatePath('/admin/setup')
     revalidatePath('/dashboard')
-    return { success: true }
+    return { success: true, data: updatedTeam }
   } catch (error: any) {
     return { success: false, error: error.message }
   }
@@ -271,6 +280,7 @@ export async function getTeamMembers(teamId: string) {
 }
 
 export async function getTeamsWithDetails() {
+  noStore()
   try {
     const adminClient = createAdminClient()
     // Fetch all teams with member count, category info, and selection state
@@ -292,7 +302,7 @@ export async function getTeamsWithDetails() {
       current_balance: team.role === 'INVESTOR' ? (team.current_balance || 0) : 0,
       starting_balance: team.role === 'INVESTOR' ? (team.starting_balance || 0) : 0,
       memberCount: team.team_members?.[0]?.count || 0,
-      categoryName: team.categories?.name || null,
+      categoryName: team.categories?.name || (team.role === 'INVESTOR' ? null : (team.category === 'N/A' ? null : team.category)),
       selectionStatus: team.team_problem_selection_state?.status || 'NOT_STARTED',
       selectionsCount: team.team_problem_selections?.[0]?.count || 0
     }))
@@ -324,45 +334,58 @@ export async function updateTeamCategory(teamId: string, categoryId: string | nu
     if (!user) return { success: false, error: 'Not authenticated' }
     
     const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
+    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).maybeSingle()
     if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
 
-    // Check team role: Investors cannot have a category assigned
-    const { data: team } = await adminClient.from('teams').select('role, category, category_id').eq('id', teamId).single()
-    if (!team) return { success: false, error: 'Team not found' }
+    let updatedTeam: any = null
 
     if (categoryId) {
-      if (team.role === 'INVESTOR') {
-        return { success: false, error: 'Investors cannot be assigned a category. Categories are only assigned to Founders.' }
-      }
-
       const { data: cat } = await adminClient.from('categories').select('name').eq('id', categoryId).single()
       if (!cat) return { success: false, error: 'Category not found' }
 
       const updateData: any = {
         category_id: categoryId,
-        category: cat.name
-      }
-      // If team was PENDING, promote to INNOVATOR
-      if (team.role === 'PENDING') {
-        updateData.role = 'INNOVATOR'
+        category: cat.name,
+        role: 'INNOVATOR', // Assigning a category always sets role to Founder
+        starting_balance: 0,
+        current_balance: 0
       }
 
-      const { error } = await adminClient.from('teams').update(updateData).eq('id', teamId)
+      const { data, error } = await adminClient
+        .from('teams')
+        .update(updateData)
+        .eq('id', teamId)
+        .select(`
+          *,
+          categories(name, slug)
+        `)
+        .single()
+
       if (error) return { success: false, error: error.message }
+      updatedTeam = data
 
       await logAdminAction(user.id, 'UPDATE_TEAM_CATEGORY', 'teams', teamId, { 
         categoryId, 
         categoryName: cat.name, 
-        role: updateData.role || team.role 
+        role: 'INNOVATOR' 
       })
     } else {
       // Unassign category safely — category column in DB has NOT NULL constraint, so set to 'Unassigned'
-      const { error } = await adminClient.from('teams').update({
-        category_id: null,
-        category: 'Unassigned'
-      }).eq('id', teamId)
+      const { data, error } = await adminClient
+        .from('teams')
+        .update({
+          category_id: null,
+          category: 'Unassigned'
+        })
+        .eq('id', teamId)
+        .select(`
+          *,
+          categories(name, slug)
+        `)
+        .single()
+
       if (error) return { success: false, error: error.message }
+      updatedTeam = data
 
       await logAdminAction(user.id, 'UNASSIGN_TEAM_CATEGORY', 'teams', teamId, { categoryId: null })
     }
@@ -375,7 +398,7 @@ export async function updateTeamCategory(teamId: string, categoryId: string | nu
     revalidatePath('/admin/setup')
     revalidatePath('/dashboard')
     
-    return { success: true }
+    return { success: true, data: updatedTeam }
   } catch (error: any) {
     return { success: false, error: error.message }
   }

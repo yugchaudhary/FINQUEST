@@ -3,11 +3,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logAdminAction } from '@/lib/audit'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, unstable_noStore as noStore } from 'next/cache'
 import { z } from 'zod'
 import { EVENT_CHANNEL } from '@/lib/constants'
 
 export async function getCategories() {
+  noStore()
   try {
     const supabase = await createClient()
     const { data, error } = await supabase.from('categories').select('*').order('sort_order', { ascending: true })

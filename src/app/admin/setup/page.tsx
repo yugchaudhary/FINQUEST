@@ -51,7 +51,7 @@ export default function SetupPage() {
     setUpdatingRole(teamId);
     setError(null);
     setSuccess(null);
-    const prevTeams = [...existingTeams];
+    const originalTeam = existingTeams.find(t => t.id === teamId);
     setExistingTeams(prev => prev.map(t => {
       if (t.id !== teamId) return t;
       return {
@@ -63,11 +63,23 @@ export default function SetupPage() {
 
     const result = await updateTeamRole(teamId, newRole);
     if (!result?.success) {
-      setExistingTeams(prevTeams);
+      if (originalTeam) {
+        setExistingTeams(prev => prev.map(t => t.id === teamId ? originalTeam : t));
+      }
       setError(result?.error || 'Failed to update role');
     } else {
       setSuccess(`Role updated to ${newRole === 'INNOVATOR' ? 'Founder' : 'Investor'}`);
-      await loadExisting();
+      if (result.data) {
+        setExistingTeams(prev => prev.map(t => {
+          if (t.id !== teamId) return t;
+          return {
+            ...t,
+            role: result.data.role,
+            category: result.data.category,
+            category_id: result.data.category_id
+          };
+        }));
+      }
     }
     setUpdatingRole(null);
   };

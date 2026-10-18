@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import {
   Users, Shield, Target, Trash2, ChevronDown, ChevronUp,
-  XCircle, CheckCircle, Info, Loader2, Search, Trophy
+  XCircle, CheckCircle, Info, Loader2, Search, Trophy,
+  AlertCircle, CheckCircle2
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
@@ -47,7 +48,8 @@ export default function AdminTeamsPage() {
     setUpdatingRole(teamId);
     setError(null);
     setSuccess(null);
-    const prevTeams = [...teams];
+    const originalTeam = teams.find(t => t.id === teamId);
+
     setTeams(prev => prev.map(t => {
       if (t.id !== teamId) return t;
       return {
@@ -55,18 +57,34 @@ export default function AdminTeamsPage() {
         role: role,
         category: role === 'INVESTOR' ? 'N/A' : (t.category === 'N/A' ? 'Unassigned' : t.category),
         category_id: role === 'INVESTOR' ? null : t.category_id,
-        categoryName: role === 'INVESTOR' ? null : (t.category === 'N/A' ? null : t.categoryName)
+        categoryName: role === 'INVESTOR' ? null : (t.category === 'N/A' ? null : t.categoryName),
+        current_balance: role === 'INVESTOR' ? (t.current_balance || 0) : 0,
+        starting_balance: role === 'INVESTOR' ? (t.starting_balance || 0) : 0
       };
     }));
 
     const result = await updateTeamRole(teamId, role);
     if (!result?.success) {
-      setTeams(prevTeams);
+      if (originalTeam) {
+        setTeams(prev => prev.map(t => t.id === teamId ? originalTeam : t));
+      }
       setError(result?.error || 'Failed to update role');
     } else {
-      setSuccess(role === 'INVESTOR' ? 'Role updated to Investor (category cleared)' : `Role updated to ${role === 'INNOVATOR' ? 'Founder' : role}`);
-      const refreshed = await getTeamsWithDetails();
-      if (refreshed?.success && refreshed.data) setTeams(refreshed.data);
+      setSuccess(role === 'INVESTOR' ? 'Role updated to Investor (category cleared)' : 'Role updated to Founder');
+      if (result.data) {
+        setTeams(prev => prev.map(t => {
+          if (t.id !== teamId) return t;
+          return {
+            ...t,
+            role: result.data.role,
+            category: result.data.category,
+            category_id: result.data.category_id,
+            categoryName: result.data.categories?.name || (result.data.role === 'INVESTOR' ? null : (result.data.category === 'N/A' ? null : result.data.category)),
+            current_balance: result.data.current_balance,
+            starting_balance: result.data.starting_balance
+          };
+        }));
+      }
     }
     setUpdatingRole(null);
   };
@@ -141,6 +159,20 @@ export default function AdminTeamsPage() {
           Reset All Data
         </Button>
       </div>
+
+      {error && (
+        <div className="flex items-center gap-2 p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {success && (
+        <div className="flex items-center gap-2 p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
+          <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+          <span>{success}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="md:col-span-2 relative">
