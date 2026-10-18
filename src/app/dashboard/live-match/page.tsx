@@ -15,7 +15,6 @@ import {
   ArrowLeft,
   Lock,
   Trophy,
-  TrendingUp,
   AlertCircle,
   Loader2,
   CheckCircle2,
@@ -171,7 +170,7 @@ export default function ParticipantLiveMatchPage() {
       return
     }
     if (!selectedTeamId) {
-      setError('Please select a team in Step 2.')
+      setError('Please select a team in Step 1.')
       return
     }
     const amt = parseInt(amountStr || '0', 10)
@@ -193,7 +192,7 @@ export default function ParticipantLiveMatchPage() {
       if (res.error?.includes('closed') || res.error?.includes('not LIVE')) {
         setMatch((prev: any) => (prev ? { ...prev, status: 'GAMBITS_CLOSED' } : null))
       }
-      setError(res.error || 'Failed to submit bet')
+      setError(res.error || 'Failed to submit investment')
       await loadData()
     }
     setIsLocking(false)
@@ -255,7 +254,7 @@ export default function ParticipantLiveMatchPage() {
             </div>
             {isLocked ? (
               <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30 py-2 px-4 text-sm font-bold">
-                <Lock className="w-3.5 h-3.5 mr-2" /> BET LOCKED
+                <Lock className="w-3.5 h-3.5 mr-2" /> INVESTMENT LOCKED
               </Badge>
             ) : isGambitsClosed ? (
               <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30 py-2 px-4 text-sm font-bold">
@@ -263,7 +262,7 @@ export default function ParticipantLiveMatchPage() {
               </Badge>
             ) : (
               <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/30 py-2 px-4 text-sm font-bold">
-                <Zap className="w-3.5 h-3.5 mr-2" /> BETTING OPEN
+                <Zap className="w-3.5 h-3.5 mr-2" /> INVESTMENTS OPEN
               </Badge>
             )}
           </div>
@@ -274,7 +273,7 @@ export default function ParticipantLiveMatchPage() {
           <div className="mb-8 p-6 rounded-2xl bg-green-500/10 border-2 border-green-500/30 text-center">
             <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
             <h3 className="text-2xl font-black text-foreground font-space-grotesk mb-1">
-              Bet Submitted & Locked
+              Investment Submitted & Locked
             </h3>
             <p className="text-slate-600 text-sm mb-4">
               Your investment is registered. Waiting for the judge decision and round settlement.
@@ -303,7 +302,7 @@ export default function ParticipantLiveMatchPage() {
             <Lock className="w-10 h-10 text-amber-500 mx-auto mb-2" />
             <h3 className="text-xl font-bold text-foreground mb-1">Investments are Closed</h3>
             <p className="text-slate-600 text-sm">
-              The betting window for Battle {match.round_number} has ended. The judges are currently evaluating the elevator pitches.
+              The investment window for Battle {match.round_number} has ended. The judges are currently evaluating the elevator pitches.
             </p>
           </div>
         )}
@@ -314,21 +313,112 @@ export default function ParticipantLiveMatchPage() {
             <ShieldCheck className="w-10 h-10 text-blue-500 mx-auto mb-2" />
             <h3 className="text-xl font-bold text-foreground mb-1">Founder Pitch Battle</h3>
             <p className="text-slate-600 text-sm">
-              Your team is registered as a <strong className="text-foreground">FOUNDER</strong>. Watch the live match! Only investor teams place bets during this phase.
+              Your team is registered as a <strong className="text-foreground">FOUNDER</strong>. Watch the live match! Only investor teams place investments during this phase.
             </p>
           </div>
         )}
 
-        {/* Active Betting Interface for INVESTOR */}
+        {/* Active Investment Interface for INVESTOR */}
         {canLock && (
           <div className="space-y-6">
-            {/* ─── 1. CHOOSE INVESTMENT AMOUNT ─── */}
+            {/* ─── 1. SELECT ONE OF THE TEAMS ─── */}
+            <div>
+              <div className="flex items-center gap-3 mb-4 px-1">
+                <span className="w-7 h-7 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center text-xs">
+                  1
+                </span>
+                <div>
+                  <h3 className="text-lg font-bold font-space-grotesk text-foreground">
+                    Select Your Team
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Back the startup you predict will win the judge panel&apos;s vote.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* RED TEAM CARD */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedTeamId(match.red_team.id)
+                    setError(null)
+                  }}
+                  className={`relative p-6 rounded-2xl border-2 transition-all text-left flex flex-col justify-between min-h-[140px] ${
+                    selectedTeamId === match.red_team.id
+                      ? 'border-red-500 bg-red-500/10 shadow-[0_0_25px_rgba(239,68,68,0.2)] scale-[1.01]'
+                      : 'border-border bg-surface hover:border-red-500/50 hover:bg-surface/80'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between w-full mb-2">
+                      <span className="text-xs font-bold tracking-widest text-red-500 uppercase flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-red-500" />
+                        RED TEAM
+                      </span>
+                      {selectedTeamId === match.red_team.id && (
+                        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wider uppercase">
+                          ✓ SELECTED
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="text-2xl font-black text-foreground font-space-grotesk">
+                      {match.red_team.team_name}
+                    </h4>
+                  </div>
+                  {match.category && (
+                    <span className="text-xs text-slate-500 font-medium mt-3 block">
+                      Category: {match.category}
+                    </span>
+                  )}
+                </button>
+
+                {/* BLUE TEAM CARD */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedTeamId(match.blue_team.id)
+                    setError(null)
+                  }}
+                  className={`relative p-6 rounded-2xl border-2 transition-all text-left flex flex-col justify-between min-h-[140px] ${
+                    selectedTeamId === match.blue_team.id
+                      ? 'border-blue-500 bg-blue-500/10 shadow-[0_0_25px_rgba(59,130,246,0.2)] scale-[1.01]'
+                      : 'border-border bg-surface hover:border-blue-500/50 hover:bg-surface/80'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between w-full mb-2">
+                      <span className="text-xs font-bold tracking-widest text-blue-500 uppercase flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-blue-500" />
+                        BLUE TEAM
+                      </span>
+                      {selectedTeamId === match.blue_team.id && (
+                        <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wider uppercase">
+                          ✓ SELECTED
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="text-2xl font-black text-foreground font-space-grotesk">
+                      {match.blue_team.team_name}
+                    </h4>
+                  </div>
+                  {match.category && (
+                    <span className="text-xs text-slate-500 font-medium mt-3 block">
+                      Category: {match.category}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* ─── 2. CHOOSE INVESTMENT AMOUNT ─── */}
             <Card className="bg-surface border-border shadow-sm">
               <CardContent className="p-6 md:p-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                   <div className="flex items-center gap-3">
                     <span className="w-7 h-7 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center text-xs">
-                      1
+                      2
                     </span>
                     <div>
                       <h3 className="text-lg font-bold font-space-grotesk text-foreground">
@@ -448,98 +538,7 @@ export default function ParticipantLiveMatchPage() {
               </CardContent>
             </Card>
 
-            {/* ─── 2. SELECT ONE OF THE TEAMS ─── */}
-            <div>
-              <div className="flex items-center gap-3 mb-4 px-1">
-                <span className="w-7 h-7 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center text-xs">
-                  2
-                </span>
-                <div>
-                  <h3 className="text-lg font-bold font-space-grotesk text-foreground">
-                    Select Your Team
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Back the startup you predict will win the judge panel&apos;s vote.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* RED TEAM CARD */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedTeamId(match.red_team.id)
-                    setError(null)
-                  }}
-                  className={`relative p-6 rounded-2xl border-2 transition-all text-left flex flex-col justify-between min-h-[140px] ${
-                    selectedTeamId === match.red_team.id
-                      ? 'border-red-500 bg-red-500/10 shadow-[0_0_25px_rgba(239,68,68,0.2)] scale-[1.01]'
-                      : 'border-border bg-surface hover:border-red-500/50 hover:bg-surface/80'
-                  }`}
-                >
-                  <div>
-                    <div className="flex items-center justify-between w-full mb-2">
-                      <span className="text-xs font-bold tracking-widest text-red-500 uppercase flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-red-500" />
-                        RED TEAM
-                      </span>
-                      {selectedTeamId === match.red_team.id && (
-                        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wider uppercase">
-                          ✓ SELECTED
-                        </span>
-                      )}
-                    </div>
-                    <h4 className="text-2xl font-black text-foreground font-space-grotesk">
-                      {match.red_team.team_name}
-                    </h4>
-                  </div>
-                  {match.category && (
-                    <span className="text-xs text-slate-500 font-medium mt-3 block">
-                      Category: {match.category}
-                    </span>
-                  )}
-                </button>
-
-                {/* BLUE TEAM CARD */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedTeamId(match.blue_team.id)
-                    setError(null)
-                  }}
-                  className={`relative p-6 rounded-2xl border-2 transition-all text-left flex flex-col justify-between min-h-[140px] ${
-                    selectedTeamId === match.blue_team.id
-                      ? 'border-blue-500 bg-blue-500/10 shadow-[0_0_25px_rgba(59,130,246,0.2)] scale-[1.01]'
-                      : 'border-border bg-surface hover:border-blue-500/50 hover:bg-surface/80'
-                  }`}
-                >
-                  <div>
-                    <div className="flex items-center justify-between w-full mb-2">
-                      <span className="text-xs font-bold tracking-widest text-blue-500 uppercase flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-blue-500" />
-                        BLUE TEAM
-                      </span>
-                      {selectedTeamId === match.blue_team.id && (
-                        <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wider uppercase">
-                          ✓ SELECTED
-                        </span>
-                      )}
-                    </div>
-                    <h4 className="text-2xl font-black text-foreground font-space-grotesk">
-                      {match.blue_team.team_name}
-                    </h4>
-                  </div>
-                  {match.category && (
-                    <span className="text-xs text-slate-500 font-medium mt-3 block">
-                      Category: {match.category}
-                    </span>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* ─── 3. OPTION TO SUBMIT HIS BET ─── */}
+            {/* ─── 3. OPTION TO SUBMIT INVESTMENT ─── */}
             <Card className="bg-surface border-border shadow-sm">
               <CardContent className="p-6 md:p-8">
                 <div className="flex items-center gap-3 mb-4">
@@ -548,7 +547,7 @@ export default function ParticipantLiveMatchPage() {
                   </span>
                   <div>
                     <h3 className="text-lg font-bold font-space-grotesk text-foreground">
-                      Confirm & Submit Bet
+                      Confirm & Submit Investment
                     </h3>
                     <p className="text-xs text-slate-500">
                       Review your investment and confirm your prediction.
@@ -586,19 +585,19 @@ export default function ParticipantLiveMatchPage() {
                   ) : (
                     <div className="text-sm text-slate-500 py-1">
                       {!isAmountValid && !selectedTeam && (
-                        <span>👉 Select an investment amount in Step 1 and choose a team in Step 2 to proceed.</span>
+                        <span>👉 Select either Red Team or Blue Team in Step 1 and choose an investment amount in Step 2 to proceed.</span>
                       )}
                       {!isAmountValid && selectedTeam && (
-                        <span>👉 Choose a valid investment amount in Step 1 to proceed.</span>
+                        <span>👉 Choose a valid investment amount in Step 2 to proceed.</span>
                       )}
                       {isAmountValid && !selectedTeam && (
-                        <span>👉 Select either Red Team or Blue Team in Step 2 to proceed.</span>
+                        <span>👉 Select either Red Team or Blue Team in Step 1 to proceed.</span>
                       )}
                     </div>
                   )}
                 </div>
 
-                {/* Submit Bet Button */}
+                {/* Submit Investment Button */}
                 <Button
                   onClick={handleLock}
                   disabled={!isAmountValid || !selectedTeamId || isLocking || !canLock}
@@ -606,23 +605,23 @@ export default function ParticipantLiveMatchPage() {
                 >
                   {isLocking ? (
                     <span className="flex items-center justify-center gap-2">
-                      <Loader2 className="w-5 h-5 animate-spin" /> SUBMITTING BET...
+                      <Loader2 className="w-5 h-5 animate-spin" /> SUBMITTING INVESTMENT...
                     </span>
                   ) : (
                     <span className="flex items-center justify-center gap-2">
-                      <Lock className="w-5 h-5" /> SUBMIT BET
+                      <Lock className="w-5 h-5" /> SUBMIT INVESTMENT
                     </span>
                   )}
                 </Button>
                 <p className="text-center text-slate-400 text-xs mt-3">
-                  Once submitted, your bet cannot be changed or cancelled for this battle.
+                  Once submitted, your investment cannot be changed or cancelled for this battle.
                 </p>
               </CardContent>
             </Card>
           </div>
         )}
 
-        {/* Read-only view for teams if not in active betting state */}
+        {/* Read-only view for teams if not in active investment state */}
         {!canLock && !isLocked && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div className="p-6 rounded-2xl border border-border bg-surface">
@@ -655,20 +654,10 @@ export default function ParticipantLiveMatchPage() {
           </div>
 
           {/* 3 Step Guide */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl border border-border bg-background/50">
               <div className="w-7 h-7 rounded-full bg-purple-500/10 text-purple-600 font-bold flex items-center justify-center text-xs mb-3">
                 1
-              </div>
-              <h4 className="font-bold text-foreground text-sm mb-1">Choose Investment</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Allocate any amount from ₹1 up to ₹2,50,000 from your available balance. Your balance is reserved when you submit.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl border border-border bg-background/50">
-              <div className="w-7 h-7 rounded-full bg-purple-500/10 text-purple-600 font-bold flex items-center justify-center text-xs mb-3">
-                2
               </div>
               <h4 className="font-bold text-foreground text-sm mb-1">Pick Winning Startup</h4>
               <p className="text-xs text-slate-500 leading-relaxed">
@@ -678,39 +667,22 @@ export default function ParticipantLiveMatchPage() {
 
             <div className="p-4 rounded-xl border border-border bg-background/50">
               <div className="w-7 h-7 rounded-full bg-purple-500/10 text-purple-600 font-bold flex items-center justify-center text-xs mb-3">
-                3
+                2
               </div>
-              <h4 className="font-bold text-foreground text-sm mb-1">Submit Your Bet</h4>
+              <h4 className="font-bold text-foreground text-sm mb-1">Choose Investment</h4>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Confirm your bet before investments close. Once locked, your bet is permanently registered for this battle.
+                Allocate any amount from ₹1 up to ₹2,50,000 from your available balance. Your balance is reserved when you submit.
               </p>
             </div>
-          </div>
 
-          {/* Multiplier Matrix */}
-          <div className="p-5 rounded-xl border border-border bg-background/40">
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="w-4 h-4 text-purple-600" />
-              <span className="text-xs font-bold text-foreground uppercase tracking-wider">
-                Judges&apos; Vote Multiplier Payouts (5 Total Votes)
-              </span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
-              <div className="p-3 rounded-lg border border-border bg-surface">
-                <div className="text-[11px] font-mono font-bold text-slate-500 mb-1">5 - 0 CLEAN SWEEP</div>
-                <div className="text-base font-bold text-green-600">3.0x Gross Return</div>
-                <div className="text-xs text-red-500 mt-0.5">0.0x for Loser (Total Loss)</div>
+            <div className="p-4 rounded-xl border border-border bg-background/50">
+              <div className="w-7 h-7 rounded-full bg-purple-500/10 text-purple-600 font-bold flex items-center justify-center text-xs mb-3">
+                3
               </div>
-              <div className="p-3 rounded-lg border border-border bg-surface">
-                <div className="text-[11px] font-mono font-bold text-slate-500 mb-1">4 - 1 STRONG WIN</div>
-                <div className="text-base font-bold text-green-600">2.2x Gross Return</div>
-                <div className="text-xs text-amber-500 mt-0.5">0.5x for Loser (50% Back)</div>
-              </div>
-              <div className="p-3 rounded-lg border border-border bg-surface">
-                <div className="text-[11px] font-mono font-bold text-slate-500 mb-1">3 - 2 SPLIT DECISION</div>
-                <div className="text-base font-bold text-green-600">1.6x Gross Return</div>
-                <div className="text-xs text-slate-500 mt-0.5">0.8x for Loser (80% Back)</div>
-              </div>
+              <h4 className="font-bold text-foreground text-sm mb-1">Submit Your Investment</h4>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Confirm your investment before investments close. Once locked, your investment is permanently registered for this battle.
+              </p>
             </div>
           </div>
         </div>
