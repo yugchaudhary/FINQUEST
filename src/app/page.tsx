@@ -115,15 +115,19 @@ export default function LandingPage() {
               Live Event Portal Active
             </motion.div>
             
-            <motion.h1
+            <motion.div
               initial="hidden"
               animate="visible"
               variants={fadeIn}
-              className="font-display text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-br from-slate-900 via-slate-700 to-slate-900"
+              className="flex justify-center items-center mb-8"
             >
-              FOUNDER&apos;S GOT <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-blue-500">PATENT</span>
-            </motion.h1>
+              <h1 className="sr-only">FOUNDER&apos;S GOT PATENT</h1>
+              <img
+                src="/founders-got-patent-banner.png"
+                alt="Founder's Got Patent"
+                className="w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-3xl h-auto object-contain select-none mx-auto"
+              />
+            </motion.div>
             
             <motion.p
               initial="hidden"
