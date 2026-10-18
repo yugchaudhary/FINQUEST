@@ -106,19 +106,19 @@ export function DashboardHero({ user, team, eventState }: DashboardHeroProps) {
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.15 }}
-            className="flex flex-col items-start md:items-end justify-center gap-3 p-5 md:p-6 rounded-xl bg-slate-200/80 dark:bg-black/40 border border-slate-300 dark:border-white/15 backdrop-blur-sm self-start md:self-center min-w-[280px] shadow-sm"
+            className="flex flex-col items-start md:items-end justify-center gap-3 p-5 md:p-6 rounded-2xl bg-white dark:bg-white border-2 border-border shadow-md self-start md:self-center min-w-[280px]"
           >
             <div className="flex items-center gap-3">
-              <span className="text-[11px] font-black text-slate-700 dark:text-slate-300 tracking-widest font-mono">
+              <span className="text-[11px] font-black text-slate-500 dark:text-slate-500 tracking-widest font-mono">
                 YOUR TEAM
               </span>
-              <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-400 dark:border-emerald-500/40 px-3 py-1 rounded-full font-mono shadow-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse" />
+              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-700 flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-50 border border-emerald-300 dark:border-emerald-300 px-3 py-1 rounded-full font-mono shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 OFFICIAL TEAM
               </span>
             </div>
 
-            <h2 className="text-2xl md:text-3xl font-space-grotesk font-black text-slate-950 dark:text-white tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-space-grotesk font-black text-slate-900 dark:text-slate-900 tracking-tight">
               {team.team_name}
             </h2>
 
@@ -126,16 +126,16 @@ export function DashboardHero({ user, team, eventState }: DashboardHeroProps) {
               <Badge 
                 variant="outline" 
                 className={team.role === 'INVESTOR' 
-                  ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-900 dark:text-blue-200 border-2 border-blue-400/80 dark:border-blue-500/50 font-mono text-xs px-2.5 py-1 font-black shadow-sm' 
-                  : 'bg-purple-100 dark:bg-purple-950/60 text-purple-900 dark:text-purple-200 border-2 border-purple-400/80 dark:border-purple-500/50 font-mono text-xs px-2.5 py-1 font-black shadow-sm'
+                  ? 'bg-blue-50 dark:bg-blue-50 text-blue-700 dark:text-blue-700 border-2 border-blue-400 dark:border-blue-400 font-mono text-xs px-2.5 py-1 font-black shadow-sm' 
+                  : 'bg-purple-50 dark:bg-purple-50 text-purple-700 dark:text-purple-700 border-2 border-purple-400 dark:border-purple-400 font-mono text-xs px-2.5 py-1 font-black shadow-sm'
                 }
               >
                 {team.role === 'INNOVATOR' ? 'FOUNDER' : team.role}
               </Badge>
               {team.role !== 'INVESTOR' && (
                 <>
-                  <span className="text-slate-600 dark:text-slate-400 text-xs font-bold">/</span>
-                  <span className="text-slate-900 dark:text-slate-100 font-bold text-xs px-3 py-1 bg-white dark:bg-white/10 rounded-full border border-slate-400/60 dark:border-white/20 shadow-sm">
+                  <span className="text-slate-400 dark:text-slate-400 text-xs font-bold">/</span>
+                  <span className="text-slate-800 dark:text-slate-800 font-bold text-xs px-3 py-1 bg-slate-100 dark:bg-slate-100 rounded-full border border-slate-300 dark:border-slate-300 shadow-sm">
                     {team.categoryName || (team.category && team.category !== 'N/A' ? team.category : 'Category Not Assigned')}
                   </span>
                 </>
