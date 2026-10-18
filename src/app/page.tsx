@@ -103,7 +103,7 @@ export default function LandingPage() {
 
       <main className="relative z-10">
         {/* Hero Section */}
-        <section className="relative pt-32 pb-40 px-6 overflow-hidden">
+        <section className="relative pt-8 md:pt-12 pb-16 md:pb-24 px-6 overflow-hidden">
           <div className="max-w-7xl mx-auto text-center">
             <motion.div
               initial="hidden"
@@ -119,13 +119,13 @@ export default function LandingPage() {
               initial="hidden"
               animate="visible"
               variants={fadeIn}
-              className="flex justify-center items-center mb-4 md:mb-5"
+              className="flex justify-center items-center mb-3 md:mb-4"
             >
               <h1 className="sr-only">FOUNDER&apos;S GOT PATENT</h1>
               <img
                 src="/founders-got-patent-banner.png"
                 alt="Founder's Got Patent"
-                className="w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-3xl h-auto object-contain select-none mx-auto"
+                className="w-full max-w-sm sm:max-w-md md:max-w-xl lg:max-w-2xl max-h-[220px] md:max-h-[260px] h-auto object-contain select-none mx-auto"
               />
             </motion.div>
             
@@ -133,7 +133,7 @@ export default function LandingPage() {
               initial="hidden"
               animate="visible"
               variants={fadeIn}
-              className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-12 font-light"
+              className="text-base md:text-lg text-slate-500 max-w-2xl mx-auto mb-6 md:mb-8 font-light"
             >
               A strategic battle of ideas, conviction and calculated risk. Where visionary founders meet strategic capital.
             </motion.p>
