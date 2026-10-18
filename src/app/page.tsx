@@ -109,7 +109,7 @@ export default function LandingPage() {
               initial="hidden"
               animate="visible"
               variants={fadeIn}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-bold mb-8"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-bold mb-3 md:mb-4"
             >
               <span className="w-2 h-2 rounded-full bg-accent animate-pulse-live"></span>
               Live Event Portal Active
@@ -119,7 +119,7 @@ export default function LandingPage() {
               initial="hidden"
               animate="visible"
               variants={fadeIn}
-              className="flex justify-center items-center mb-8"
+              className="flex justify-center items-center mb-4 md:mb-5"
             >
               <h1 className="sr-only">FOUNDER&apos;S GOT PATENT</h1>
               <img
