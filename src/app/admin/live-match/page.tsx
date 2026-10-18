@@ -654,12 +654,13 @@ export default function AdminLiveMatchPage() {
                       <span className="text-gray-600 text-sm">–</span>
                       <span className={`font-black text-lg ${isSelected ? 'text-blue-400' : 'text-slate-500'}`}>{dist.blue}</span>
                     </div>
-                    <div className="text-xs text-slate-500">
-                      {dist.red > dist.blue
-                        ? `Red wins · ${['5-0:3×','4-1:2.2×','3-2:1.6×'][Math.floor((dist.red - 3))]?.split(':')[1] || ''}`
-                        : dist.blue > dist.red
-                        ? `Blue wins · ${['5-0:3×','4-1:2.2×','3-2:1.6×'][Math.floor((dist.blue - 3))]?.split(':')[1] || ''}`
-                        : ''}
+                    <div className="text-xs text-slate-500 font-medium">
+                      {dist.red === 5 && 'Red wins · 3×'}
+                      {dist.red === 4 && 'Red wins · 2.2×'}
+                      {dist.red === 3 && 'Red wins · 1.6×'}
+                      {dist.blue === 3 && 'Blue wins · 1.6×'}
+                      {dist.blue === 4 && 'Blue wins · 2.2×'}
+                      {dist.blue === 5 && 'Blue wins · 3×'}
                     </div>
                   </div>
                   {isSelected && <span className="text-accent text-lg">✓</span>}
