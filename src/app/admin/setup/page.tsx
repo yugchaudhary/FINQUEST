@@ -468,6 +468,7 @@ export default function SetupPage() {
                   <th className="py-3 px-6 w-24">Team No.</th>
                   <th className="py-3 px-6">Team Name (Login ID)</th>
                   <th className="py-3 px-6">Assigned Password</th>
+                  <th className="py-3 px-6">Default Role</th>
                   <th className="py-3 px-6">Status</th>
                 </tr>
               </thead>
@@ -484,6 +485,11 @@ export default function SetupPage() {
                     <td className="py-3 px-6 font-mono text-slate-800">
                       <span className="bg-slate-100 px-2 py-0.5 rounded border border-slate-300">
                         {row.password}
+                      </span>
+                    </td>
+                    <td className="py-3 px-6">
+                      <span className="font-bold text-xs text-purple-700 bg-purple-50 border border-purple-200 px-2.5 py-1 rounded">
+                        Innovator
                       </span>
                     </td>
                     <td className="py-3 px-6">

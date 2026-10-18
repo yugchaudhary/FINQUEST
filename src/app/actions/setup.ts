@@ -202,7 +202,7 @@ export async function confirmTeamExcelImport(teams: TeamRosterRow[]) {
       // 2. Insert or update team in teams table
       const { data: existingTeam } = await adminClient
         .from('teams')
-        .select('id')
+        .select('id, role')
         .eq('team_name', cleanTeamName)
         .maybeSingle()
 
@@ -210,15 +210,19 @@ export async function confirmTeamExcelImport(teams: TeamRosterRow[]) {
 
       if (existingTeam) {
         teamId = existingTeam.id
-        await adminClient.from('teams').update({
+        const updatePayload: any = {
           join_code: String(item.team_no || ''),
           updated_at: new Date().toISOString()
-        }).eq('id', teamId)
+        }
+        if (!existingTeam.role || existingTeam.role === 'PENDING') {
+          updatePayload.role = 'INNOVATOR'
+        }
+        await adminClient.from('teams').update(updatePayload).eq('id', teamId)
       } else {
         const { data: newTeam, error: teamInsertErr } = await adminClient.from('teams').insert({
           team_name: cleanTeamName,
           category: 'Unassigned',
-          role: 'PENDING',
+          role: 'INNOVATOR',
           join_code: String(item.team_no || ''),
           starting_balance: 0,
           current_balance: 0,
