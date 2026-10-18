@@ -17,17 +17,27 @@ import {
   ArrowRight,
   RefreshCw,
   RotateCcw,
-  Sparkles
+  Sparkles,
+  UserPlus,
+  Plus,
+  Trash2
 } from 'lucide-react';
 import { 
   importTeamsFromExcel, 
   confirmTeamExcelImport, 
   getExistingTeamsRoster,
+  createManualTeams,
+  ManualTeamData,
   TeamRosterRow 
 } from '@/app/actions/setup';
 import { updateTeamRole } from '@/app/actions/teams';
 
 export default function SetupPage() {
+  const [entryMode, setEntryMode] = useState<'excel' | 'manual'>('excel');
+  const [manualRows, setManualRows] = useState<ManualTeamData[]>([
+    { team_no: '1', team_name: '', password: '', role: 'INNOVATOR' }
+  ]);
+  const [isSubmittingManual, setIsSubmittingManual] = useState(false);
   const [previewData, setPreviewData] = useState<TeamRosterRow[]>([]);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -67,6 +77,12 @@ export default function SetupPage() {
     try {
       const data = await getExistingTeamsRoster();
       setExistingTeams(data);
+      setManualRows(prev => {
+        if (prev.length === 1 && !prev[0].team_name) {
+          return [{ ...prev[0], team_no: String(data.length + 1) }];
+        }
+        return prev;
+      });
     } catch {
       setExistingTeams([]);
     } finally {
@@ -77,6 +93,70 @@ export default function SetupPage() {
   useEffect(() => {
     loadExisting();
   }, []);
+
+  const handleAddManualRow = () => {
+    setManualRows(prev => [
+      ...prev,
+      {
+        team_no: String(existingTeams.length + prev.length + 1),
+        team_name: '',
+        password: '',
+        role: 'INNOVATOR'
+      }
+    ]);
+  };
+
+  const handleRemoveManualRow = (index: number) => {
+    if (manualRows.length <= 1) return;
+    setManualRows(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleManualRowChange = (index: number, field: keyof ManualTeamData, value: string) => {
+    setManualRows(prev => prev.map((row, i) => {
+      if (i !== index) return row;
+      return { ...row, [field]: value };
+    }));
+  };
+
+  const handleSaveManualTeams = async () => {
+    setError(null);
+    setSuccess(null);
+
+    const emptyRow = manualRows.find(r => !r.team_name.trim());
+    if (emptyRow) {
+      setError('Please provide a Team Name for all entered rows.');
+      return;
+    }
+
+    const shortPassRow = manualRows.find(r => (r.password || '').trim().length < 6);
+    if (shortPassRow) {
+      setError(`Password for team "${shortPassRow.team_name}" must be at least 6 characters long.`);
+      return;
+    }
+
+    setIsSubmittingManual(true);
+    try {
+      const res = await createManualTeams(manualRows);
+      if (res?.success) {
+        setSuccess(`Successfully created ${res.count || manualRows.length} team account(s). Login credentials are active and ready.`);
+        setManualRows([
+          {
+            team_no: String(existingTeams.length + (res.count || manualRows.length) + 1),
+            team_name: '',
+            password: '',
+            role: 'INNOVATOR'
+          }
+        ]);
+        await loadExisting();
+      } else {
+        setError(res?.error || 'Failed to create team accounts');
+      }
+    } catch (e: any) {
+      setError(e.message || 'Error creating team accounts');
+    } finally {
+      setIsSubmittingManual(false);
+    }
+  };
 
   const handleFileSelect = async (selectedFile: File) => {
     setError(null);
@@ -123,44 +203,45 @@ export default function SetupPage() {
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">
           <span>Event Setup</span>
           <span>→</span>
-          <span className="text-accent-dark font-black">Team Roster Import</span>
+          <span className="text-accent-dark font-black">Team Roster Setup</span>
         </div>
         <h1 className="text-3xl md:text-4xl font-space-grotesk font-black text-foreground flex items-center gap-3">
-          <FileSpreadsheet className="w-8 h-8 text-accent-dark" />
-          Team Setup & Excel Import
+          <Users className="w-8 h-8 text-accent-dark" />
+          Team Setup & Registration
         </h1>
         <p className="text-slate-600 mt-2 font-medium max-w-3xl">
-          Upload an Excel file with format <strong className="text-black font-mono bg-slate-200 px-1 py-0.5 rounded">Team No. | Team Name | Password</strong>. 
+          Register participant teams using an Excel file upload or by typing credentials manually. 
           Each team&apos;s name will serve as their unique participant login ID.
         </p>
       </div>
 
-      {/* Format Requirement Guide */}
-      <Card className="border-2 border-black bg-blue-50/60 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <CardContent className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h3 className="text-sm font-black text-blue-950 uppercase tracking-wide flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-blue-700" />
-              Expected Excel Format (.xlsx / .xls / .csv)
-            </h3>
-            <p className="text-xs text-blue-900 font-medium">
-              Create a spreadsheet with three columns: <strong>Team No.</strong>, <strong>Team Name</strong>, and <strong>Password</strong>.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className="bg-white border-2 border-black px-4 py-2 rounded-lg font-mono text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex gap-4">
-              <div><span className="text-slate-400">Col A:</span> <strong>Team No.</strong></div>
-              <div><span className="text-slate-400">Col B:</span> <strong>Team Name</strong></div>
-              <div><span className="text-slate-400">Col C:</span> <strong>Password</strong></div>
-            </div>
-            <a href="/sample_teams_roster.xlsx" download="sample_teams_roster.xlsx">
-              <Button variant="outline" size="sm" className="border-2 border-black font-bold whitespace-nowrap bg-white hover:bg-slate-100">
-                Download Sample .xlsx
-              </Button>
-            </a>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Mode Switcher */}
+      <div className="flex items-center gap-2 p-1.5 bg-slate-100 border-2 border-black rounded-xl max-w-md shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+        <button
+          type="button"
+          onClick={() => { setEntryMode('excel'); setError(null); setSuccess(null); }}
+          className={`flex-1 py-2 px-4 rounded-lg font-space-grotesk font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
+            entryMode === 'excel'
+              ? 'bg-black text-white shadow-sm'
+              : 'text-slate-600 hover:text-black hover:bg-slate-200/60'
+          }`}
+        >
+          <FileSpreadsheet className="w-4 h-4" />
+          Excel Upload
+        </button>
+        <button
+          type="button"
+          onClick={() => { setEntryMode('manual'); setError(null); setSuccess(null); }}
+          className={`flex-1 py-2 px-4 rounded-lg font-space-grotesk font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
+            entryMode === 'manual'
+              ? 'bg-black text-white shadow-sm'
+              : 'text-slate-600 hover:text-black hover:bg-slate-200/60'
+          }`}
+        >
+          <UserPlus className="w-4 h-4" />
+          Manual Entry Mode
+        </button>
+      </div>
 
       {/* Feedback Alerts */}
       {error && (
@@ -177,21 +258,176 @@ export default function SetupPage() {
         </div>
       )}
 
-      {/* Upload Zone */}
-      <Card className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <CardHeader className="pb-3 border-b-2 border-black/5">
-          <CardTitle className="text-lg font-black font-space-grotesk flex items-center gap-2">
-            <Users className="w-5 h-5 text-accent-dark" />
-            Upload Team Roster File
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <FileUpload 
-            onFileSelect={handleFileSelect} 
-            accept=".xlsx, .xls, .csv" 
-          />
-        </CardContent>
-      </Card>
+      {entryMode === 'excel' && (
+        <>
+          {/* Format Requirement Guide */}
+          <Card className="border-2 border-black bg-blue-50/60 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <CardContent className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <h3 className="text-sm font-black text-blue-950 uppercase tracking-wide flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-blue-700" />
+                  Expected Excel Format (.xlsx / .xls / .csv)
+                </h3>
+                <p className="text-xs text-blue-900 font-medium">
+                  Create a spreadsheet with three columns: <strong>Team No.</strong>, <strong>Team Name</strong>, and <strong>Password</strong>.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <div className="bg-white border-2 border-black px-4 py-2 rounded-lg font-mono text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex gap-4">
+                  <div><span className="text-slate-400">Col A:</span> <strong>Team No.</strong></div>
+                  <div><span className="text-slate-400">Col B:</span> <strong>Team Name</strong></div>
+                  <div><span className="text-slate-400">Col C:</span> <strong>Password</strong></div>
+                </div>
+                <a href="/sample_teams_roster.xlsx" download="sample_teams_roster.xlsx">
+                  <Button variant="outline" size="sm" className="border-2 border-black font-bold whitespace-nowrap bg-white hover:bg-slate-100">
+                    Download Sample .xlsx
+                  </Button>
+                </a>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Upload Zone */}
+          <Card className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <CardHeader className="pb-3 border-b-2 border-black/5">
+              <CardTitle className="text-lg font-black font-space-grotesk flex items-center gap-2">
+                <Users className="w-5 h-5 text-accent-dark" />
+                Upload Team Roster File
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <FileUpload 
+                onFileSelect={handleFileSelect} 
+                accept=".xlsx, .xls, .csv" 
+              />
+            </CardContent>
+          </Card>
+        </>
+      )}
+
+      {entryMode === 'manual' && (
+        <Card className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <CardHeader className="pb-3 border-b-2 border-black/10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <CardTitle className="text-lg font-black font-space-grotesk flex items-center gap-2">
+                  <UserPlus className="w-5 h-5 text-accent-dark" />
+                  Manual Team Registration
+                </CardTitle>
+                <p className="text-xs text-slate-500 font-medium mt-1">
+                  Type team credentials manually to create participant login credentials directly. Team Name serves as the Login ID.
+                </p>
+              </div>
+              <Badge variant="outline" className="border-black text-xs font-mono w-fit">
+                {manualRows.length} {manualRows.length === 1 ? 'Entry' : 'Entries'}
+              </Badge>
+            </div>
+          </CardHeader>
+
+          <CardContent className="p-0 overflow-x-auto">
+            <table className="w-full text-left text-sm font-medium">
+              <thead className="bg-surface-2 text-xs uppercase font-black tracking-wider text-slate-700 border-b-2 border-black">
+                <tr>
+                  <th className="py-3 px-4 w-28">Team No.</th>
+                  <th className="py-3 px-4">Team Name (Login ID) *</th>
+                  <th className="py-3 px-4">Password (min 6 chars) *</th>
+                  <th className="py-3 px-4 w-36">Role</th>
+                  <th className="py-3 px-3 w-12 text-center"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200">
+                {manualRows.map((row, idx) => (
+                  <tr key={idx} className="hover:bg-slate-50/50">
+                    <td className="py-2.5 px-4">
+                      <input
+                        type="text"
+                        value={row.team_no}
+                        onChange={(e) => handleManualRowChange(idx, 'team_no', e.target.value)}
+                        placeholder={String(idx + 1)}
+                        className="w-full bg-white border-2 border-slate-300 rounded-md px-2.5 py-1.5 font-mono text-xs font-bold text-black focus:outline-none focus:border-black"
+                      />
+                    </td>
+                    <td className="py-2.5 px-4">
+                      <input
+                        type="text"
+                        value={row.team_name}
+                        onChange={(e) => handleManualRowChange(idx, 'team_name', e.target.value)}
+                        placeholder="e.g. Apex Innovators"
+                        className="w-full bg-white border-2 border-slate-300 rounded-md px-2.5 py-1.5 text-xs font-bold text-black focus:outline-none focus:border-black"
+                      />
+                    </td>
+                    <td className="py-2.5 px-4">
+                      <input
+                        type="text"
+                        value={row.password}
+                        onChange={(e) => handleManualRowChange(idx, 'password', e.target.value)}
+                        placeholder="e.g. apex2026"
+                        className="w-full bg-white border-2 border-slate-300 rounded-md px-2.5 py-1.5 font-mono text-xs text-black focus:outline-none focus:border-black"
+                      />
+                    </td>
+                    <td className="py-2.5 px-4">
+                      <select
+                        value={row.role || 'INNOVATOR'}
+                        onChange={(e) => handleManualRowChange(idx, 'role', e.target.value as any)}
+                        className="w-full bg-white border-2 border-slate-300 rounded-md px-2 py-1.5 text-xs font-bold text-black focus:outline-none focus:border-black cursor-pointer"
+                      >
+                        <option value="INNOVATOR">Innovator</option>
+                        <option value="INVESTOR">Investor</option>
+                      </select>
+                    </td>
+                    <td className="py-2.5 px-3 text-center">
+                      {manualRows.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveManualRow(idx)}
+                          className="text-slate-400 hover:text-red-600 p-1 rounded transition-colors"
+                          title="Remove row"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </CardContent>
+
+          <CardFooter className="p-4 bg-surface-2/40 border-t-2 border-black flex flex-col sm:flex-row items-center justify-between gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAddManualRow}
+              className="border-2 border-black font-bold flex items-center gap-1.5 bg-white hover:bg-slate-100"
+            >
+              <Plus className="w-4 h-4" />
+              Add Another Team
+            </Button>
+
+            <Button
+              type="button"
+              variant="default"
+              size="lg"
+              disabled={isSubmittingManual}
+              onClick={handleSaveManualTeams}
+              className="border-2 border-black font-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2"
+            >
+              {isSubmittingManual ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Creating Accounts...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  {manualRows.length === 1 ? 'Create Team Account' : `Create All (${manualRows.length}) Teams`}
+                </>
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
 
       {/* Preview Section */}
       {previewData.length > 0 && (

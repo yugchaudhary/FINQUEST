@@ -258,6 +258,147 @@ export async function confirmTeamExcelImport(teams: TeamRosterRow[]) {
   }
 }
 
+export interface ManualTeamData {
+  team_no?: string
+  team_name: string
+  password: string
+  role?: 'INNOVATOR' | 'INVESTOR' | 'PENDING'
+}
+
+/**
+ * Creates one or more team accounts manually with login credentials
+ */
+export async function createManualTeams(teams: ManualTeamData[]) {
+  try {
+    const supabase = await createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
+    if (!user) return { success: false, error: 'Authentication required' }
+
+    const adminClient = createAdminClient()
+    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
+    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized: Admin privileges required' }
+
+    if (!teams || teams.length === 0) {
+      return { success: false, error: 'No team data provided' }
+    }
+
+    // Validate inputs upfront
+    for (const item of teams) {
+      const cleanTeamName = (item.team_name || '').trim()
+      if (!cleanTeamName) {
+        return { success: false, error: 'Team Name is required for every team entry' }
+      }
+      const pass = (item.password || '').trim()
+      if (!pass || pass.length < 6) {
+        return { success: false, error: `Password for "${cleanTeamName}" must be at least 6 characters long` }
+      }
+    }
+
+    const results = []
+    let createdCount = 0
+
+    for (const item of teams) {
+      const cleanTeamName = item.team_name.trim()
+      const slug = cleanTeamName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      const email = `${slug}@finquest.com`
+      const password = item.password.trim()
+      const role = item.role || 'INNOVATOR'
+      const category = role === 'INVESTOR' ? 'N/A' : 'Unassigned'
+
+      // 1. Create or update user in Supabase Auth
+      let authUserId: string | null = null
+
+      const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true
+      })
+
+      if (authData?.user) {
+        authUserId = authData.user.id
+      } else if (authError) {
+        // User might already exist in auth, update password
+        const { data: userList } = await adminClient.auth.admin.listUsers()
+        const existingAuthUser = userList?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase())
+        if (existingAuthUser) {
+          authUserId = existingAuthUser.id
+          await adminClient.auth.admin.updateUserById(existingAuthUser.id, {
+            password
+          })
+        } else {
+          return { success: false, error: `Auth error for ${cleanTeamName}: ${authError.message}` }
+        }
+      }
+
+      if (!authUserId) {
+        return { success: false, error: `Failed to create auth record for ${cleanTeamName}` }
+      }
+
+      // 2. Insert or update team in teams table
+      const { data: existingTeam } = await adminClient
+        .from('teams')
+        .select('id')
+        .eq('team_name', cleanTeamName)
+        .maybeSingle()
+
+      let teamId: string
+
+      if (existingTeam) {
+        teamId = existingTeam.id
+        await adminClient.from('teams').update({
+          join_code: String(item.team_no || ''),
+          role,
+          category,
+          updated_at: new Date().toISOString()
+        }).eq('id', teamId)
+      } else {
+        const { data: newTeam, error: teamInsertErr } = await adminClient.from('teams').insert({
+          team_name: cleanTeamName,
+          category,
+          role,
+          join_code: String(item.team_no || ''),
+          starting_balance: 0,
+          current_balance: 0,
+          is_active: true
+        }).select().single()
+
+        if (teamInsertErr) {
+          return { success: false, error: `Database error for ${cleanTeamName}: ${teamInsertErr.message}` }
+        }
+        teamId = newTeam.id
+      }
+
+      // 3. Upsert user in public.users table
+      await adminClient.from('users').upsert({
+        id: authUserId,
+        email,
+        name: cleanTeamName,
+        auth_role: 'PARTICIPANT',
+        team_id: teamId
+      }, { onConflict: 'id' })
+
+      createdCount++
+      results.push({ team: cleanTeamName, success: true })
+    }
+
+    await logAdminAction(user.id, 'CREATE_MANUAL_TEAMS', 'teams', undefined, { count: createdCount })
+
+    revalidatePath('/admin/setup')
+    revalidatePath('/admin/teams')
+    revalidatePath('/admin/categories')
+    revalidatePath('/admin/reset')
+
+    return { success: true, count: createdCount, results }
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Error creating team manually' }
+  }
+}
+
+export async function createManualTeam(data: ManualTeamData) {
+  return createManualTeams([data])
+}
+
 /**
  * Returns current list of teams for the setup page
  */
