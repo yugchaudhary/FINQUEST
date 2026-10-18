@@ -9,6 +9,7 @@ import { Phase1Leaderboard } from '@/components/leaderboard/phase1-leaderboard';
 import { FinalsLeaderboard } from '@/components/leaderboard/finals-leaderboard';
 import { getEventState } from '@/app/actions/event-state';
 import { ChevronRight } from 'lucide-react';
+import { AnimatedLogo } from '@/components/home/animated-logo';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -93,11 +94,7 @@ export default function LandingPage() {
               className="flex justify-center items-center mb-3 md:mb-4"
             >
               <h1 className="sr-only">FOUNDER&apos;S GOT PATENT</h1>
-              <img
-                src="/founders-got-patent-banner.png"
-                alt="Founder's Got Patent"
-                className="w-full max-w-sm sm:max-w-md md:max-w-xl lg:max-w-2xl max-h-[220px] md:max-h-[260px] h-auto object-contain select-none mx-auto"
-              />
+              <AnimatedLogo />
             </motion.div>
             
             <motion.p
