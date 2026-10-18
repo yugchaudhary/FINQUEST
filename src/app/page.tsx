@@ -4,44 +4,15 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { getPhase1Leaderboard, getFinalsLeaderboard } from '@/app/actions/leaderboard';
 import { Phase1Leaderboard } from '@/components/leaderboard/phase1-leaderboard';
 import { FinalsLeaderboard } from '@/components/leaderboard/finals-leaderboard';
 import { getEventState } from '@/app/actions/event-state';
-import {
-  Crown,
-  Target,
-  TrendingUp,
-  Users,
-  Trophy,
-  Swords,
-  ChevronRight,
-  Zap,
-  BarChart3,
-  Shield,
-  Utensils,
-  Dumbbell,
-  Plane,
-  MonitorSmartphone,
-  Banknote,
-  Ghost
-} from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2
-    }
-  }
 };
 
 export default function LandingPage() {
@@ -103,8 +74,8 @@ export default function LandingPage() {
 
       <main className="relative z-10">
         {/* Hero Section */}
-        <section className="relative pt-8 md:pt-12 pb-16 md:pb-24 px-6 overflow-hidden">
-          <div className="max-w-7xl mx-auto text-center">
+        <section className="relative min-h-[calc(100vh-5rem)] flex flex-col justify-center items-center px-6 py-8 overflow-hidden">
+          <div className="max-w-7xl mx-auto text-center w-full">
             <motion.div
               initial="hidden"
               animate="visible"
@@ -167,166 +138,7 @@ export default function LandingPage() {
             </div>
           </section>
         ))}
-
-        {/* About Section */}
-        <section className="py-24 px-6 bg-surface border-b border-border">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={staggerContainer}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6"
-            >
-              {[
-                { icon: Users, title: "Teams of 4", desc: "Collaborate and brainstorm with 3 other visionary founders." },
-                { icon: Target, title: "6 Categories", desc: "Each with 20 distinct, chaotic problem statements to choose from." },
-                { icon: Trophy, title: "1 Ultimate Pitch", desc: "Combine 4 problems into one product. Weird, funny, and pitchable wins!" }
-              ].map((item, i) => (
-                <motion.div key={i} variants={fadeIn}>
-                  <Card className="bg-surface border-border hover:bg-surface-2 shadow-sm transition-colors h-full">
-                    <CardContent className="p-8 text-center flex flex-col items-center">
-                      <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mb-6 text-accent">
-                        <item.icon className="w-7 h-7 animate-bounce-subtle" />
-                      </div>
-                      <h3 className="text-2xl font-display font-bold mb-2">{item.title}</h3>
-                      <p className="text-slate-500">{item.desc}</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </section>
-
-        {/* How It Works */}
-        <section className="py-32 px-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-5xl font-display font-bold mb-4">The Strategy</h2>
-              <p className="text-slate-500 max-w-2xl mx-auto">Master the board. Navigate two intense phases of competition where every decision counts.</p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeIn}
-                className="relative p-1 rounded-2xl bg-gradient-to-b from-blue-500/20 to-transparent"
-              >
-                <div className="bg-surface rounded-xl p-8 h-full border border-border shadow-md">
-                  <Badge className="bg-blue-500/10 text-blue-400 hover:bg-blue-500/30 mb-6">Phase 1</Badge>
-                  <h3 className="text-3xl font-display font-bold mb-4 flex items-center gap-3">
-                    <Swords className="text-blue-500" />
-                    The Investment
-                  </h3>
-                  <p className="text-slate-500 mb-8 leading-relaxed">
-                    Investors evaluate founders across intense rapid-fire pitch sessions. Place strategic bets, build conviction, and secure your position for the final board.
-                  </p>
-                  <ul className="space-y-4">
-                    {[
-                      "Rapid pitch evaluations",
-                      "Strategic capital allocation",
-                      "Dynamic leaderboards"
-                    ].map((item, i) => (
-                      <li key={i} className="flex items-center gap-3 text-sm font-medium text-slate-600">
-                        <div className="w-6 h-6 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 text-xs">
-                          {i + 1}
-                        </div>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeIn}
-                className="relative p-1 rounded-2xl bg-gradient-to-b from-accent/20 to-transparent"
-              >
-                <div className="bg-surface rounded-xl p-8 h-full border border-border shadow-md">
-                  <Badge className="bg-accent/10 text-accent hover:bg-accent/30 mb-6">Phase 2</Badge>
-                  <h3 className="text-3xl font-display font-bold mb-4 flex items-center gap-3">
-                    <Crown className="text-accent" />
-                    The Finals
-                  </h3>
-                  <p className="text-slate-500 mb-8 leading-relaxed">
-                    The top performers face off in the ultimate showdown. Deep diligence, rigorous Q&A, and final verdicts from the grandmaster judges.
-                  </p>
-                  <ul className="space-y-4">
-                    {[
-                      "Top team presentations",
-                      "Live Q&A defense",
-                      "Final judging & awards"
-                    ].map((item, i) => (
-                      <li key={i} className="flex items-center gap-3 text-sm font-medium text-slate-600">
-                        <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center text-accent text-xs">
-                          {i + 1}
-                        </div>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* Categories */}
-        <section className="py-24 px-6 bg-surface border-t border-border">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Sectors of Play</h2>
-            </div>
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={staggerContainer}
-              className="grid grid-cols-2 md:grid-cols-3 gap-6"
-            >
-              {[
-                { name: "Let Us Cook", icon: Utensils, color: "text-orange-500" },
-                { name: "What the Fit", icon: Dumbbell, color: "text-green-500" },
-                { name: "Bon Voyage, Bestie", icon: Plane, color: "text-blue-500" },
-                { name: "Digital Disorder", icon: MonitorSmartphone, color: "text-purple-500" },
-                { name: "Cash & Chaos", icon: Banknote, color: "text-yellow-500" },
-                { name: "Feeling 404", icon: Ghost, color: "text-slate-500" }
-              ].map((cat, i) => (
-                <motion.div key={i} variants={fadeIn}>
-                  <Card className="bg-surface border-border hover:bg-surface-2 shadow-sm transition-colors cursor-pointer group">
-                    <CardContent className="p-6 text-center flex flex-col items-center">
-                      <cat.icon className={`w-8 h-8 mb-4 animate-float ${cat.color} group-hover:scale-110 transition-transform`} />
-                      <h4 className="font-semibold text-lg">{cat.name}</h4>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </section>
       </main>
-
-      {/* Footer */}
-      <footer className="relative z-10 py-12 px-6 border-t border-white/10 bg-surface">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-slate-500">
-          <div className="flex items-center gap-2">
-            <Crown className="w-4 h-4" />
-            <span className="font-display font-semibold text-slate-600">FOUNDER&apos;S GOT PATENT</span>
-          </div>
-          <p>© {new Date().getFullYear()} Founder&apos;s Got Patent. All rights reserved.</p>
-          <div className="flex gap-4">
-            <a href="#" className="hover:text-foreground transition-colors">Twitter</a>
-            <a href="#" className="hover:text-foreground transition-colors">LinkedIn</a>
-            <a href="#" className="hover:text-foreground transition-colors">Contact</a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
