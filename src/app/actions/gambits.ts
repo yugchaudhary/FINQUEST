@@ -51,12 +51,33 @@ export async function lockGambit(matchId: string, selectedTeamId: string, amount
     // 2. Also check event_state to ensure event is currently in MATCH_LIVE screen state
     const { data: eventState } = await adminClient
       .from('event_state')
-      .select('current_screen_state')
+      .select('current_screen_state, phase_1_leaderboard_published')
       .eq('id', 1)
       .single()
 
     if (eventState && eventState.current_screen_state !== 'MATCH_LIVE') {
       return { success: false, error: 'Investments are closed for this battle' }
+    }
+
+    // Available balance check according to logic:
+    // x: amount assigned by admin (starting_balance)
+    // y: amount displayed to investors
+    // after round: y = y - amount invested on the team = x - totalInvested
+    // after leaderboard published: y = y + z = current_balance
+    const isPhase1Published = Boolean(eventState?.phase_1_leaderboard_published)
+    if (!isPhase1Published) {
+      const { data: teamGambits } = await adminClient
+        .from('gambits')
+        .select('amount')
+        .eq('investor_team_id', team.id)
+
+      const totalInvested = (teamGambits || []).reduce((sum, g) => sum + (Number(g.amount) || 0), 0)
+      const x = Number(team.starting_balance || 0)
+      const availableBalance = Math.max(0, x - totalInvested)
+
+      if (gambitAmount > availableBalance) {
+        return { success: false, error: 'Insufficient balance' }
+      }
     }
 
     const { data, error } = await adminClient.rpc('lock_gambit', {

@@ -148,10 +148,15 @@ export default function ParticipantLiveMatchPage() {
   const canLock = !isLocked && team?.role === 'INVESTOR' && isGambitsOpen
 
   const parsedAmount = parseInt(amountStr || '0', 10)
+  const effectiveBalance =
+    team?.display_balance !== undefined
+      ? Number(team.display_balance)
+      : Number(team?.current_balance || 0)
+
   const isAmountValid =
     !isNaN(parsedAmount) &&
     parsedAmount > 0 &&
-    parsedAmount <= Math.min(MAX_GAMBIT_AMOUNT, team?.current_balance || 0)
+    parsedAmount <= Math.min(MAX_GAMBIT_AMOUNT, effectiveBalance)
 
   const selectedTeam =
     selectedTeamId === match.red_team?.id
@@ -174,7 +179,7 @@ export default function ParticipantLiveMatchPage() {
       setError(`Amount must be between ₹1 and ₹${MAX_GAMBIT_AMOUNT.toLocaleString()}`)
       return
     }
-    if (amt > (team?.current_balance || 0)) {
+    if (amt > effectiveBalance) {
       setError('Insufficient balance for this investment.')
       return
     }
@@ -245,7 +250,7 @@ export default function ParticipantLiveMatchPage() {
                 CURRENT BALANCE
               </div>
               <div className="text-3xl font-mono font-black text-foreground">
-                ₹{Number(team.current_balance || 0).toLocaleString()}
+                ₹{Number(effectiveBalance).toLocaleString()}
               </div>
             </div>
             {isLocked ? (
@@ -345,7 +350,7 @@ export default function ParticipantLiveMatchPage() {
                 {/* Quick Presets */}
                 <div className="grid grid-cols-3 sm:grid-cols-7 gap-2 mb-4">
                   {PRESET_AMOUNTS.map((amt) => {
-                    const isDisabled = amt > (team?.current_balance || 0)
+                    const isDisabled = amt > effectiveBalance
                     const isSelected = amountStr === amt.toString()
                     return (
                       <Button
@@ -372,15 +377,15 @@ export default function ParticipantLiveMatchPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    disabled={(team?.current_balance || 0) <= 0}
+                    disabled={effectiveBalance <= 0}
                     onClick={() => {
-                      const maxAmt = Math.min(MAX_GAMBIT_AMOUNT, team?.current_balance || 0)
+                      const maxAmt = Math.min(MAX_GAMBIT_AMOUNT, effectiveBalance)
                       setAmountStr(maxAmt.toString())
                       setError(null)
                     }}
                     className={`font-mono text-xs font-bold transition-all ${
-                      amountStr === Math.min(MAX_GAMBIT_AMOUNT, team?.current_balance || 0).toString() &&
-                      (team?.current_balance || 0) > 0
+                      amountStr === Math.min(MAX_GAMBIT_AMOUNT, effectiveBalance).toString() &&
+                      effectiveBalance > 0
                         ? 'border-2 border-purple-600 bg-purple-500/15 text-purple-600 shadow-sm'
                         : 'border-border text-purple-600 hover:bg-purple-50'
                     }`}
@@ -397,7 +402,7 @@ export default function ParticipantLiveMatchPage() {
                   <input
                     type="number"
                     min="1"
-                    max={Math.min(MAX_GAMBIT_AMOUNT, team?.current_balance || 0)}
+                    max={Math.min(MAX_GAMBIT_AMOUNT, effectiveBalance)}
                     value={amountStr}
                     onChange={(e) => {
                       setAmountStr(e.target.value)
@@ -419,9 +424,9 @@ export default function ParticipantLiveMatchPage() {
 
                 {/* Amount Feedback */}
                 <div className="mt-3 flex items-center justify-between text-xs">
-                  {parsedAmount > (team?.current_balance || 0) ? (
+                  {parsedAmount > effectiveBalance ? (
                     <span className="text-red-500 font-medium">
-                      ⚠ Amount exceeds available balance (₹{Number(team?.current_balance || 0).toLocaleString()})
+                      ⚠ Amount exceeds available balance (₹{Number(effectiveBalance).toLocaleString()})
                     </span>
                   ) : parsedAmount > MAX_GAMBIT_AMOUNT ? (
                     <span className="text-red-500 font-medium">
@@ -433,11 +438,11 @@ export default function ParticipantLiveMatchPage() {
                     </span>
                   ) : (
                     <span className="text-slate-500">
-                      Enter an investment between ₹1 and ₹{Math.min(MAX_GAMBIT_AMOUNT, team?.current_balance || 0).toLocaleString()}
+                      Enter an investment between ₹1 and ₹{Math.min(MAX_GAMBIT_AMOUNT, effectiveBalance).toLocaleString()}
                     </span>
                   )}
                   <span className="text-slate-500 font-mono">
-                    Balance: ₹{Number(team?.current_balance || 0).toLocaleString()}
+                    Balance: ₹{Number(effectiveBalance).toLocaleString()}
                   </span>
                 </div>
               </CardContent>

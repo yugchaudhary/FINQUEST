@@ -7,12 +7,30 @@ interface InvestmentBalanceCardProps {
   startingBalance: number;
   currentBalance: number;
   isPhase1LeaderboardPublished: boolean;
+  totalInvested?: number;
+  displayBalance?: number;
 }
 
-export function InvestmentBalanceCard({ startingBalance, currentBalance, isPhase1LeaderboardPublished }: InvestmentBalanceCardProps) {
-  // If phase 1 leaderboard is not published, we don't show the P&L difference, 
-  // we just show the remaining balance.
-  const displayBalance = isPhase1LeaderboardPublished ? currentBalance : startingBalance;
+export function InvestmentBalanceCard({ 
+  startingBalance, 
+  currentBalance, 
+  isPhase1LeaderboardPublished, 
+  totalInvested = 0,
+  displayBalance: propDisplayBalance 
+}: InvestmentBalanceCardProps) {
+  // Logic:
+  // x: amount assigned by admin (startingBalance)
+  // y: amount will display to investors
+  // initially: y = x
+  // z = profit or loss from investment
+  // after round: y = y - (amount invested on the team) = x - totalInvested
+  // this will continue until leaderboard is globally published
+  // after leaderboard published: y = y + z = currentBalance
+  const displayBalance = propDisplayBalance !== undefined 
+    ? propDisplayBalance 
+    : (isPhase1LeaderboardPublished 
+        ? currentBalance 
+        : Math.max(0, (startingBalance || 0) - (totalInvested || 0)));
 
   return (
     <div className="w-full pt-8">

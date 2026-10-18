@@ -172,6 +172,8 @@ export default function DashboardPage() {
             startingBalance={data.team.starting_balance} 
             currentBalance={data.team.current_balance} 
             isPhase1LeaderboardPublished={data.eventState?.phase_1_leaderboard_published}
+            displayBalance={data.team.display_balance}
+            totalInvested={data.team.total_invested}
           />
         )}
 
