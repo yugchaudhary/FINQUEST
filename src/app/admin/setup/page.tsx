@@ -35,7 +35,7 @@ import { updateTeamRole } from '@/app/actions/teams';
 export default function SetupPage() {
   const [entryMode, setEntryMode] = useState<'excel' | 'manual'>('excel');
   const [manualRows, setManualRows] = useState<ManualTeamData[]>([
-    { team_no: '1', team_name: '', password: '', role: 'INNOVATOR' }
+    { team_no: '1', team_name: '', password: '', role: 'INVESTOR' }
   ]);
   const [isSubmittingManual, setIsSubmittingManual] = useState(false);
   const [previewData, setPreviewData] = useState<TeamRosterRow[]>([]);
@@ -66,7 +66,7 @@ export default function SetupPage() {
       setExistingTeams(prevTeams);
       setError(result?.error || 'Failed to update role');
     } else {
-      setSuccess(`Role updated to ${newRole}`);
+      setSuccess(`Role updated to ${newRole === 'INNOVATOR' ? 'Founder' : 'Investor'}`);
       await loadExisting();
     }
     setUpdatingRole(null);
@@ -101,7 +101,7 @@ export default function SetupPage() {
         team_no: String(existingTeams.length + prev.length + 1),
         team_name: '',
         password: '',
-        role: 'INNOVATOR'
+        role: 'INVESTOR'
       }
     ]);
   };
@@ -144,7 +144,7 @@ export default function SetupPage() {
             team_no: String(existingTeams.length + (res.count || manualRows.length) + 1),
             team_name: '',
             password: '',
-            role: 'INNOVATOR'
+            role: 'INVESTOR'
           }
         ]);
         await loadExisting();
@@ -352,7 +352,7 @@ export default function SetupPage() {
                         type="text"
                         value={row.team_name}
                         onChange={(e) => handleManualRowChange(idx, 'team_name', e.target.value)}
-                        placeholder="e.g. Apex Innovators"
+                        placeholder="e.g. Apex Founders"
                         className="w-full bg-white border-2 border-slate-300 rounded-md px-2.5 py-1.5 text-xs font-bold text-black focus:outline-none focus:border-black"
                       />
                     </td>
@@ -367,12 +367,12 @@ export default function SetupPage() {
                     </td>
                     <td className="py-2.5 px-4">
                       <select
-                        value={row.role || 'INNOVATOR'}
+                        value={row.role || 'INVESTOR'}
                         onChange={(e) => handleManualRowChange(idx, 'role', e.target.value as any)}
                         className="w-full bg-white border-2 border-slate-300 rounded-md px-2 py-1.5 text-xs font-bold text-black focus:outline-none focus:border-black cursor-pointer"
                       >
-                        <option value="INNOVATOR">Innovator</option>
                         <option value="INVESTOR">Investor</option>
+                        <option value="INNOVATOR">Founder</option>
                       </select>
                     </td>
                     <td className="py-2.5 px-3 text-center">
@@ -468,7 +468,6 @@ export default function SetupPage() {
                   <th className="py-3 px-6 w-24">Team No.</th>
                   <th className="py-3 px-6">Team Name (Login ID)</th>
                   <th className="py-3 px-6">Assigned Password</th>
-                  <th className="py-3 px-6">Default Role</th>
                   <th className="py-3 px-6">Status</th>
                 </tr>
               </thead>
@@ -485,11 +484,6 @@ export default function SetupPage() {
                     <td className="py-3 px-6 font-mono text-slate-800">
                       <span className="bg-slate-100 px-2 py-0.5 rounded border border-slate-300">
                         {row.password}
-                      </span>
-                    </td>
-                    <td className="py-3 px-6">
-                      <span className="font-bold text-xs text-purple-700 bg-purple-50 border border-purple-200 px-2.5 py-1 rounded">
-                        Innovator
                       </span>
                     </td>
                     <td className="py-3 px-6">
@@ -588,7 +582,7 @@ export default function SetupPage() {
                               : 'border-purple-500/30 text-purple-700 bg-purple-50 hover:bg-purple-100'
                           }`}
                         >
-                          Innovator
+                          Founder
                         </button>
                         <button
                           disabled={updatingRole === team.id || team.role === 'INVESTOR'}

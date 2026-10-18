@@ -33,7 +33,7 @@ export function TeamOverviewCard({ team }: TeamOverviewProps) {
                     : 'bg-purple-900/20 text-purple-400 border-purple-500/30 font-mono text-xs px-2.5 py-1 font-bold'
                   }
                 >
-                  {team.role}
+                  {team.role === 'INNOVATOR' ? 'FOUNDER' : team.role}
                 </Badge>
                 {team.role !== 'INVESTOR' && (
                   <>

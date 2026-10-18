@@ -64,7 +64,7 @@ export default function AdminTeamsPage() {
       setTeams(prevTeams);
       setError(result?.error || 'Failed to update role');
     } else {
-      setSuccess(role === 'INVESTOR' ? 'Role updated to Investor (category cleared)' : `Role updated to ${role}`);
+      setSuccess(role === 'INVESTOR' ? 'Role updated to Investor (category cleared)' : `Role updated to ${role === 'INNOVATOR' ? 'Founder' : role}`);
       const refreshed = await getTeamsWithDetails();
       if (refreshed?.success && refreshed.data) setTeams(refreshed.data);
     }
@@ -157,7 +157,7 @@ export default function AdminTeamsPage() {
           label="Role"
           options={[
             { label: 'All Roles', value: 'ALL' },
-            { label: 'Innovator', value: 'INNOVATOR' },
+            { label: 'Founder', value: 'INNOVATOR' },
             { label: 'Investor', value: 'INVESTOR' },
             { label: 'Pending', value: 'PENDING' }
           ]}
@@ -213,7 +213,7 @@ export default function AdminTeamsPage() {
                     {/* Role — switchable */}
                     <div className="flex items-center gap-2">
                       <span className={`inline-flex text-xs font-bold px-2.5 py-1 rounded-full border ${roleColors[team.role] || 'bg-gray-500/10 text-slate-500 border-gray-500/20'}`}>
-                        {team.role}
+                        {team.role === 'INNOVATOR' ? 'FOUNDER' : team.role}
                       </span>
                       <div className="flex gap-1">
                         <button
@@ -221,7 +221,7 @@ export default function AdminTeamsPage() {
                           onClick={() => handleUpdateRole(team.id, 'INNOVATOR')}
                           className="text-xs px-2 py-1 rounded border border-blue-500/30 text-blue-400 hover:bg-blue-500/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
-                          Innovator
+                          Founder
                         </button>
                         <button
                           disabled={updatingRole === team.id || team.role === 'INVESTOR'}

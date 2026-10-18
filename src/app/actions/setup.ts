@@ -202,7 +202,7 @@ export async function confirmTeamExcelImport(teams: TeamRosterRow[]) {
       // 2. Insert or update team in teams table
       const { data: existingTeam } = await adminClient
         .from('teams')
-        .select('id, role')
+        .select('id')
         .eq('team_name', cleanTeamName)
         .maybeSingle()
 
@@ -210,19 +210,15 @@ export async function confirmTeamExcelImport(teams: TeamRosterRow[]) {
 
       if (existingTeam) {
         teamId = existingTeam.id
-        const updatePayload: any = {
+        await adminClient.from('teams').update({
           join_code: String(item.team_no || ''),
           updated_at: new Date().toISOString()
-        }
-        if (!existingTeam.role || existingTeam.role === 'PENDING') {
-          updatePayload.role = 'INNOVATOR'
-        }
-        await adminClient.from('teams').update(updatePayload).eq('id', teamId)
+        }).eq('id', teamId)
       } else {
         const { data: newTeam, error: teamInsertErr } = await adminClient.from('teams').insert({
           team_name: cleanTeamName,
-          category: 'Unassigned',
-          role: 'INNOVATOR',
+          category: 'N/A',
+          role: 'INVESTOR',
           join_code: String(item.team_no || ''),
           starting_balance: 0,
           current_balance: 0,
@@ -307,7 +303,7 @@ export async function createManualTeams(teams: ManualTeamData[]) {
       const slug = cleanTeamName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
       const email = `${slug}@finquest.com`
       const password = item.password.trim()
-      const role = item.role || 'INNOVATOR'
+      const role = item.role || 'INVESTOR'
       const category = role === 'INVESTOR' ? 'N/A' : 'Unassigned'
 
       // 1. Create or update user in Supabase Auth

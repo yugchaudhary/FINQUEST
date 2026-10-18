@@ -303,13 +303,13 @@ export default function ParticipantLiveMatchPage() {
           </div>
         )}
 
-        {/* Notice for INNOVATOR Role */}
+        {/* Notice for FOUNDER Role */}
         {team?.role === 'INNOVATOR' && (
           <div className="mb-8 p-6 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-center">
             <ShieldCheck className="w-10 h-10 text-blue-500 mx-auto mb-2" />
-            <h3 className="text-xl font-bold text-foreground mb-1">Innovator Pitch Battle</h3>
+            <h3 className="text-xl font-bold text-foreground mb-1">Founder Pitch Battle</h3>
             <p className="text-slate-600 text-sm">
-              Your team is registered as an <strong className="text-foreground">INNOVATOR</strong>. Watch the live match! Only investor teams place bets during this phase.
+              Your team is registered as a <strong className="text-foreground">FOUNDER</strong>. Watch the live match! Only investor teams place bets during this phase.
             </p>
           </div>
         )}

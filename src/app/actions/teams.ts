@@ -28,7 +28,7 @@ export async function importTeams(formData: FormData) {
     const validTeams = data.map(row => ({
       category: row.category || row.Category,
       team_name: row.team_name || row['Team Name'] || row.teamName,
-      role: (row.role || row.Role || 'INNOVATOR').toUpperCase()
+      role: (row.role || row.Role || 'INVESTOR').toUpperCase()
     })).filter(t => t.team_name && t.category)
 
     const validated = z.array(teamSchema).parse(validTeams)
@@ -333,7 +333,7 @@ export async function updateTeamCategory(teamId: string, categoryId: string | nu
 
     if (categoryId) {
       if (team.role === 'INVESTOR') {
-        return { success: false, error: 'Investors cannot be assigned a category. Categories are only assigned to Innovators.' }
+        return { success: false, error: 'Investors cannot be assigned a category. Categories are only assigned to Founders.' }
       }
 
       const { data: cat } = await adminClient.from('categories').select('name').eq('id', categoryId).single()

@@ -131,7 +131,7 @@ export default function LandingPage() {
               variants={fadeIn}
               className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-12 font-light"
             >
-              A strategic battle of ideas, conviction and calculated risk. Where visionary innovators meet strategic capital.
+              A strategic battle of ideas, conviction and calculated risk. Where visionary founders meet strategic capital.
             </motion.p>
             
             <motion.div
@@ -218,7 +218,7 @@ export default function LandingPage() {
                     The Investment
                   </h3>
                   <p className="text-slate-500 mb-8 leading-relaxed">
-                    Investors evaluate innovators across intense rapid-fire pitch sessions. Place strategic bets, build conviction, and secure your position for the final board.
+                    Investors evaluate founders across intense rapid-fire pitch sessions. Place strategic bets, build conviction, and secure your position for the final board.
                   </p>
                   <ul className="space-y-4">
                     {[

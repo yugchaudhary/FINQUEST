@@ -60,7 +60,7 @@ export default function CategoryAssignmentPage() {
       setTeams(prevTeams);
       setError(res?.error || 'Failed to update role');
     } else {
-      setSuccess(newRole === 'INVESTOR' ? 'Role set to Investor (category cleared)' : 'Role set to Innovator');
+      setSuccess(newRole === 'INVESTOR' ? 'Role set to Investor (category cleared)' : 'Role set to Founder');
       const teamsRes = await getTeamsWithDetails();
       if (teamsRes.success && teamsRes.data) setTeams(teamsRes.data);
     }
@@ -70,7 +70,7 @@ export default function CategoryAssignmentPage() {
   const handleCategoryChange = async (teamId: string, categoryId: string) => {
     const target = teams.find(t => t.id === teamId);
     if (target?.role === 'INVESTOR') {
-      setError('Investors cannot be assigned a category. Change role to Innovator first.');
+      setError('Investors cannot be assigned a category. Change role to Founder first.');
       return;
     }
 
@@ -130,7 +130,7 @@ export default function CategoryAssignmentPage() {
                 : 'border-purple-500/30 text-purple-400 hover:bg-purple-500/15'
             }`}
           >
-            Innovator
+            Founder
           </button>
           <button
             disabled={updatingRole === row.id || row.role === 'INVESTOR'}
@@ -185,7 +185,7 @@ export default function CategoryAssignmentPage() {
             Category Assignment
           </h1>
           <p className="text-slate-500 mt-1">
-            Assign problem categories exclusively to Innovator teams. Investors cannot be assigned any category.
+            Assign problem categories exclusively to Founder teams. Investors cannot be assigned any category.
           </p>
         </div>
       </div>
@@ -231,7 +231,7 @@ export default function CategoryAssignmentPage() {
               onClick={() => setRoleFilter('INNOVATOR')}
               className={roleFilter === 'INNOVATOR' ? 'bg-purple-600 hover:bg-purple-700' : ''}
             >
-              Innovators Only
+              Founders Only
             </Button>
             <Button
               variant={roleFilter === 'INVESTOR' ? 'default' : 'outline'}

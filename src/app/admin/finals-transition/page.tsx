@@ -40,7 +40,7 @@ export default function FinalsTransitionPage() {
             {teams.map(team => (
               <div key={team.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
                 <div>
-                  <span className="font-bold">{team.team_name}</span> - <span className="text-slate-500">{team.role}</span>
+                  <span className="font-bold">{team.team_name}</span> - <span className="text-slate-500">{team.role === 'INNOVATOR' ? 'FOUNDER' : team.role}</span>
                 </div>
                 <div className="flex gap-4 items-center">
                   <Button variant="outline" size="sm" onClick={async () => {
@@ -48,7 +48,7 @@ export default function FinalsTransitionPage() {
                     await changeTeamStatus(team.id, newRole);
                     setTeams(teams.map(t => t.id === team.id ? { ...t, role: newRole } : t));
                   }}>
-                    Make {team.role === 'INNOVATOR' ? 'Investor' : 'Innovator'}
+                    Make {team.role === 'INNOVATOR' ? 'Investor' : 'Founder'}
                   </Button>
                   <label className="flex items-center gap-2">
                     <input type="checkbox" onChange={(e) => {
