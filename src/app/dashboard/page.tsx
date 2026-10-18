@@ -12,7 +12,6 @@ import { EVENT_CHANNEL } from '@/lib/constants'
 // Components
 import { DashboardNav } from '@/components/dashboard/dashboard-nav'
 import { DashboardHero } from '@/components/dashboard/dashboard-hero'
-import { TeamOverviewCard } from '@/components/dashboard/team-overview-card'
 import { LiveStatusCard } from '@/components/dashboard/live-status-card'
 import { InvestmentBalanceCard } from '@/components/dashboard/investment-balance-card'
 import { AnnouncementsBanner } from '@/components/dashboard/announcements-banner'
@@ -160,8 +159,6 @@ export default function DashboardPage() {
           team={data.team} 
           eventState={data.eventState} 
         />
-
-        <TeamOverviewCard team={data.team} />
 
         <LiveStatusCard 
           eventState={data.eventState} 

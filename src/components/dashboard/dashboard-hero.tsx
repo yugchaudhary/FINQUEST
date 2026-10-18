@@ -78,11 +78,11 @@ export function DashboardHero({ user, team, eventState }: DashboardHeroProps) {
       <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3" />
       <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-600/10 rounded-full blur-[60px] translate-y-1/3 -translate-x-1/3" />
       
-      <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-4 max-w-2xl"
+          className="space-y-4 max-w-xl"
         >
           <div className="flex items-center gap-3">
             <span className="text-purple-400 font-mono text-xs font-bold tracking-widest">{content.tag}</span>
@@ -101,15 +101,58 @@ export function DashboardHero({ user, team, eventState }: DashboardHeroProps) {
           </p>
         </motion.div>
 
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="flex flex-col gap-1 text-left md:text-right"
-        >
-          <div className="text-sm text-slate-500">WELCOME BACK</div>
-          <div className="text-xl font-medium text-foreground">{user?.name || 'Participant'}</div>
-        </motion.div>
+        {team ? (
+          <motion.div 
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.15 }}
+            className="flex flex-col items-start md:items-end justify-center gap-3 p-5 md:p-6 rounded-xl bg-black/20 border border-white/10 backdrop-blur-sm self-start md:self-center min-w-[280px]"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-[11px] font-bold text-slate-400 tracking-widest font-mono">
+                YOUR TEAM
+              </span>
+              <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 bg-emerald-400/10 border border-emerald-500/20 px-3 py-1 rounded-full font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                OFFICIAL TEAM
+              </span>
+            </div>
+
+            <h2 className="text-2xl md:text-3xl font-space-grotesk font-black text-foreground tracking-tight">
+              {team.team_name}
+            </h2>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge 
+                variant="outline" 
+                className={team.role === 'INVESTOR' 
+                  ? 'bg-blue-900/20 text-blue-400 border-blue-500/30 font-mono text-xs px-2.5 py-1 font-bold' 
+                  : 'bg-purple-900/20 text-purple-400 border-purple-500/30 font-mono text-xs px-2.5 py-1 font-bold'
+                }
+              >
+                {team.role === 'INNOVATOR' ? 'FOUNDER' : team.role}
+              </Badge>
+              {team.role !== 'INVESTOR' && (
+                <>
+                  <span className="text-slate-500 text-xs font-bold">/</span>
+                  <span className="text-slate-300 font-medium text-xs px-3 py-1 bg-surface/5 rounded-full border border-white/10">
+                    {team.categoryName || (team.category && team.category !== 'N/A' ? team.category : 'Category Not Assigned')}
+                  </span>
+                </>
+              )}
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="flex flex-col gap-1 text-left md:text-right"
+          >
+            <div className="text-sm text-slate-500">WELCOME BACK</div>
+            <div className="text-xl font-medium text-foreground">{user?.name || 'Participant'}</div>
+          </motion.div>
+        )}
       </div>
     </div>
   )
