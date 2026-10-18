@@ -8,16 +8,10 @@ import {
   Upload, 
   Radio, 
   Trophy, 
-  ArrowRightLeft, 
-  Tv, 
-  Calculator, 
-  ScrollText, 
-  Settings, 
   LogOut,
   Menu,
   X,
   Tags,
-  FileText,
   PiggyBank,
   Megaphone,
   RotateCcw
@@ -35,12 +29,7 @@ const NAV_LINKS = [
   { href: '/admin/announcements', label: 'Announcements', icon: Megaphone },
   { href: '/admin/live-match', label: 'Live Match', icon: Radio },
   { href: '/admin/phase1-finale', label: 'Phase 1 Finale', icon: Trophy },
-  { href: '/admin/finals-transition', label: 'Finals Transition', icon: ArrowRightLeft },
-  { href: '/admin/finals-broadcast', label: 'Finals Broadcast', icon: Tv },
-  { href: '/admin/finals-scoring', label: 'Finals Scoring', icon: Calculator },
-  { href: '/admin/audit', label: 'Audit Log', icon: ScrollText },
   { href: '/admin/reset', label: 'Reset Test Data', icon: RotateCcw },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
