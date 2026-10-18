@@ -106,19 +106,19 @@ export function DashboardHero({ user, team, eventState }: DashboardHeroProps) {
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.15 }}
-            className="flex flex-col items-start md:items-end justify-center gap-3 p-5 md:p-6 rounded-xl bg-black/20 border border-white/10 backdrop-blur-sm self-start md:self-center min-w-[280px]"
+            className="flex flex-col items-start md:items-end justify-center gap-3 p-5 md:p-6 rounded-xl bg-slate-200/80 dark:bg-black/40 border border-slate-300 dark:border-white/15 backdrop-blur-sm self-start md:self-center min-w-[280px] shadow-sm"
           >
             <div className="flex items-center gap-3">
-              <span className="text-[11px] font-bold text-slate-400 tracking-widest font-mono">
+              <span className="text-[11px] font-black text-slate-700 dark:text-slate-300 tracking-widest font-mono">
                 YOUR TEAM
               </span>
-              <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 bg-emerald-400/10 border border-emerald-500/20 px-3 py-1 rounded-full font-mono">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-400 dark:border-emerald-500/40 px-3 py-1 rounded-full font-mono shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse" />
                 OFFICIAL TEAM
               </span>
             </div>
 
-            <h2 className="text-2xl md:text-3xl font-space-grotesk font-black text-foreground tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-space-grotesk font-black text-slate-950 dark:text-white tracking-tight">
               {team.team_name}
             </h2>
 
@@ -126,16 +126,16 @@ export function DashboardHero({ user, team, eventState }: DashboardHeroProps) {
               <Badge 
                 variant="outline" 
                 className={team.role === 'INVESTOR' 
-                  ? 'bg-blue-900/20 text-blue-400 border-blue-500/30 font-mono text-xs px-2.5 py-1 font-bold' 
-                  : 'bg-purple-900/20 text-purple-400 border-purple-500/30 font-mono text-xs px-2.5 py-1 font-bold'
+                  ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-900 dark:text-blue-200 border-2 border-blue-400/80 dark:border-blue-500/50 font-mono text-xs px-2.5 py-1 font-black shadow-sm' 
+                  : 'bg-purple-100 dark:bg-purple-950/60 text-purple-900 dark:text-purple-200 border-2 border-purple-400/80 dark:border-purple-500/50 font-mono text-xs px-2.5 py-1 font-black shadow-sm'
                 }
               >
                 {team.role === 'INNOVATOR' ? 'FOUNDER' : team.role}
               </Badge>
               {team.role !== 'INVESTOR' && (
                 <>
-                  <span className="text-slate-500 text-xs font-bold">/</span>
-                  <span className="text-slate-300 font-medium text-xs px-3 py-1 bg-surface/5 rounded-full border border-white/10">
+                  <span className="text-slate-600 dark:text-slate-400 text-xs font-bold">/</span>
+                  <span className="text-slate-900 dark:text-slate-100 font-bold text-xs px-3 py-1 bg-white dark:bg-white/10 rounded-full border border-slate-400/60 dark:border-white/20 shadow-sm">
                     {team.categoryName || (team.category && team.category !== 'N/A' ? team.category : 'Category Not Assigned')}
                   </span>
                 </>
