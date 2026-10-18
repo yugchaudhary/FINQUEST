@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Key, Loader2, Users, AlertCircle } from 'lucide-react';
+import { ChevronLeft, Key, Loader2, Users, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [teamName, setTeamName] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -91,15 +92,26 @@ export default function LoginPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Input
-                    label="Password"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="border-2 border-black bg-white font-medium"
-                  />
+                  <label className="text-sm font-medium text-slate-500">Password</label>
+                  <div className="relative flex items-center">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full rounded-md border-2 border-black bg-white py-2 pl-3 pr-10 text-sm text-foreground font-medium placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 text-slate-400 hover:text-black transition-colors focus:outline-none p-1"
+                      tabIndex={-1}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <Button
