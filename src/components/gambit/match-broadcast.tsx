@@ -37,7 +37,7 @@ export function MatchBroadcast({ redTeam, blueTeam, roundNumber, category, onSel
         <Badge variant="live">LIVE</Badge>
         {roundNumber && (
           <span className="text-sm text-slate-500 uppercase tracking-wider font-display">
-            Round {roundNumber}
+            Battle {roundNumber}
           </span>
         )}
         {category && (

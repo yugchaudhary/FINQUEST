@@ -189,9 +189,8 @@ export default function ParticipantLiveMatchPage() {
             <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
             <span className="text-sm font-bold tracking-widest text-red-500">LIVE MATCH</span>
           </div>
-          <div className="w-24 text-right">
-            <span className="text-xs font-mono text-slate-500">ROUND</span>
-            <span className="ml-2 font-mono font-bold">{String(match.round_number).padStart(2, '0')}</span>
+          <div className="text-right">
+            <span className="text-xs font-mono font-bold text-slate-400">Battle {match.round_number}</span>
           </div>
         </div>
       </div>
@@ -271,7 +270,7 @@ export default function ParticipantLiveMatchPage() {
             <Lock className="w-10 h-10 text-amber-500 mx-auto mb-2" />
             <h3 className="text-xl font-bold text-foreground mb-1">Gambits are Closed</h3>
             <p className="text-slate-600 text-sm">
-              The betting window for Round {match.round_number} has ended. The judges are currently evaluating the elevator pitches.
+              The betting window for Battle {match.round_number} has ended. The judges are currently evaluating the elevator pitches.
             </p>
           </div>
         )}
@@ -280,7 +279,7 @@ export default function ParticipantLiveMatchPage() {
         {team?.role === 'INNOVATOR' && (
           <div className="mb-8 p-6 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-center">
             <ShieldCheck className="w-10 h-10 text-blue-500 mx-auto mb-2" />
-            <h3 className="text-xl font-bold text-foreground mb-1">Innovator Pitch Round</h3>
+            <h3 className="text-xl font-bold text-foreground mb-1">Innovator Pitch Battle</h3>
             <p className="text-slate-600 text-sm">
               Your team is registered as an <strong className="text-foreground">INNOVATOR</strong>. Watch the live match! Only investor teams place bets during this phase.
             </p>
@@ -303,12 +302,12 @@ export default function ParticipantLiveMatchPage() {
                         Choose Investment Amount
                       </h3>
                       <p className="text-xs text-slate-500">
-                        Select a preset or enter a custom amount for Round {match.round_number}.
+                        Select a preset or enter a custom amount for Battle {match.round_number}.
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs text-slate-500 uppercase tracking-wider block">Max Per Round</span>
+                    <span className="text-xs text-slate-500 uppercase tracking-wider block">Max Per Battle</span>
                     <span className="text-xs font-mono font-bold text-purple-600">
                       ₹{MAX_GAMBIT_AMOUNT.toLocaleString()}
                     </span>
@@ -398,7 +397,7 @@ export default function ParticipantLiveMatchPage() {
                     </span>
                   ) : parsedAmount > MAX_GAMBIT_AMOUNT ? (
                     <span className="text-red-500 font-medium">
-                      ⚠ Maximum gambit per round is ₹{MAX_GAMBIT_AMOUNT.toLocaleString()}
+                      ⚠ Maximum gambit per battle is ₹{MAX_GAMBIT_AMOUNT.toLocaleString()}
                     </span>
                   ) : parsedAmount > 0 ? (
                     <span className="text-green-600 font-medium flex items-center gap-1">
@@ -583,7 +582,7 @@ export default function ParticipantLiveMatchPage() {
                   )}
                 </Button>
                 <p className="text-center text-slate-400 text-xs mt-3">
-                  Once submitted, your bet cannot be changed or cancelled for this round.
+                  Once submitted, your bet cannot be changed or cancelled for this battle.
                 </p>
               </CardContent>
             </Card>
@@ -606,7 +605,7 @@ export default function ParticipantLiveMatchPage() {
           </div>
         )}
 
-        {/* ─── 4. ROUND INSTRUCTIONS & RULES (IN EMPTY SPACE) ─── */}
+        {/* ─── 4. BATTLE INSTRUCTIONS & RULES (IN EMPTY SPACE) ─── */}
         <div className="mt-8 bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-sm">
           <div className="flex items-center gap-3 mb-6 border-b border-border/60 pb-4">
             <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-600">
@@ -614,10 +613,10 @@ export default function ParticipantLiveMatchPage() {
             </div>
             <div>
               <h3 className="text-xl font-bold font-space-grotesk text-foreground">
-                ROUND INSTRUCTIONS & RULES
+                BATTLE INSTRUCTIONS & RULES
               </h3>
               <p className="text-xs text-slate-500 uppercase tracking-wider">
-                How to participate in Round {String(match.round_number).padStart(2, '0')}
+                How to participate in Battle {match.round_number}
               </p>
             </div>
           </div>
@@ -650,7 +649,7 @@ export default function ParticipantLiveMatchPage() {
               </div>
               <h4 className="font-bold text-foreground text-sm mb-1">Submit Your Bet</h4>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Confirm your bet before gambits close. Once locked, your bet is permanently registered for this round.
+                Confirm your bet before gambits close. Once locked, your bet is permanently registered for this battle.
               </p>
             </div>
           </div>

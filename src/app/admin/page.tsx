@@ -56,7 +56,7 @@ export default function AdminOverview() {
         </Card>
         
         <Card variant="elevated">
-          <CardHeader className="text-slate-500 pb-2">Current Round</CardHeader>
+          <CardHeader className="text-slate-500 pb-2">Current Battle</CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-accent">{overview?.currentRound || 0}</div>
           </CardContent>

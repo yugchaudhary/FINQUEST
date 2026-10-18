@@ -39,7 +39,7 @@ export const LIVE_EVENTS = {
 } as const
 
 export function formatRoundLabel(roundNumber: number, total = PHASE_1_ROUNDS): string {
-  return `ROUND ${String(roundNumber).padStart(2, '0')} / ${total}`
+  return `Battle ${roundNumber}`
 }
 
 export function sanitizeGambitAmount(raw: unknown): number {

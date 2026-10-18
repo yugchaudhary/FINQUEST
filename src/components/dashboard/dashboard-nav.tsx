@@ -14,7 +14,7 @@ export function DashboardNav({ user, team, eventState }: DashboardNavProps) {
     switch (eventState?.current_phase) {
       case 'SETUP': return 'SETUP'
       case 'PHASE_1': 
-        if (eventState?.current_round) return `PHASE 1 · ROUND 0${eventState.current_round}`
+        if (eventState?.current_round) return `PHASE 1 · BATTLE ${eventState.current_round}`
         return 'PHASE 1'
       case 'PHASE_1_REVEAL': return 'PHASE 1 REVEAL'
       case 'FINALS_TRANSITION': return 'FINALS TRANSITION'

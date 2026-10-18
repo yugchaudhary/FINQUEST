@@ -52,7 +52,7 @@ export function LiveStatusCard({ eventState, team }: LiveStatusCardProps) {
               <CheckCircle2 className="w-8 h-8 text-green-400" />
             </div>
             <h3 className="text-xl font-bold text-foreground mb-2">Gambit Locked</h3>
-            <p className="text-slate-500">Awaiting judge decision for Round {eventState.current_round}.</p>
+            <p className="text-slate-500">Awaiting judge decision for Battle {eventState.current_round}.</p>
           </div>
         )
       }
@@ -65,7 +65,7 @@ export function LiveStatusCard({ eventState, team }: LiveStatusCardProps) {
                 <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                 LIVE NOW
               </span>
-              <span className="text-slate-500 font-mono text-sm">ROUND 0{eventState.current_round}</span>
+              <span className="text-slate-500 font-mono text-sm">Battle {eventState.current_round}</span>
             </div>
             
             <div className="flex items-center gap-4 text-lg md:text-xl font-bold">
@@ -94,7 +94,7 @@ export function LiveStatusCard({ eventState, team }: LiveStatusCardProps) {
         <div className="flex flex-col items-center justify-center py-6 text-center opacity-80">
           <Activity className="w-8 h-8 text-purple-400 mb-4 animate-pulse" />
           <h3 className="text-lg font-medium text-foreground">Event Setup in Progress</h3>
-          <p className="text-slate-500 text-sm mt-1">Teams are registered and confirmed. The administrator will broadcast Round 1 shortly.</p>
+          <p className="text-slate-500 text-sm mt-1">Teams are registered and confirmed. The administrator will broadcast Battle 1 shortly.</p>
         </div>
       )
     }
@@ -103,7 +103,7 @@ export function LiveStatusCard({ eventState, team }: LiveStatusCardProps) {
     return (
       <div className="flex flex-col items-center justify-center py-6 text-center opacity-70">
         <Activity className="w-8 h-8 text-slate-500 mb-4" />
-        <h3 className="text-lg font-medium text-slate-600">Awaiting Next Round</h3>
+        <h3 className="text-lg font-medium text-slate-600">Awaiting Next Battle</h3>
         <p className="text-slate-500 text-sm mt-1">The Admin will start the next phase shortly.</p>
       </div>
     )

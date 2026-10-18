@@ -42,7 +42,7 @@ export function DashboardHero({ user, team, eventState }: DashboardHeroProps) {
     if (screen === 'MATCH_LIVE') {
       return {
         tag: 'LIVE NOW',
-        title: `Round 0${eventState.current_round} Live`,
+        title: `Battle ${eventState.current_round} Live`,
         subtitle: 'The pitch is underway. Make your investment decisions.'
       }
     }

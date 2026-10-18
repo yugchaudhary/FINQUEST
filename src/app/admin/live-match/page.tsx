@@ -529,7 +529,7 @@ export default function AdminLiveMatchPage() {
               </div>
               <div className="bg-background rounded-xl p-4 text-center">
                 <div className="text-2xl font-black text-accent">{currentMatch.round_number}</div>
-                <div className="text-xs text-slate-500 mt-1 uppercase tracking-wider">Round</div>
+                <div className="text-xs text-slate-500 mt-1 uppercase tracking-wider">Battle</div>
               </div>
             </div>
 
