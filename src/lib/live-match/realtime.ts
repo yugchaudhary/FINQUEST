@@ -35,7 +35,7 @@ export async function emitLiveEvent(
       })
     }
     // Allow brief moment for broadcast packet to flush over WebSocket
-    await new Promise((resolve) => setTimeout(resolve, 300))
+    await new Promise((resolve) => setTimeout(resolve, 50))
   } catch (error) {
     console.error('Failed to emit live event', event, error)
   } finally {

@@ -3,15 +3,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function requireUser() {
   const supabase = await createClient()
-  const { data: sessData } = await supabase.auth.getSession()
-  let user = sessData?.session?.user || null
+  const { data: { user }, error } = await supabase.auth.getUser()
 
-  if (!user) {
-    const { data: { user: remoteUser } } = await supabase.auth.getUser()
-    user = remoteUser || null
-  }
-
-  if (!user) return { ok: false as const, error: 'Not authenticated' }
+  if (error || !user) return { ok: false as const, error: 'Not authenticated' }
   return { ok: true as const, user, adminClient: createAdminClient() }
 }
 

@@ -99,63 +99,8 @@ export async function lockGambit(matchId: string, selectedTeamId: string, amount
         return { success: false, error: 'Investments are closed for this battle' }
       }
 
-      // Resilient fallback if RPC encountered match status string mismatch
-      try {
-        // Re-verify match status right before fallback insert
-        const { data: freshMatch } = await adminClient
-          .from('matches')
-          .select('status')
-          .eq('id', validated.match_id)
-          .single()
-
-        if (!freshMatch || !['GAMBITS_OPEN', 'MATCH_LIVE', 'LIVE'].includes(freshMatch.status)) {
-          return { success: false, error: 'Investments are closed for this battle' }
-        }
-
-        const { data: teamData } = await adminClient.from('teams').select('current_balance').eq('id', team.id).single()
-        if (!teamData || (teamData.current_balance || 0) < gambitAmount) {
-          return { success: false, error: 'Insufficient balance' }
-        }
-
-        const { data: existing } = await adminClient.from('gambits').select('id').eq('match_id', validated.match_id).eq('investor_team_id', team.id).maybeSingle()
-        if (existing) {
-          return { success: false, error: 'You have already placed an Investment for this match' }
-        }
-
-        const { error: balErr } = await adminClient.from('teams').update({
-          current_balance: (teamData.current_balance || 0) - gambitAmount
-        }).eq('id', team.id)
-        if (balErr) return { success: false, error: balErr.message }
-
-        const { data: fallbackData, error: insErr } = await adminClient.from('gambits').insert({
-          match_id: validated.match_id,
-          investor_team_id: team.id,
-          selected_team_id: validated.selected_team_id,
-          amount: gambitAmount,
-          status: 'LOCKED'
-        }).select().single()
-
-        if (insErr) {
-          await adminClient.from('teams').update({ current_balance: teamData.current_balance }).eq('id', team.id)
-          return { success: false, error: insErr.message }
-        }
-
-        const { count } = await adminClient
-          .from('gambits')
-          .select('*', { count: 'exact', head: true })
-          .eq('match_id', validated.match_id)
-
-        await emitLiveEvent(LIVE_EVENTS.GAMBIT_LOCKED, {
-          matchId: validated.match_id,
-          lockedCount: count || 0,
-        })
-
-        revalidatePath('/dashboard')
-        revalidatePath('/dashboard/live-match')
-        return { success: true, data: fallbackData }
-      } catch (fbErr: any) {
-        return { success: false, error: message.replace(/^.*ERROR:\s*/i, '') }
-      }
+      // Unknown RPC error – surface it cleanly
+      return { success: false, error: message.replace(/^.*ERROR:\s*/i, '') }
     }
 
     const { count } = await adminClient

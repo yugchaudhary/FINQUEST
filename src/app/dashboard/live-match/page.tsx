@@ -93,16 +93,22 @@ export default function ParticipantLiveMatchPage() {
         }
         loadData()
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'gambits' }, loadData)
       .subscribe()
 
-    // 3-second heartbeat fallback in case mobile tab sleeps or socket reconnects
+    // 15-second heartbeat fallback for stale connections
     const heartbeat = setInterval(() => {
       loadData()
-    }, 3000)
+    }, 15000)
+
+    // Refresh immediately when a mobile tab wakes up
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') loadData()
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
 
     return () => {
       clearInterval(heartbeat)
+      document.removeEventListener('visibilitychange', handleVisibility)
       supabase.removeChannel(ch)
     }
   }, [])

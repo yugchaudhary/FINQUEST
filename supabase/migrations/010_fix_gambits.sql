@@ -9,13 +9,13 @@ DECLARE
     v_current_balance BIGINT;
     v_gambit_id UUID;
 BEGIN
-    -- Verify match is LIVE
+    -- Verify match is accepting bets
     SELECT status INTO v_match_status FROM matches WHERE id = p_match_id FOR UPDATE;
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Match not found';
     END IF;
-    IF v_match_status != 'LIVE' THEN
-        RAISE EXCEPTION 'Match is not LIVE';
+    IF v_match_status NOT IN ('GAMBITS_OPEN', 'MATCH_LIVE', 'LIVE') THEN
+        RAISE EXCEPTION 'Match is not accepting Gambits';
     END IF;
 
     -- Verify balance and role
@@ -59,15 +59,24 @@ BEGIN
         RAISE EXCEPTION 'Total votes must equal 5';
     END IF;
 
-    -- Look up the match and verify it is LIVE
+    -- Look up the match and verify it is ready for settlement
     SELECT * INTO v_match_record FROM matches WHERE id = p_match_id FOR UPDATE;
     
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Match not found';
     END IF;
-    
-    IF v_match_record.status != 'LIVE' THEN
-        RAISE EXCEPTION 'Match is not LIVE';
+
+    IF v_match_record.status IN ('MATCH_COMPLETE', 'COMPLETED', 'PROCESSING_RESULT') THEN
+        RAISE EXCEPTION 'Match has already been settled';
+    END IF;
+
+    IF v_match_record.status NOT IN ('GAMBITS_CLOSED', 'AWAITING_JUDGE_RESULT', 'LIVE') THEN
+        RAISE EXCEPTION 'Gambits must be closed before entering a result';
+    END IF;
+
+    -- Guard against double-settle
+    IF EXISTS (SELECT 1 FROM judge_results WHERE match_id = p_match_id) THEN
+        RAISE EXCEPTION 'Match has already been settled';
     END IF;
 
     -- Determine multipliers based on vote distribution
