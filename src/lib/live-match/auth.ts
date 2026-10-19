@@ -26,6 +26,18 @@ export async function requireUser() {
           error: 'Logged in from another device. Only one device is allowed per team account.'
         }
       }
+    } else {
+      // Keep active session fresh (throttled to every 2 minutes)
+      const lastActive = user.user_metadata?.session_last_active
+      if (!lastActive || Date.now() - Number(lastActive) > 2 * 60 * 1000) {
+        const adminClient = createAdminClient()
+        adminClient.auth.admin.updateUserById(user.id, {
+          user_metadata: {
+            ...(user.user_metadata || {}),
+            session_last_active: Date.now()
+          }
+        }).catch(() => {})
+      }
     }
   }
 

@@ -324,17 +324,38 @@ export async function signIn(teamNameInput: string, passwordInput: string) {
 
     const role = userData?.auth_role || 'PARTICIPANT'
 
-    // If PARTICIPANT, enforce single-device login
+    // If PARTICIPANT, enforce single-device login (block login if already active elsewhere)
     if (role === 'PARTICIPANT') {
-      const sessionId = crypto.randomUUID()
+      const currentSessionId = data.user.user_metadata?.current_session_id
+      const lastActive = data.user.user_metadata?.session_last_active
+      const cookieStore = await cookies()
+      const clientSession = cookieStore.get('finquest_device_session')?.value
+
+      // Check if team is already logged in on another device
+      if (currentSessionId) {
+        const isSameDevice = clientSession && clientSession === currentSessionId
+        // Active if last activity was within 10 minutes
+        const isRecentlyActive = lastActive && (Date.now() - Number(lastActive) < 10 * 60 * 1000)
+
+        if (!isSameDevice && isRecentlyActive) {
+          // Another device is actively using this account — reject this login attempt
+          await supabase.auth.signOut()
+          return {
+            success: false,
+            error: 'This team is already logged in on another device. Only one device is allowed to log in at a time. Please log out from the active device first.'
+          }
+        }
+      }
+
+      const sessionId = (clientSession && clientSession === currentSessionId) ? currentSessionId : crypto.randomUUID()
       await adminClient.auth.admin.updateUserById(data.user.id, {
         user_metadata: {
           ...(data.user.user_metadata || {}),
-          current_session_id: sessionId
+          current_session_id: sessionId,
+          session_last_active: Date.now()
         }
       })
 
-      const cookieStore = await cookies()
       cookieStore.set('finquest_device_session', sessionId, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -386,6 +407,17 @@ export async function signInAdmin(emailInput: string, passwordInput: string) {
 export async function signOut() {
   const supabase = await createClient()
   try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const adminClient = createAdminClient()
+      await adminClient.auth.admin.updateUserById(user.id, {
+        user_metadata: {
+          ...(user.user_metadata || {}),
+          current_session_id: null,
+          session_last_active: null
+        }
+      })
+    }
     const cookieStore = await cookies()
     cookieStore.delete('finquest_device_session')
   } catch {}
@@ -414,6 +446,16 @@ export async function getSession() {
         return {
           success: false,
           error: 'Logged in from another device. Only one device is allowed per team account.'
+        }
+      } else {
+        const lastActive = user.user_metadata?.session_last_active
+        if (!lastActive || Date.now() - Number(lastActive) > 2 * 60 * 1000) {
+          adminClient.auth.admin.updateUserById(user.id, {
+            user_metadata: {
+              ...(user.user_metadata || {}),
+              session_last_active: Date.now()
+            }
+          }).catch(() => {})
         }
       }
     }
