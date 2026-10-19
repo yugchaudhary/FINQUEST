@@ -191,7 +191,6 @@ export function useEventState(options?: { role?: 'ADMIN' | 'PARTICIPANT'; teamId
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           setConnectionStatus('connected')
-          fetchInitialState()
         } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
           setConnectionStatus('reconnecting')
         }

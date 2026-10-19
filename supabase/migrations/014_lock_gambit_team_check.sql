@@ -30,6 +30,10 @@ BEGIN
     IF p_selected_team_id IS NULL OR p_selected_team_id NOT IN (v_red, v_blue) THEN
         RAISE EXCEPTION 'Selected team is not in this match';
     END IF;
+    -- Amount validation
+    IF p_amount IS NULL OR p_amount <= 0 OR p_amount > 250000 THEN
+        RAISE EXCEPTION 'Gambit amount must be between 1 and 250000';
+    END IF;
     -- Verify balance, role and that the team is active
     SELECT current_balance INTO v_current_balance FROM teams
     WHERE id = p_investor_team_id AND role = 'INVESTOR' AND is_active IS TRUE FOR UPDATE;

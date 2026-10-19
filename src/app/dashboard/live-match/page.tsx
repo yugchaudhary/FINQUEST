@@ -71,27 +71,35 @@ export default function ParticipantLiveMatchPage() {
   useEffect(() => {
     loadData()
 
+    let timeoutId: NodeJS.Timeout
+    const throttledLoadData = () => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        loadData()
+      }, Math.random() * 1200) // Random jitter between 0-1.2s to prevent thundering herd
+    }
+
     const supabase = createClient()
     const ch = supabase.channel(EVENT_CHANNEL)
-      .on('broadcast', { event: 'MATCH_BROADCAST' }, loadData)
-      .on('broadcast', { event: 'MATCH_BROADCASTED' }, loadData)
+      .on('broadcast', { event: 'MATCH_BROADCAST' }, throttledLoadData)
+      .on('broadcast', { event: 'MATCH_BROADCASTED' }, throttledLoadData)
       .on('broadcast', { event: 'GAMBITS_CLOSED' }, () => {
         setMatch((prev: any) => (prev ? { ...prev, status: 'GAMBITS_CLOSED' } : null))
-        loadData()
+        throttledLoadData()
       })
-      .on('broadcast', { event: 'MATCH_RESET' }, loadData)
-      .on('broadcast', { event: 'MATCH_COMPLETED' }, loadData)
+      .on('broadcast', { event: 'MATCH_RESET' }, throttledLoadData)
+      .on('broadcast', { event: 'MATCH_COMPLETED' }, throttledLoadData)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, (payload) => {
         if (payload.new && (payload.new as any).status === 'GAMBITS_CLOSED') {
           setMatch((prev: any) => (prev ? { ...prev, status: 'GAMBITS_CLOSED' } : null))
         }
-        loadData()
+        throttledLoadData()
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'event_state' }, (payload) => {
         if (payload.new && (payload.new as any).current_screen_state === 'AWAITING_RESULT') {
           setMatch((prev: any) => (prev ? { ...prev, status: 'GAMBITS_CLOSED' } : null))
         }
-        loadData()
+        throttledLoadData()
       })
       .subscribe()
 
@@ -107,6 +115,7 @@ export default function ParticipantLiveMatchPage() {
     document.addEventListener('visibilitychange', handleVisibility)
 
     return () => {
+      clearTimeout(timeoutId)
       clearInterval(heartbeat)
       document.removeEventListener('visibilitychange', handleVisibility)
       supabase.removeChannel(ch)

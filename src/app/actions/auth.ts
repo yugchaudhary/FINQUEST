@@ -41,11 +41,17 @@ async function verifyAndClaimRegistrationNumber(regNumber: string, userId: strin
   if (error || !allowedReg) throw new Error('Invalid Registration Number')
   if (allowedReg.is_used) throw new Error('Registration Number is already in use')
 
-  // Claim it
-  await adminClient
+  // Claim it atomically with WHERE is_used = false
+  const { data: claimed, error: claimError } = await adminClient
     .from('allowed_registrations')
     .update({ is_used: true, used_by_user_id: userId })
     .eq('registration_number', regNumber)
+    .eq('is_used', false)
+    .select()
+
+  if (claimError || !claimed || claimed.length === 0) {
+    throw new Error('Registration Number is already in use')
+  }
 }
 
 export async function registerLeader(data: any) {
@@ -264,12 +270,13 @@ export async function signIn(teamNameInput: string, passwordInput: string) {
 
     if (team) {
       targetTeamId = team.id
-      const { data: userRec } = await adminClient
+      const { data: userRecs } = await adminClient
         .from('users')
         .select('id, email, auth_role')
         .eq('team_id', team.id)
-        .maybeSingle()
+        .limit(1)
 
+      const userRec = userRecs?.[0]
       if (userRec) {
         targetEmail = userRec.email
       } else {
@@ -278,12 +285,13 @@ export async function signIn(teamNameInput: string, passwordInput: string) {
       }
     } else {
       // Also check if entered directly as email or user name
-      const { data: userRec } = await adminClient
+      const { data: userRecs } = await adminClient
         .from('users')
         .select('id, email, team_id, auth_role')
         .or(`email.ilike.${teamName},name.ilike.${teamName}`)
-        .maybeSingle()
+        .limit(1)
 
+      const userRec = userRecs?.[0]
       if (userRec) {
         targetEmail = userRec.email
         targetTeamId = userRec.team_id

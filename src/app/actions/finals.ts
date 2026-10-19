@@ -11,7 +11,10 @@ import { emitLiveEvent } from '@/lib/live-match/realtime'
 
 export async function getTeamsForTransition() {
   try {
-    const adminClient = createAdminClient()
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient } = auth
+
     const { data: teams, error } = await adminClient
       .from('teams')
       .select('id, team_name, category, role, is_active, current_balance')
@@ -131,8 +134,8 @@ export async function submitInvestorScore(finalistTeamId: string, score: number)
     z.string().uuid().parse(finalistTeamId)
     const validatedScore = z.number().min(1.0).max(10.0).parse(score)
 
-    // Validate 0.5 increments
-    if ((validatedScore * 2) % 1 !== 0) {
+    // Validate 0.5 increments (immune to IEEE-754 float precision issues)
+    if (!Number.isInteger(Number((validatedScore * 2).toFixed(6)))) {
       return { success: false, error: 'Score must be in 0.5 increments' }
     }
 
