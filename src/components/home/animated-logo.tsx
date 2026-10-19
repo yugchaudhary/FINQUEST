@@ -71,14 +71,14 @@ export function AnimatedLogo() {
           scale: 1,
         }}
         animate={{
-          // On load & trigger: flies high into the air, arcs with tilt, then lands right back on the logo with a bounce!
-          y: [0, -55, -80, -25, 0],
-          x: [0, 20, 30, 8, 0],
-          rotate: [0, -20, 16, -6, 0],
-          scale: [1, 1.15, 1.25, 1.05, 1],
+          // On load & trigger: gentle subtle lift and arc, landing right back on the logo with a soft bounce
+          y: [0, -16, -26, -8, 0],
+          x: [0, 6, 10, 3, 0],
+          rotate: [0, -6, 5, -2, 0],
+          scale: [1, 1.04, 1.08, 1.02, 1],
         }}
         transition={{
-          duration: 2.2,
+          duration: 1.8,
           times: [0, 0.3, 0.6, 0.85, 1],
           ease: [0.25, 1, 0.5, 1],
           delay: flightKey === 0 ? 0.35 : 0,

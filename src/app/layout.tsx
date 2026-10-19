@@ -3,7 +3,7 @@ import './globals.css'
 import { ToastProvider } from '@/components/ui/toast'
 
 export const metadata: Metadata = {
-  title: "THE FOUNDER'S GAMBIT",
+  title: "FOUNDER'S GOT PATENT",
   description: 'A strategic battle of ideas, conviction and calculated risk.',
   icons: { icon: '/favicon.ico' },
 }
