@@ -59,11 +59,6 @@ export default function LandingPage() {
             <span className="font-display font-black text-xl tracking-tight text-foreground">FOUNDER&apos;S GOT PATENT</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/admin/login">
-              <Button variant="ghost" className="text-slate-500 hover:bg-slate-100">
-                Admin
-              </Button>
-            </Link>
             <Link href="/login">
               <Button className="bg-[#5eb3d1] hover:bg-[#4ea2c0] text-foreground border-0">
                 Participant Login
