@@ -33,13 +33,26 @@ export async function lockGambit(matchId: string, selectedTeamId: string, amount
       return { success: false, error: 'Investment amount must be greater than 0' }
     }
 
-    // 1. Strictly verify match exists and is currently accepting investments
-    const { data: matchData, error: matchErr } = await adminClient
-      .from('matches')
-      .select('status, red_team_id, blue_team_id')
-      .eq('id', validated.match_id)
-      .single()
+    // Pre-flight checks executed in parallel to minimize lock latency
+    const [matchRes, eventStateRes, teamGambitsRes] = await Promise.all([
+      adminClient
+        .from('matches')
+        .select('status, red_team_id, blue_team_id')
+        .eq('id', validated.match_id)
+        .single(),
+      adminClient
+        .from('event_state')
+        .select('current_screen_state, phase_1_leaderboard_published')
+        .eq('id', 1)
+        .single(),
+      adminClient
+        .from('gambits')
+        .select('amount')
+        .eq('investor_team_id', team.id),
+    ])
 
+    const matchData = matchRes.data
+    const matchErr = matchRes.error
     if (matchErr || !matchData) {
       return { success: false, error: 'Match not found' }
     }
@@ -55,13 +68,7 @@ export async function lockGambit(matchId: string, selectedTeamId: string, amount
       return { success: false, error: 'Selected team is not in this match' }
     }
 
-    // 2. Also check event_state to ensure event is currently in MATCH_LIVE screen state
-    const { data: eventState } = await adminClient
-      .from('event_state')
-      .select('current_screen_state, phase_1_leaderboard_published')
-      .eq('id', 1)
-      .single()
-
+    const eventState = eventStateRes.data
     if (eventState && eventState.current_screen_state !== 'MATCH_LIVE') {
       return { success: false, error: 'Investments are closed for this battle' }
     }
@@ -73,12 +80,8 @@ export async function lockGambit(matchId: string, selectedTeamId: string, amount
     // after leaderboard published: y = y + z = current_balance
     const isPhase1Published = Boolean(eventState?.phase_1_leaderboard_published)
     if (!isPhase1Published) {
-      const { data: teamGambits } = await adminClient
-        .from('gambits')
-        .select('amount')
-        .eq('investor_team_id', team.id)
-
-      const totalInvested = (teamGambits || []).reduce((sum, g) => sum + (Number(g.amount) || 0), 0)
+      const teamGambits = teamGambitsRes.data || []
+      const totalInvested = teamGambits.reduce((sum, g) => sum + (Number(g.amount) || 0), 0)
       const x = Number(team.starting_balance || 0)
       const availableBalance = Math.max(0, x - totalInvested)
 

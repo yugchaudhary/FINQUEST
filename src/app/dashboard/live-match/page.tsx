@@ -4,9 +4,8 @@ import React, { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
-import { getCurrentMatch } from '@/app/actions/matches'
-import { lockGambit, getMyGambit } from '@/app/actions/gambits'
-import { getDashboardData } from '@/app/actions/dashboard'
+import { getLiveMatchState } from '@/app/actions/matches'
+import { lockGambit } from '@/app/actions/gambits'
 import { EVENT_CHANNEL, MAX_GAMBIT_AMOUNT } from '@/lib/constants'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -35,78 +34,111 @@ export default function ParticipantLiveMatchPage() {
   const [error, setError] = useState<string | null>(null)
   const [isLocking, setIsLocking] = useState(false)
   const isInitialLoadRef = useRef(true)
+  const isFetchingRef = useRef(false)
+  const hasQueuedFetchRef = useRef(false)
 
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null)
   const [amountStr, setAmountStr] = useState<string>('')
 
   const loadData = async () => {
+    if (isFetchingRef.current) {
+      hasQueuedFetchRef.current = true
+      return
+    }
+    isFetchingRef.current = true
     try {
-      const dashRes = await getDashboardData()
-      if (!dashRes.success || !dashRes.data?.team) {
-        if (isInitialLoadRef.current && dashRes.error === 'Not authenticated') {
+      const res = await getLiveMatchState()
+      if (!res.success || !res.data?.team) {
+        if (isInitialLoadRef.current && (res.error === 'Not authenticated' || res.error === 'Team not found')) {
           router.push('/login')
         }
         return
       }
       isInitialLoadRef.current = false
-      setTeam(dashRes.data.team)
-
-      const matchRes = await getCurrentMatch()
-      if (matchRes.success && matchRes.data) {
-        setMatch(matchRes.data)
-        const gambitRes = await getMyGambit(matchRes.data.id)
-        if (gambitRes.success && gambitRes.data) {
-          setGambit(gambitRes.data)
-        }
-      } else {
-        setMatch(null)
-      }
+      setTeam(res.data.team)
+      setMatch(res.data.match)
+      setGambit(res.data.gambit)
     } catch (e) {
       console.error(e)
     } finally {
       setLoading(false)
+      isFetchingRef.current = false
+      if (hasQueuedFetchRef.current) {
+        hasQueuedFetchRef.current = false
+        throttledLoadData(500)
+      }
     }
+  }
+
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null)
+  const throttledLoadData = (delay = Math.random() * 1200) => {
+    if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current)
+    timeoutIdRef.current = setTimeout(() => {
+      loadData()
+    }, delay)
   }
 
   useEffect(() => {
     loadData()
 
-    let timeoutId: NodeJS.Timeout
-    const throttledLoadData = () => {
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => {
-        loadData()
-      }, Math.random() * 1200) // Random jitter between 0-1.2s to prevent thundering herd
+    const handleMatchBroadcast = (payload: any) => {
+      if (payload) {
+        const red = payload.redTeam || payload.red_team
+        const blue = payload.blueTeam || payload.blue_team
+        setMatch({
+          id: payload.matchId || payload.match_id || payload.id,
+          round_number: payload.roundNumber || payload.round_number,
+          category: payload.category,
+          status: payload.status || 'GAMBITS_OPEN',
+          red_team: red ? { id: red.id, team_name: red.name || red.team_name } : undefined,
+          blue_team: blue ? { id: blue.id, team_name: blue.name || blue.team_name } : undefined,
+        })
+        setGambit(null)
+        setSelectedTeamId(null)
+        setAmountStr('')
+        setError(null)
+      }
+      throttledLoadData()
     }
 
     const supabase = createClient()
     const ch = supabase.channel(EVENT_CHANNEL)
-      .on('broadcast', { event: 'MATCH_BROADCAST' }, throttledLoadData)
-      .on('broadcast', { event: 'MATCH_BROADCASTED' }, throttledLoadData)
+      .on('broadcast', { event: 'MATCH_BROADCAST' }, (msg: any) => handleMatchBroadcast(msg?.payload))
+      .on('broadcast', { event: 'MATCH_BROADCASTED' }, (msg: any) => handleMatchBroadcast(msg?.payload))
       .on('broadcast', { event: 'GAMBITS_CLOSED' }, () => {
         setMatch((prev: any) => (prev ? { ...prev, status: 'GAMBITS_CLOSED' } : null))
+      })
+      .on('broadcast', { event: 'MATCH_RESET' }, () => {
+        setMatch(null)
+        setGambit(null)
         throttledLoadData()
       })
-      .on('broadcast', { event: 'MATCH_RESET' }, throttledLoadData)
-      .on('broadcast', { event: 'MATCH_COMPLETED' }, throttledLoadData)
+      .on('broadcast', { event: 'MATCH_COMPLETED' }, () => {
+        setMatch((prev: any) => (prev ? { ...prev, status: 'COMPLETED' } : null))
+        throttledLoadData()
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, (payload) => {
         if (payload.new && (payload.new as any).status === 'GAMBITS_CLOSED') {
           setMatch((prev: any) => (prev ? { ...prev, status: 'GAMBITS_CLOSED' } : null))
+        } else {
+          throttledLoadData()
         }
-        throttledLoadData()
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'event_state' }, (payload) => {
         if (payload.new && (payload.new as any).current_screen_state === 'AWAITING_RESULT') {
           setMatch((prev: any) => (prev ? { ...prev, status: 'GAMBITS_CLOSED' } : null))
+        } else {
+          throttledLoadData()
         }
-        throttledLoadData()
       })
       .subscribe()
 
-    // 15-second heartbeat fallback for stale connections
+    // 30-45s jittered heartbeat fallback (only when tab is visible)
     const heartbeat = setInterval(() => {
-      loadData()
-    }, 15000)
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        loadData()
+      }
+    }, 30000 + Math.random() * 15000)
 
     // Refresh immediately when a mobile tab wakes up
     const handleVisibility = () => {
@@ -115,7 +147,7 @@ export default function ParticipantLiveMatchPage() {
     document.addEventListener('visibilitychange', handleVisibility)
 
     return () => {
-      clearTimeout(timeoutId)
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current)
       clearInterval(heartbeat)
       document.removeEventListener('visibilitychange', handleVisibility)
       supabase.removeChannel(ch)
@@ -202,13 +234,37 @@ export default function ParticipantLiveMatchPage() {
     setError(null)
     const res = await lockGambit(match.id, selectedTeamId, amt)
     if (res.success) {
-      await loadData()
+      if (res.data) {
+        setGambit(res.data)
+      } else {
+        setGambit({
+          match_id: match.id,
+          selected_team_id: selectedTeamId,
+          amount: amt,
+          status: 'LOCKED',
+          locked_at: new Date().toISOString(),
+        })
+      }
+      setTeam((prev: any) => {
+        if (!prev) return prev
+        const prevDisplay = Number(prev.display_balance ?? prev.current_balance ?? 0)
+        const prevCurrent = Number(prev.current_balance ?? 0)
+        const prevInvested = Number(prev.total_invested ?? 0)
+        return {
+          ...prev,
+          display_balance: Math.max(0, prevDisplay - amt),
+          current_balance: Math.max(0, prevCurrent - amt),
+          total_invested: prevInvested + amt,
+        }
+      })
+      // Non-blocking background sync
+      loadData()
     } else {
       if (res.error?.includes('closed') || res.error?.includes('not LIVE')) {
         setMatch((prev: any) => (prev ? { ...prev, status: 'GAMBITS_CLOSED' } : null))
       }
       setError(res.error || 'Failed to submit investment')
-      await loadData()
+      loadData()
     }
     setIsLocking(false)
   }

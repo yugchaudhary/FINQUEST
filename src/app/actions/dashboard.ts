@@ -13,20 +13,22 @@ export async function getDashboardData() {
     const { data: userData } = await adminClient.from('users').select('team_id, auth_role').eq('id', user.id).maybeSingle()
     if (!userData?.team_id) return { success: false, error: 'Team not found' }
 
-    // Fetch team with category and balance
-    const { data: team } = await adminClient.from('teams').select('*, categories(name)').eq('id', userData.team_id).maybeSingle()
-    
-    // Fetch members
-    const { data: members } = await adminClient.from('team_members').select('*').eq('team_id', userData.team_id)
+    // Fetch team, members, announcements, event_state, and gambits concurrently
+    const [teamRes, membersRes, announcementsRes, eventStateRes, gambitsRes] = await Promise.all([
+      adminClient.from('teams').select('*, categories(name)').eq('id', userData.team_id).maybeSingle(),
+      adminClient.from('team_members').select('*').eq('team_id', userData.team_id),
+      adminClient.from('announcements').select('*').order('published_at', { ascending: false }),
+      adminClient.from('event_state').select('*').maybeSingle(),
+      adminClient.from('gambits').select('amount').eq('investor_team_id', userData.team_id),
+    ])
 
-    // Fetch announcements reliably using adminClient (bypassing any RLS token delays)
-    const { data: announcements, error: annError } = await adminClient.from('announcements').select('*').order('published_at', { ascending: false })
-    if (annError) {
-      console.error('Error fetching announcements:', annError)
+    const team = teamRes.data
+    const members = membersRes.data || []
+    const announcements = announcementsRes.data || []
+    if (announcementsRes.error) {
+      console.error('Error fetching announcements:', announcementsRes.error)
     }
-
-    // Fetch event state to know what screen to show globally (e.g. Phase 1 Leaderboard)
-    const { data: eventState } = await adminClient.from('event_state').select('*').maybeSingle()
+    const eventState = eventStateRes.data
 
     // Calculate investor display_balance according to logic:
     // x: amount assigned by admin (starting_balance)
@@ -40,12 +42,8 @@ export async function getDashboardData() {
     let displayBalance = Number(team?.current_balance || 0)
 
     if (team?.role === 'INVESTOR') {
-      const { data: gambits } = await adminClient
-        .from('gambits')
-        .select('amount')
-        .eq('investor_team_id', userData.team_id)
-
-      totalInvested = (gambits || []).reduce((sum, g) => sum + (Number(g.amount) || 0), 0)
+      const gambits = gambitsRes.data || []
+      totalInvested = gambits.reduce((sum, g) => sum + (Number(g.amount) || 0), 0)
       const isPhase1Published = Boolean(eventState?.phase_1_leaderboard_published)
       const x = Number(team?.starting_balance || 0)
       displayBalance = isPhase1Published ? Number(team?.current_balance || 0) : Math.max(0, x - totalInvested)

@@ -281,6 +281,114 @@ export async function getMatchActivity(matchId: string) {
   }
 }
 
+export async function getLiveMatchState() {
+  try {
+    const auth = await requireUser()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
+
+    const { data: userData } = await adminClient
+      .from('users')
+      .select('team_id, auth_role')
+      .eq('id', user.id)
+      .single()
+
+    if (!userData?.team_id) {
+      return { success: false, error: 'Team not found' }
+    }
+
+    // Parallel execution of all required live match state queries
+    const [teamRes, matchRes, eventStateRes, gambitsRes] = await Promise.all([
+      adminClient
+        .from('teams')
+        .select('id, team_name, role, starting_balance, current_balance, is_active')
+        .eq('id', userData.team_id)
+        .maybeSingle(),
+      adminClient
+        .from('matches')
+        .select(`
+          id, round_number, category, status,
+          red_team:teams!matches_red_team_id_fkey(id, team_name, category, role, is_active),
+          blue_team:teams!matches_blue_team_id_fkey(id, team_name, category, role, is_active)
+        `)
+        .in('status', [...ACTIVE_MATCH_STATUSES, 'LIVE'])
+        .order('round_number', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      adminClient
+        .from('event_state')
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle(),
+      adminClient
+        .from('gambits')
+        .select('id, match_id, selected_team_id, amount, status, locked_at')
+        .eq('investor_team_id', userData.team_id),
+    ])
+
+    const team = teamRes.data
+    let activeMatch = matchRes.data
+    const eventState = eventStateRes.data
+    const allGambits = gambitsRes.data || []
+
+    // Fallback if match wasn't found by active status query but eventState has current_match_id
+    if (!activeMatch && eventState?.current_match_id && eventState.current_screen_state === 'MATCH_LIVE') {
+      const { data: fallbackMatch } = await adminClient
+        .from('matches')
+        .select(`
+          id, round_number, category, status,
+          red_team:teams!matches_red_team_id_fkey(id, team_name, category, role, is_active),
+          blue_team:teams!matches_blue_team_id_fkey(id, team_name, category, role, is_active)
+        `)
+        .eq('id', eventState.current_match_id)
+        .maybeSingle()
+      if (fallbackMatch && fallbackMatch.status !== 'COMPLETED' && fallbackMatch.status !== MATCH_STATUS.MATCH_COMPLETE) {
+        activeMatch = fallbackMatch
+      }
+    }
+
+    // Filter out completed matches
+    if (activeMatch && (activeMatch.status === 'COMPLETED' || activeMatch.status === MATCH_STATUS.MATCH_COMPLETE)) {
+      activeMatch = null
+    }
+
+    // Calculate investor display_balance and total_invested
+    let totalInvested = 0
+    let displayBalance = Number(team?.current_balance || 0)
+
+    if (team?.role === 'INVESTOR') {
+      totalInvested = allGambits.reduce((sum, g) => sum + (Number(g.amount) || 0), 0)
+      const isPhase1Published = Boolean(eventState?.phase_1_leaderboard_published)
+      const x = Number(team?.starting_balance || 0)
+      displayBalance = isPhase1Published ? Number(team?.current_balance || 0) : Math.max(0, x - totalInvested)
+    }
+
+    // Find gambit for the active match
+    let myGambit = null
+    if (activeMatch) {
+      myGambit = allGambits.find((g: any) => g.match_id === activeMatch.id) || null
+    }
+
+    return {
+      success: true,
+      data: {
+        team: team
+          ? {
+              ...team,
+              total_invested: totalInvested,
+              display_balance: displayBalance,
+            }
+          : null,
+        match: activeMatch,
+        gambit: myGambit,
+        eventState,
+      },
+    }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
 export async function getInvestorLiveState() {
   try {
     const auth = await requireUser()
@@ -293,23 +401,27 @@ export async function getInvestorLiveState() {
       .eq('id', user.id)
       .single()
 
-    const { data: eventState } = await adminClient
-      .from('event_state')
-      .select('*')
-      .eq('id', 1)
-      .single()
+    const [eventStateRes, activeMatchRes, teamRes] = await Promise.all([
+      adminClient.from('event_state').select('*').eq('id', 1).single(),
+      adminClient
+        .from('matches')
+        .select(`
+          id, round_number, category, status, red_team_id, blue_team_id,
+          red_team:teams!matches_red_team_id_fkey(id, team_name),
+          blue_team:teams!matches_blue_team_id_fkey(id, team_name)
+        `)
+        .in('status', [...ACTIVE_MATCH_STATUSES, 'LIVE'])
+        .order('round_number', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      userData?.team_id
+        ? adminClient.from('teams').select('id, team_name, role, current_balance, starting_balance').eq('id', userData.team_id).maybeSingle()
+        : Promise.resolve({ data: null }),
+    ])
 
-    const { data: activeMatch } = await adminClient
-      .from('matches')
-      .select(`
-        id, round_number, category, status, red_team_id, blue_team_id,
-        red_team:teams!matches_red_team_id_fkey(id, team_name),
-        blue_team:teams!matches_blue_team_id_fkey(id, team_name)
-      `)
-      .in('status', [...ACTIVE_MATCH_STATUSES, 'LIVE'])
-      .order('round_number', { ascending: false })
-      .limit(1)
-      .maybeSingle()
+    const eventState = eventStateRes.data
+    const activeMatch = activeMatchRes.data
+    const team = teamRes.data
 
     let myGambit = null
     if (activeMatch && userData?.team_id) {
@@ -350,6 +462,7 @@ export async function getInvestorLiveState() {
     return {
       success: true,
       data: {
+        team,
         eventState,
         match: publicMatch,
         myGambit: myGambit

@@ -31,8 +31,15 @@ export default function DashboardPage() {
   const [hasRated, setHasRated] = useState(false)
   const [currentFinalist, setCurrentFinalist] = useState<any>(null)
   const isInitialLoadRef = useRef(true)
+  const isFetchingRef = useRef(false)
+  const hasQueuedFetchRef = useRef(false)
 
   const loadData = async () => {
+    if (isFetchingRef.current) {
+      hasQueuedFetchRef.current = true
+      return
+    }
+    isFetchingRef.current = true
     try {
       const res = await getDashboardData()
       if (res.success && res.data) {
@@ -67,43 +74,47 @@ export default function DashboardPage() {
       console.warn('Dashboard sync error:', err)
     } finally {
       setIsLoading(false)
+      isFetchingRef.current = false
+      if (hasQueuedFetchRef.current) {
+        hasQueuedFetchRef.current = false
+        throttledLoadData()
+      }
     }
+  }
+
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null)
+  const throttledLoadData = (delay = Math.random() * 1500) => {
+    if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current)
+    timeoutIdRef.current = setTimeout(() => {
+      loadData()
+    }, delay)
   }
 
   useEffect(() => {
     loadData()
 
-    // Add a small randomized delay to prevent thundering herd when 200 users fetch at once
-    let timeoutId: NodeJS.Timeout
-    const throttledLoadData = () => {
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => {
-        loadData()
-      }, Math.random() * 1500) // Random jitter between 0-1.5s
-    }
-
     const supabase = createClient()
     const ch = supabase.channel(EVENT_CHANNEL)
       // Broadcast events (Fallback / Custom payload events)
-      .on('broadcast', { event: 'CATEGORY_ASSIGNED' }, throttledLoadData)
-      .on('broadcast', { event: 'ANNOUNCEMENT' }, throttledLoadData)
-      .on('broadcast', { event: 'ANNOUNCEMENT_DELETED' }, throttledLoadData)
-      .on('broadcast', { event: 'PHASE_CHANGE' }, throttledLoadData)
-      .on('broadcast', { event: 'LEADERBOARD_PUBLISHED' }, throttledLoadData)
-      .on('broadcast', { event: 'FINALS_LEADERBOARD_UPDATE' }, throttledLoadData)
+      .on('broadcast', { event: 'CATEGORY_ASSIGNED' }, () => throttledLoadData())
+      .on('broadcast', { event: 'ANNOUNCEMENT' }, () => throttledLoadData())
+      .on('broadcast', { event: 'ANNOUNCEMENT_DELETED' }, () => throttledLoadData())
+      .on('broadcast', { event: 'PHASE_CHANGE' }, () => throttledLoadData())
+      .on('broadcast', { event: 'LEADERBOARD_PUBLISHED' }, () => throttledLoadData())
+      .on('broadcast', { event: 'FINALS_LEADERBOARD_UPDATE' }, () => throttledLoadData())
       .on('broadcast', { event: 'FINALIST_BROADCAST' }, (msg) => {
         setHasRated(false)
         setCurrentFinalist(msg.payload)
         throttledLoadData()
       })
       // Database changes (Highly reliable, bypasses Serverless edge issues)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_state' }, throttledLoadData)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, throttledLoadData)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, throttledLoadData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_state' }, () => throttledLoadData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, () => throttledLoadData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => throttledLoadData())
       .subscribe()
 
     return () => { 
-      clearTimeout(timeoutId)
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current)
       supabase.removeChannel(ch) 
     }
   }, [])

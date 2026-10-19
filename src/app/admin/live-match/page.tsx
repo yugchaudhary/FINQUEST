@@ -189,10 +189,14 @@ export default function AdminLiveMatchPage() {
   // ── Realtime listener ────────────────────────────────────────────────────
   useEffect(() => {
     const supabase = createClient()
-    const ch = supabase.channel(`admin-live-${Date.now()}`)
+    const ch = supabase.channel(EVENT_CHANNEL)
     ch
-      .on('broadcast', { event: LIVE_EVENTS.GAMBIT_LOCKED }, () => {
-        setGambitsLocked(n => n + 1)
+      .on('broadcast', { event: LIVE_EVENTS.GAMBIT_LOCKED }, (msg: any) => {
+        if (typeof msg?.payload?.lockedCount === 'number') {
+          setGambitsLocked(msg.payload.lockedCount)
+        } else {
+          setGambitsLocked(n => n + 1)
+        }
       })
       .on('broadcast', { event: LIVE_EVENTS.MATCH_COMPLETED }, () => {
         setPhase('MATCH_COMPLETE')

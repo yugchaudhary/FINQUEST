@@ -4,8 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Activity, ArrowRight, Lock, CheckCircle2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { getCurrentMatch } from '@/app/actions/matches'
-import { hasSubmittedGambit } from '@/app/actions/gambits'
+import { getInvestorLiveState } from '@/app/actions/matches'
 
 interface LiveStatusCardProps {
   eventState: any
@@ -21,16 +20,10 @@ export function LiveStatusCard({ eventState, team }: LiveStatusCardProps) {
   useEffect(() => {
     async function loadMatch() {
       if (screen === 'MATCH_LIVE' && eventState?.current_match_id) {
-        const [matchRes, gambitRes] = await Promise.all([
-          getCurrentMatch(),
-          hasSubmittedGambit(eventState.current_match_id)
-        ])
-        
-        if (matchRes.success) {
-          setMatchInfo(matchRes.data)
-        }
-        if (gambitRes.success && gambitRes.data !== undefined) {
-          setGambitLocked(gambitRes.data)
+        const res = await getInvestorLiveState()
+        if (res.success && res.data) {
+          setMatchInfo(res.data.match)
+          setGambitLocked(!!res.data.myGambit)
         }
       }
     }
