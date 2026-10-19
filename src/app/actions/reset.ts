@@ -6,6 +6,7 @@ import { logAdminAction } from '@/lib/audit'
 import { EVENT_CHANNEL } from '@/lib/constants'
 import { revalidatePath } from 'next/cache'
 import crypto from 'crypto'
+import { requireAdmin } from '@/lib/live-match/auth'
 
 export interface ResetPreviewData {
   participantAccounts: number
@@ -77,21 +78,9 @@ export interface ResetResultData {
  */
 export async function getResetPreview(): Promise<{ success: boolean; data?: ResetPreviewData; error?: string }> {
   try {
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Authentication required. Please log in as an administrator.' }
-
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient
-      .from('users')
-      .select('auth_role')
-      .eq('id', user.id)
-      .single()
-
-    if (adminUser?.auth_role !== 'ADMIN') {
-      return { success: false, error: 'Unauthorized. Administrator privileges required.' }
-    }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: 'Unauthorized. Administrator privileges required.' }
+    const { adminClient } = auth
 
     const [
       { count: participantAccounts },
@@ -183,23 +172,11 @@ export async function resetTestEnvironment(confirmationPhrase: string): Promise<
 
   try {
     // 1. Strict Server-side Authentication & Authorization Check
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) {
-      return { success: false, error: 'Not authenticated. Please log in as an administrator.' }
-    }
-
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient
-      .from('users')
-      .select('id, auth_role, email')
-      .eq('id', user.id)
-      .single()
-
-    if (!adminUser || adminUser.auth_role !== 'ADMIN') {
+    const auth = await requireAdmin()
+    if (!auth.ok) {
       return { success: false, error: 'Unauthorized. Only administrator accounts can reset test data.' }
     }
+    const { adminClient, user } = auth
 
     // 2. Strict Confirmation Phrase Verification
     const normalizedPhrase = (confirmationPhrase || '').trim()

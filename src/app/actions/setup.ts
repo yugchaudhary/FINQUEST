@@ -6,6 +6,7 @@ import { logAdminAction } from '@/lib/audit'
 import { revalidatePath } from 'next/cache'
 import * as xlsx from 'xlsx'
 import { z } from 'zod'
+import { requireAdmin } from '@/lib/live-match/auth'
 
 const teamRosterRowSchema = z.object({
   team_no: z.string().default(''),
@@ -154,14 +155,9 @@ export async function importTeamsFromExcel(formData: FormData) {
  */
 export async function confirmTeamExcelImport(teams: TeamRosterRow[]) {
   try {
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Authentication required' }
-
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: 'Unauthorized: Admin privileges required' }
+    const { adminClient, user } = auth
 
     const results = []
     let createdCount = 0
@@ -270,14 +266,9 @@ export interface ManualTeamData {
  */
 export async function createManualTeams(teams: ManualTeamData[]) {
   try {
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Authentication required' }
-
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized: Admin privileges required' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: 'Unauthorized: Admin privileges required' }
+    const { adminClient, user } = auth
 
     if (!teams || teams.length === 0) {
       return { success: false, error: 'No team data provided' }

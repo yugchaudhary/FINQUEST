@@ -7,6 +7,7 @@ import * as xlsx from 'xlsx'
 import { revalidatePath, unstable_noStore as noStore } from 'next/cache'
 import { z } from 'zod'
 import { DEFAULT_STARTING_BALANCE } from '@/lib/constants'
+import { requireAdmin } from '@/lib/live-match/auth'
 
 const roleSchema = z.enum(['INNOVATOR', 'INVESTOR'])
 const teamSchema = z.object({
@@ -42,14 +43,9 @@ export async function importTeams(formData: FormData) {
 export async function confirmImport(teams: Array<{category: string, team_name: string, role: 'INNOVATOR'|'INVESTOR'}>) {
   try {
     const validated = z.array(teamSchema).parse(teams)
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-    
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     const results = []
     for (const team of validated) {
@@ -101,25 +97,9 @@ export async function updateTeamRole(teamId: string, role: 'INNOVATOR'|'INVESTOR
   try {
     z.string().uuid().parse(teamId)
     roleSchema.parse(role)
-    const supabase = await createClient()
-    
-    let user = null
-    const { data: sessData } = await supabase.auth.getSession()
-    user = sessData?.session?.user || null
-    if (!user) {
-      try {
-        const { data: authData } = await supabase.auth.getUser()
-        user = authData?.user || null
-      } catch {
-        user = null
-      }
-    }
-
-    if (!user) return { success: false, error: 'Not authenticated' }
-    
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).maybeSingle()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     const updatePayload: any = { role }
     if (role === 'INVESTOR') {
@@ -170,23 +150,9 @@ export async function updateStartingBalance(teamId: string, balance: number) {
   try {
     z.string().uuid().parse(teamId)
     z.number().nonnegative().parse(balance)
-    const supabase = await createClient()
-    let user = null
-    const { data: sessData } = await supabase.auth.getSession()
-    user = sessData?.session?.user || null
-    if (!user) {
-      try {
-        const { data: authData } = await supabase.auth.getUser()
-        user = authData?.user || null
-      } catch {
-        user = null
-      }
-    }
-    if (!user) return { success: false, error: 'Not authenticated' }
-    
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     // Only investors can have balance assigned
     const { data: team } = await adminClient.from('teams').select('role').eq('id', teamId).single()
@@ -235,14 +201,9 @@ export async function getTeamsByCategory(category: string) {
 
 export async function clearAllTeams() {
   try {
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-    
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     // 1. Unclaim allowed registrations by setting used_by_user_id to null and is_used to false
     await adminClient.from('allowed_registrations').update({ is_used: false, used_by_user_id: null }).neq('registration_number', '')
@@ -318,24 +279,9 @@ export async function updateTeamCategory(teamId: string, categoryId: string | nu
     z.string().uuid().parse(teamId)
     if (categoryId) z.string().uuid().parse(categoryId)
 
-    const supabase = await createClient()
-    let user = null
-    const { data: sessData } = await supabase.auth.getSession()
-    user = sessData?.session?.user || null
-    if (!user) {
-      try {
-        const { data: authData } = await supabase.auth.getUser()
-        user = authData?.user || null
-      } catch {
-        user = null
-      }
-    }
-
-    if (!user) return { success: false, error: 'Not authenticated' }
-    
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).maybeSingle()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     let updatedTeam: any = null
 

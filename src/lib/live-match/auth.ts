@@ -1,11 +1,34 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { cookies } from 'next/headers'
 
 export async function requireUser() {
   const supabase = await createClient()
   const { data: { user }, error } = await supabase.auth.getUser()
 
   if (error || !user) return { ok: false as const, error: 'Not authenticated' }
+
+  const currentSessionId = user.user_metadata?.current_session_id
+  if (currentSessionId) {
+    const cookieStore = await cookies()
+    const deviceSession = cookieStore.get('finquest_device_session')?.value
+    if (deviceSession !== currentSessionId) {
+      const adminClient = createAdminClient()
+      const { data: userData } = await adminClient
+        .from('users')
+        .select('auth_role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (userData?.auth_role === 'PARTICIPANT') {
+        return {
+          ok: false as const,
+          error: 'Logged in from another device. Only one device is allowed per team account.'
+        }
+      }
+    }
+  }
+
   return { ok: true as const, user, adminClient: createAdminClient() }
 }
 

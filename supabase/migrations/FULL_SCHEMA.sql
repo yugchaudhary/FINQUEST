@@ -322,7 +322,60 @@ CREATE POLICY "Admins have full access to audit logs"
 ON audit_logs FOR ALL TO authenticated USING (public.is_admin());
 -- 003_functions.sql
 
--- 1. settle_match_gambits(p_match_id UUID, p_red_votes INT, p_blue_votes INT)
+-- 1. lock_gambit(p_match_id UUID, p_investor_team_id UUID, p_selected_team_id UUID, p_amount BIGINT)
+CREATE OR REPLACE FUNCTION lock_gambit(p_match_id UUID, p_investor_team_id UUID, p_selected_team_id UUID, p_amount BIGINT)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_match_status TEXT;
+    v_red UUID;
+    v_blue UUID;
+    v_current_balance BIGINT;
+    v_gambit_id UUID;
+BEGIN
+    -- Verify match is accepting bets
+    SELECT status, red_team_id, blue_team_id INTO v_match_status, v_red, v_blue
+    FROM matches WHERE id = p_match_id FOR UPDATE;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Match not found';
+    END IF;
+    IF v_match_status NOT IN ('GAMBITS_OPEN', 'MATCH_LIVE', 'LIVE') THEN
+        RAISE EXCEPTION 'Match is not accepting Gambits';
+    END IF;
+
+    -- The chosen team must be one of the two teams in this match
+    IF p_selected_team_id IS NULL OR p_selected_team_id NOT IN (v_red, v_blue) THEN
+        RAISE EXCEPTION 'Selected team is not in this match';
+    END IF;
+
+    -- Verify balance, role and that the team is active
+    SELECT current_balance INTO v_current_balance FROM teams
+    WHERE id = p_investor_team_id AND role = 'INVESTOR' AND is_active IS TRUE FOR UPDATE;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Investor team not found or not an investor';
+    END IF;
+    IF v_current_balance < p_amount THEN
+        RAISE EXCEPTION 'Insufficient balance';
+    END IF;
+
+    -- Insert gambit (unique (match_id, investor_team_id) blocks double-clicks)
+    INSERT INTO gambits (match_id, investor_team_id, selected_team_id, amount, status)
+    VALUES (p_match_id, p_investor_team_id, p_selected_team_id, p_amount, 'LOCKED')
+    RETURNING id INTO v_gambit_id;
+
+    -- Deduct balance immediately
+    UPDATE teams SET current_balance = current_balance - p_amount WHERE id = p_investor_team_id;
+
+    RETURN jsonb_build_object('status', 'success', 'gambit_id', v_gambit_id);
+EXCEPTION
+    WHEN unique_violation THEN
+        RAISE EXCEPTION 'You have already placed a Gambit for this match' USING ERRCODE = '23505';
+END;
+$$;
+
+-- 2. settle_match_gambits(p_match_id UUID, p_red_votes INT, p_blue_votes INT)
 CREATE OR REPLACE FUNCTION settle_match_gambits(p_match_id UUID, p_red_votes INT, p_blue_votes INT)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -342,15 +395,24 @@ BEGIN
         RAISE EXCEPTION 'Total votes must equal 5';
     END IF;
 
-    -- Look up the match and verify it is LIVE
+    -- Look up the match and verify it is ready for settlement
     SELECT * INTO v_match_record FROM matches WHERE id = p_match_id FOR UPDATE;
     
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Match not found';
     END IF;
-    
-    IF v_match_record.status != 'LIVE' THEN
-        RAISE EXCEPTION 'Match is not LIVE';
+
+    IF v_match_record.status IN ('MATCH_COMPLETE', 'COMPLETED', 'PROCESSING_RESULT') THEN
+        RAISE EXCEPTION 'Match has already been settled';
+    END IF;
+
+    IF v_match_record.status NOT IN ('GAMBITS_CLOSED', 'AWAITING_JUDGE_RESULT', 'LIVE') THEN
+        RAISE EXCEPTION 'Gambits must be closed before entering a result';
+    END IF;
+
+    -- Guard against double-settle
+    IF EXISTS (SELECT 1 FROM judge_results WHERE match_id = p_match_id) THEN
+        RAISE EXCEPTION 'Match has already been settled';
     END IF;
 
     -- Determine multipliers based on vote distribution
@@ -393,11 +455,9 @@ BEGIN
             RAISE EXCEPTION 'Gambit selected team not in match';
         END IF;
 
-        -- Update team balance
-        -- We don't need a separate FOR UPDATE lock query here if we just execute UPDATE, 
-        -- but a direct UPDATE is thread-safe inside this PL/pgSQL function.
+        -- Update team balance: add gross return (amount was reserved at lock time)
         UPDATE teams 
-        SET current_balance = current_balance - v_gambit.amount + v_gross_return
+        SET current_balance = current_balance + v_gross_return
         WHERE id = v_gambit.investor_team_id;
 
         -- Mark gambit as SETTLED

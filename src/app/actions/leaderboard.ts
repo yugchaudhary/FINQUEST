@@ -6,21 +6,14 @@ import { logAdminAction } from '@/lib/audit'
 import { EVENT_CHANNEL } from '@/lib/constants'
 import { revalidatePath } from 'next/cache'
 
+import { requireAdmin } from '@/lib/live-match/auth'
+import { emitLiveEvent } from '@/lib/live-match/realtime'
+
 export async function publishPhase1Leaderboard() {
   try {
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient
-      .from('users')
-      .select('auth_role')
-      .eq('id', user.id)
-      .single()
-
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     // Check not already published
     const { data: state } = await adminClient
@@ -48,12 +41,7 @@ export async function publishPhase1Leaderboard() {
     await logAdminAction(user.id, 'PUBLISH_PHASE1_LEADERBOARD', 'event_state')
 
     // Broadcast
-    const channel = adminClient.channel(EVENT_CHANNEL)
-    await channel.send({
-      type: 'broadcast',
-      event: 'LEADERBOARD_PUBLISHED',
-      payload: { phase: 'PHASE_1_REVEAL' },
-    })
+    await emitLiveEvent('LEADERBOARD_PUBLISHED', { phase: 'PHASE_1_REVEAL' })
 
     revalidatePath('/admin/phase1-finale')
     revalidatePath('/dashboard')

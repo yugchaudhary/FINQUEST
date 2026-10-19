@@ -6,23 +6,18 @@ import { logAdminAction } from '@/lib/audit'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { EVENT_CHANNEL, MIN_PROBLEM_SELECTIONS } from '@/lib/constants'
+import { requireUser, requireAdmin } from '@/lib/live-match/auth'
+import { emitLiveEvent } from '@/lib/live-match/realtime'
 
 async function notifySelectionUpdate(teamId: string) {
-  const adminClient = createAdminClient()
-  const channel = adminClient.channel(EVENT_CHANNEL)
-  await channel.send({
-    type: 'broadcast',
-    event: 'PROBLEM_SELECTION_UPDATE',
-    payload: { teamId },
-  })
+  await emitLiveEvent('PROBLEM_SELECTION_UPDATE', { teamId })
 }
 
 export async function getTeamSelections() {
   try {
+    const auth = await requireUser()
+    if (!auth.ok) return { success: false, error: auth.error }
     const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
 
     // RLS ensures they only get their own team's selections
     const [
@@ -39,7 +34,7 @@ export async function getTeamSelections() {
     return { 
       success: true, 
       data: {
-        selections: selections.map(s => s.problem_statement_id),
+        selections: (selections || []).map(s => s.problem_statement_id),
         state: state || { status: 'NOT_STARTED' }
       } 
     }
@@ -52,10 +47,10 @@ export async function selectProblem(problemStatementId: string) {
   try {
     z.string().uuid().parse(problemStatementId)
 
+    const auth = await requireUser()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const user = auth.user
     const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
 
     // First check if finalized
     const { data: state } = await supabase.from('team_problem_selection_state').select('status').single()
@@ -100,10 +95,10 @@ export async function deselectProblem(problemStatementId: string) {
   try {
     z.string().uuid().parse(problemStatementId)
 
+    const auth = await requireUser()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const user = auth.user
     const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
 
     // First check if finalized
     const { data: state } = await supabase.from('team_problem_selection_state').select('status').single()
@@ -130,10 +125,10 @@ export async function deselectProblem(problemStatementId: string) {
 
 export async function finalizeSelection() {
   try {
+    const auth = await requireUser()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const user = auth.user
     const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
 
     const { data: userData } = await supabase.from('users').select('team_id').eq('id', user.id).single()
     if (!userData?.team_id) return { success: false, error: 'Team not found' }
@@ -167,14 +162,9 @@ export async function adminReopenSelection(teamId: string) {
   try {
     z.string().uuid().parse(teamId)
 
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-    
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     const { error } = await adminClient.from('team_problem_selection_state').update({
       status: 'IN_PROGRESS',

@@ -30,29 +30,16 @@ export async function getTeamCategory(teamId: string) {
   }
 }
 
+import { requireAdmin } from '@/lib/live-match/auth'
+
 export async function assignTeamCategory(teamId: string, categoryId: string) {
   try {
     z.string().uuid().parse(teamId)
     z.string().uuid().parse(categoryId)
 
-    const supabase = await createClient()
-    let user = null
-    const { data: sessData } = await supabase.auth.getSession()
-    user = sessData?.session?.user || null
-    if (!user) {
-      try {
-        const { data: authData } = await supabase.auth.getUser()
-        user = authData?.user || null
-      } catch {
-        user = null
-      }
-    }
-
-    if (!user) return { success: false, error: 'Not authenticated' }
-    
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     // Check team role: Investors cannot have a category assigned
     const { data: team } = await adminClient.from('teams').select('role').eq('id', teamId).single()

@@ -6,6 +6,8 @@ import { logAdminAction } from '@/lib/audit'
 import { EVENT_CHANNEL } from '@/lib/constants'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import { requireAdmin, requireUser, requireInvestor } from '@/lib/live-match/auth'
+import { emitLiveEvent } from '@/lib/live-match/realtime'
 
 export async function getTeamsForTransition() {
   try {
@@ -28,14 +30,9 @@ export async function changeTeamStatus(teamId: string, newRole: 'INNOVATOR' | 'I
     z.string().uuid().parse(teamId)
     z.enum(['INNOVATOR', 'INVESTOR']).parse(newRole)
 
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     await adminClient.from('teams').update({ role: newRole }).eq('id', teamId)
     await logAdminAction(user.id, 'CHANGE_TEAM_STATUS', 'team', teamId, { newRole })
@@ -51,14 +48,9 @@ export async function initializeFinals(finalistTeamIds: string[]) {
   try {
     z.array(z.string().uuid()).min(1).parse(finalistTeamIds)
 
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     // Check not already initialized
     const { data: state } = await adminClient.from('event_state').select('finals_initialized').eq('id', 1).single()
@@ -101,14 +93,9 @@ export async function broadcastFinalist(finalistTeamId: string) {
   try {
     z.string().uuid().parse(finalistTeamId)
 
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     // Verify team is a finalist
     const { data: team } = await adminClient.from('teams').select('*').eq('id', finalistTeamId).eq('is_finalist', true).single()
@@ -124,16 +111,11 @@ export async function broadcastFinalist(finalistTeamId: string) {
     await logAdminAction(user.id, 'BROADCAST_FINALIST', 'team', finalistTeamId, { team_name: team.team_name })
 
     // Broadcast
-    const channel = adminClient.channel(EVENT_CHANNEL)
-    await channel.send({
-      type: 'broadcast',
-      event: 'FINALIST_BROADCAST',
-      payload: {
-        finalist_team_id: team.id,
-        id: team.id,
-        team_name: team.team_name,
-        category: team.category,
-      },
+    await emitLiveEvent('FINALIST_BROADCAST', {
+      finalist_team_id: team.id,
+      id: team.id,
+      team_name: team.team_name,
+      category: team.category,
     })
 
     revalidatePath('/admin/finals-broadcast')
@@ -154,23 +136,12 @@ export async function submitInvestorScore(finalistTeamId: string, score: number)
       return { success: false, error: 'Score must be in 0.5 increments' }
     }
 
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-
-    const adminClient = createAdminClient()
-    const { data: userData } = await adminClient
-      .from('users')
-      .select('*, teams(*)')
-      .eq('id', user.id)
-      .single()
-
-    if (!userData?.team_id) return { success: false, error: 'Team not found' }
-    if (userData.teams?.role !== 'INVESTOR') return { success: false, error: 'Only investors can rate' }
+    const auth = await requireInvestor()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, team } = auth
 
     // Don't allow a finalist to rate themselves
-    if (userData.team_id === finalistTeamId) {
+    if (team.id === finalistTeamId) {
       return { success: false, error: 'You cannot rate your own team' }
     }
 
@@ -188,7 +159,7 @@ export async function submitInvestorScore(finalistTeamId: string, score: number)
       .from('final_round_scores')
       .insert({
         finalist_team_id: finalistTeamId,
-        investor_team_id: userData.team_id,
+        investor_team_id: team.id,
         score: validatedScore,
         submitted_at: new Date().toISOString(),
       })
@@ -218,14 +189,9 @@ export async function calculateFinalistScore(data: {
     z.string().uuid().parse(data.finalist_team_id)
     const judgesAvg = z.number().min(1.0).max(10.0).parse(data.judges_average)
 
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     // Calculate investor average
     const { data: scores, error } = await adminClient
@@ -263,11 +229,9 @@ export async function calculateFinalistScore(data: {
     })
 
     // Broadcast update
-    const channel = adminClient.channel(EVENT_CHANNEL)
-    await channel.send({
-      type: 'broadcast',
-      event: 'FINALS_SCORE_CALCULATED',
-      payload: { finalist_team_id: data.finalist_team_id, final_score: finalScore },
+    await emitLiveEvent('FINALS_SCORE_CALCULATED', {
+      finalist_team_id: data.finalist_team_id,
+      final_score: finalScore
     })
 
     revalidatePath('/admin/finals-scoring')
@@ -282,14 +246,9 @@ export async function calculateFinalistScore(data: {
 
 export async function publishFinalsLeaderboard() {
   try {
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     await adminClient.from('event_state').update({
       current_phase: 'FINALS_LEADERBOARD',
@@ -300,12 +259,7 @@ export async function publishFinalsLeaderboard() {
 
     await logAdminAction(user.id, 'PUBLISH_FINALS_LEADERBOARD', 'event_state')
 
-    const channel = adminClient.channel(EVENT_CHANNEL)
-    await channel.send({
-      type: 'broadcast',
-      event: 'FINALS_LEADERBOARD_UPDATE',
-      payload: { active: true },
-    })
+    await emitLiveEvent('FINALS_LEADERBOARD_UPDATE', { active: true })
 
     revalidatePath('/admin/finals-scoring')
     revalidatePath('/dashboard')
@@ -334,16 +288,13 @@ export async function getFinalists() {
 export async function hasRatedFinalist(finalistTeamId: string) {
   try {
     z.string().uuid().parse(finalistTeamId)
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
+    const auth = await requireUser()
+    if (!auth.ok) return { success: false, error: auth.error }
 
-    const adminClient = createAdminClient()
-    const { data: userData } = await adminClient.from('users').select('team_id').eq('id', user.id).single()
+    const { data: userData } = await auth.adminClient.from('users').select('team_id').eq('id', auth.user.id).single()
     if (!userData?.team_id) return { success: false, error: 'Team not found' }
 
-    const { data, error } = await adminClient
+    const { data, error } = await auth.adminClient
       .from('final_round_scores')
       .select('id')
       .eq('finalist_team_id', finalistTeamId)
@@ -360,14 +311,9 @@ export async function hasRatedFinalist(finalistTeamId: string) {
 export async function getFinalistScores(finalistTeamId: string) {
   try {
     z.string().uuid().parse(finalistTeamId)
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient } = auth
 
     const { data: scores, error } = await adminClient
       .from('final_round_scores')

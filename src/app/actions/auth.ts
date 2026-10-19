@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { z } from 'zod'
 
 const HARDCODED_PASSWORD = 'FinquestEvent2026!@#';
@@ -126,6 +127,22 @@ export async function registerLeader(data: any) {
       password: HARDCODED_PASSWORD,
     })
 
+    const sessionId = crypto.randomUUID()
+    await adminClient.auth.admin.updateUserById(authData.user.id, {
+      user_metadata: {
+        ...(authData.user.user_metadata || {}),
+        current_session_id: sessionId
+      }
+    })
+
+    const cookieStore = await cookies()
+    cookieStore.set('finquest_device_session', sessionId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/'
+    })
+
     return { success: true, join_code }
   } catch (error: any) {
     if (error instanceof z.ZodError) return { success: false, error: error.errors[0].message }
@@ -193,6 +210,22 @@ export async function registerMember(data: any) {
     await supabase.auth.signInWithPassword({
       email: pseudoEmail,
       password: HARDCODED_PASSWORD,
+    })
+
+    const sessionId = crypto.randomUUID()
+    await adminClient.auth.admin.updateUserById(authData.user.id, {
+      user_metadata: {
+        ...(authData.user.user_metadata || {}),
+        current_session_id: sessionId
+      }
+    })
+
+    const cookieStore = await cookies()
+    cookieStore.set('finquest_device_session', sessionId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/'
     })
 
     return { success: true }
@@ -281,10 +314,31 @@ export async function signIn(teamNameInput: string, passwordInput: string) {
       .eq('id', data.user.id)
       .single()
 
+    const role = userData?.auth_role || 'PARTICIPANT'
+
+    // If PARTICIPANT, enforce single-device login
+    if (role === 'PARTICIPANT') {
+      const sessionId = crypto.randomUUID()
+      await adminClient.auth.admin.updateUserById(data.user.id, {
+        user_metadata: {
+          ...(data.user.user_metadata || {}),
+          current_session_id: sessionId
+        }
+      })
+
+      const cookieStore = await cookies()
+      cookieStore.set('finquest_device_session', sessionId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/'
+      })
+    }
+
     return { 
       success: true, 
       user: data.user, 
-      role: userData?.auth_role || 'PARTICIPANT', 
+      role, 
       teamId: userData?.team_id || targetTeamId 
     }
   } catch (error: any) {
@@ -323,6 +377,10 @@ export async function signInAdmin(emailInput: string, passwordInput: string) {
 
 export async function signOut() {
   const supabase = await createClient()
+  try {
+    const cookieStore = await cookies()
+    cookieStore.delete('finquest_device_session')
+  } catch {}
   await supabase.auth.signOut()
   redirect('/')
 }
@@ -330,21 +388,9 @@ export async function signOut() {
 export async function getSession() {
   try {
     const supabase = await createClient()
-    let user = null
+    const { data: { user }, error } = await supabase.auth.getUser()
 
-    const { data: sessData } = await supabase.auth.getSession()
-    user = sessData?.session?.user || null
-
-    if (!user) {
-      try {
-        const { data: authData } = await supabase.auth.getUser()
-        user = authData?.user || null
-      } catch {
-        user = null
-      }
-    }
-
-    if (!user) return { success: false, error: 'Not authenticated' }
+    if (error || !user) return { success: false, error: 'Not authenticated' }
 
     const adminClient = createAdminClient()
     const { data: userData } = await adminClient
@@ -352,6 +398,17 @@ export async function getSession() {
       .select('*, teams(*)')
       .eq('id', user.id)
       .maybeSingle()
+
+    if (userData?.auth_role === 'PARTICIPANT' && user.user_metadata?.current_session_id) {
+      const cookieStore = await cookies()
+      const deviceSession = cookieStore.get('finquest_device_session')?.value
+      if (deviceSession !== user.user_metadata.current_session_id) {
+        return {
+          success: false,
+          error: 'Logged in from another device. Only one device is allowed per team account.'
+        }
+      }
+    }
 
     return { success: true, data: { user, userData } }
   } catch (error: any) {

@@ -6,11 +6,14 @@ SECURITY DEFINER
 AS $$
 DECLARE
     v_match_status TEXT;
+    v_red UUID;
+    v_blue UUID;
     v_current_balance BIGINT;
     v_gambit_id UUID;
 BEGIN
     -- Verify match is accepting bets
-    SELECT status INTO v_match_status FROM matches WHERE id = p_match_id FOR UPDATE;
+    SELECT status, red_team_id, blue_team_id INTO v_match_status, v_red, v_blue
+    FROM matches WHERE id = p_match_id FOR UPDATE;
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Match not found';
     END IF;
@@ -18,8 +21,14 @@ BEGIN
         RAISE EXCEPTION 'Match is not accepting Gambits';
     END IF;
 
-    -- Verify balance and role
-    SELECT current_balance INTO v_current_balance FROM teams WHERE id = p_investor_team_id AND role = 'INVESTOR' FOR UPDATE;
+    -- The chosen team must be one of the two teams in this match
+    IF p_selected_team_id IS NULL OR p_selected_team_id NOT IN (v_red, v_blue) THEN
+        RAISE EXCEPTION 'Selected team is not in this match';
+    END IF;
+
+    -- Verify balance, role and that the team is active
+    SELECT current_balance INTO v_current_balance FROM teams
+    WHERE id = p_investor_team_id AND role = 'INVESTOR' AND is_active IS TRUE FOR UPDATE;
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Investor team not found or not an investor';
     END IF;
@@ -27,7 +36,7 @@ BEGIN
         RAISE EXCEPTION 'Insufficient balance';
     END IF;
 
-    -- Insert gambit
+    -- Insert gambit (unique (match_id, investor_team_id) blocks double-clicks)
     INSERT INTO gambits (match_id, investor_team_id, selected_team_id, amount, status)
     VALUES (p_match_id, p_investor_team_id, p_selected_team_id, p_amount, 'LOCKED')
     RETURNING id INTO v_gambit_id;
@@ -36,6 +45,9 @@ BEGIN
     UPDATE teams SET current_balance = current_balance - p_amount WHERE id = p_investor_team_id;
 
     RETURN jsonb_build_object('status', 'success', 'gambit_id', v_gambit_id);
+EXCEPTION
+    WHEN unique_violation THEN
+        RAISE EXCEPTION 'You have already placed a Gambit for this match' USING ERRCODE = '23505';
 END;
 $$;
 

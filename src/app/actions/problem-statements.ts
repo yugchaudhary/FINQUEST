@@ -6,13 +6,14 @@ import { logAdminAction } from '@/lib/audit'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { EVENT_CHANNEL } from '@/lib/constants'
+import { requireUser, requireAdmin } from '@/lib/live-match/auth'
+import { emitLiveEvent } from '@/lib/live-match/realtime'
 
 export async function getPublishedProblemsForTeam() {
   try {
+    const auth = await requireUser()
+    if (!auth.ok) return { success: false, error: auth.error }
     const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
 
     // RLS handles everything: we just query the table.
     // The policy ensures we only get published = true AND category_id matches the team's category.
@@ -32,14 +33,9 @@ export async function getAllProblemsForAdmin(categoryId: string) {
   try {
     z.string().uuid().parse(categoryId)
 
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-    
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient } = auth
 
     const { data, error } = await adminClient
       .from('problem_statements')
@@ -55,27 +51,16 @@ export async function getAllProblemsForAdmin(categoryId: string) {
 }
 
 async function notifyProblemChange(categoryId: string) {
-  const adminClient = createAdminClient()
-  const channel = adminClient.channel(EVENT_CHANNEL)
-  await channel.send({
-    type: 'broadcast',
-    event: 'PROBLEM_PUBLISHED',
-    payload: { categoryId },
-  })
+  await emitLiveEvent('PROBLEM_PUBLISHED', { categoryId })
 }
 
 export async function publishProblem(problemId: string) {
   try {
     z.string().uuid().parse(problemId)
 
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-    
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: 'Unauthorized' }
+    const { adminClient, user } = auth
 
     const { data: problem, error } = await adminClient
       .from('problem_statements')
@@ -103,14 +88,9 @@ export async function unpublishProblem(problemId: string) {
   try {
     z.string().uuid().parse(problemId)
 
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-    
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: 'Unauthorized' }
+    const { adminClient, user } = auth
 
     const { data: problem, error } = await adminClient
       .from('problem_statements')
@@ -138,14 +118,9 @@ export async function publishAllInCategory(categoryId: string) {
   try {
     z.string().uuid().parse(categoryId)
 
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-    
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: 'Unauthorized' }
+    const { adminClient, user } = auth
 
     const { error } = await adminClient
       .from('problem_statements')
@@ -156,7 +131,6 @@ export async function publishAllInCategory(categoryId: string) {
 
     await logAdminAction(user.id, 'PROBLEM_PUBLISHED_ALL', 'problem_statements', undefined, { categoryId })
     await notifyProblemChange(categoryId)
-    await adminClient.from('event_state').update({ updated_at: new Date().toISOString() }).eq('id', 1)
     await adminClient.from('event_state').update({ updated_at: new Date().toISOString() }).eq('id', 1)
 
     revalidatePath('/admin/problem-statements')
@@ -172,14 +146,9 @@ export async function unpublishAllInCategory(categoryId: string) {
   try {
     z.string().uuid().parse(categoryId)
 
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-    
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient.from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: 'Unauthorized' }
+    const { adminClient, user } = auth
 
     const { error } = await adminClient
       .from('problem_statements')
@@ -190,7 +159,6 @@ export async function unpublishAllInCategory(categoryId: string) {
 
     await logAdminAction(user.id, 'PROBLEM_UNPUBLISHED_ALL', 'problem_statements', undefined, { categoryId })
     await notifyProblemChange(categoryId)
-    await adminClient.from('event_state').update({ updated_at: new Date().toISOString() }).eq('id', 1)
     await adminClient.from('event_state').update({ updated_at: new Date().toISOString() }).eq('id', 1)
 
     revalidatePath('/admin/problem-statements')

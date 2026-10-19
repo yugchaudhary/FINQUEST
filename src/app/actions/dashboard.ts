@@ -1,28 +1,13 @@
 'use server'
-
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireUser } from '@/lib/live-match/auth'
 
 export async function getDashboardData() {
   try {
-    const supabase = await createClient()
-    let user = null
-
-    const { data: sessData } = await supabase.auth.getSession()
-    user = sessData?.session?.user || null
-
-    if (!user) {
-      try {
-        const { data: authData } = await supabase.auth.getUser()
-        user = authData?.user || null
-      } catch {
-        user = null
-      }
-    }
-    
-    if (!user) return { success: false, error: 'Not authenticated' }
-
-    const adminClient = createAdminClient()
+    const auth = await requireUser()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     // Get User and Team info
     const { data: userData } = await adminClient.from('users').select('team_id, auth_role').eq('id', user.id).maybeSingle()

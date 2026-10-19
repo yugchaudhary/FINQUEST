@@ -36,7 +36,7 @@ export async function lockGambit(matchId: string, selectedTeamId: string, amount
     // 1. Strictly verify match exists and is currently accepting investments
     const { data: matchData, error: matchErr } = await adminClient
       .from('matches')
-      .select('status')
+      .select('status, red_team_id, blue_team_id')
       .eq('id', validated.match_id)
       .single()
 
@@ -46,6 +46,13 @@ export async function lockGambit(matchId: string, selectedTeamId: string, amount
 
     if (!['GAMBITS_OPEN', 'MATCH_LIVE', 'LIVE'].includes(matchData.status)) {
       return { success: false, error: 'Investments are closed for this battle' }
+    }
+
+    if (
+      validated.selected_team_id !== matchData.red_team_id &&
+      validated.selected_team_id !== matchData.blue_team_id
+    ) {
+      return { success: false, error: 'Selected team is not in this match' }
     }
 
     // 2. Also check event_state to ensure event is currently in MATCH_LIVE screen state

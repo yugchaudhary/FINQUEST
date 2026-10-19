@@ -102,19 +102,9 @@ export async function submitMatchResult(data: {
 
 export async function resetToWaiting() {
   try {
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient
-      .from('users')
-      .select('auth_role')
-      .eq('id', user.id)
-      .single()
-
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     // Update event state
     await adminClient
@@ -129,12 +119,7 @@ export async function resetToWaiting() {
     await logAdminAction(user.id, 'RESET_TO_WAITING', 'event_state')
 
     // Broadcast
-    const channel = adminClient.channel(EVENT_CHANNEL)
-    await channel.send({
-      type: 'broadcast',
-      event: 'MATCH_RESET',
-      payload: { screen_state: 'WAITING_FOR_MATCH' },
-    })
+    await emitLiveEvent('MATCH_RESET', { screen_state: 'WAITING_FOR_MATCH' })
 
     revalidatePath('/admin')
     revalidatePath('/dashboard')
@@ -146,15 +131,9 @@ export async function resetToWaiting() {
 
 export async function endMatch() {
   try {
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient
-      .from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     await adminClient.from('event_state').update({
       current_screen_state: 'WAITING_FOR_MATCH',
@@ -164,12 +143,7 @@ export async function endMatch() {
 
     await logAdminAction(user.id, 'END_MATCH', 'event_state')
 
-    const channel = adminClient.channel(EVENT_CHANNEL)
-    await channel.send({
-      type: 'broadcast',
-      event: 'MATCH_RESET',
-      payload: { screen_state: 'WAITING_FOR_MATCH' },
-    })
+    await emitLiveEvent('MATCH_RESET', { screen_state: 'WAITING_FOR_MATCH' })
 
     revalidatePath('/admin/live-match')
     revalidatePath('/dashboard')
@@ -184,15 +158,9 @@ export async function addInvestorBalance(amountPerTeam: number) {
     const z = await import('zod')
     z.z.number().positive().max(10000000).parse(amountPerTeam)
 
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient
-      .from('users').select('auth_role').eq('id', user.id).single()
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     // Fetch all active investor teams
     const { data: investors, error: fetchError } = await adminClient

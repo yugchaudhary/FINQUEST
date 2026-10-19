@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logAdminAction } from '@/lib/audit'
 import { EVENT_CHANNEL } from '@/lib/constants'
+import { requireAdmin } from '@/lib/live-match/auth'
+import { emitLiveEvent } from '@/lib/live-match/realtime'
 
 export async function getEventState() {
   try {
@@ -58,19 +60,9 @@ export async function getEventState() {
 
 export async function updateScreenState(newState: string) {
   try {
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (!user) return { success: false, error: 'Not authenticated' }
-
-    const adminClient = createAdminClient()
-    const { data: adminUser } = await adminClient
-      .from('users')
-      .select('auth_role')
-      .eq('id', user.id)
-      .single()
-
-    if (adminUser?.auth_role !== 'ADMIN') return { success: false, error: 'Unauthorized' }
+    const auth = await requireAdmin()
+    if (!auth.ok) return { success: false, error: auth.error }
+    const { adminClient, user } = auth
 
     await adminClient
       .from('event_state')
@@ -82,12 +74,7 @@ export async function updateScreenState(newState: string) {
 
     await logAdminAction(user.id, 'UPDATE_SCREEN_STATE', 'event_state', undefined, { newState })
 
-    const channel = adminClient.channel(EVENT_CHANNEL)
-    await channel.send({
-      type: 'broadcast',
-      event: 'PHASE_CHANGE',
-      payload: { current_screen_state: newState },
-    })
+    await emitLiveEvent('PHASE_CHANGE', { current_screen_state: newState })
 
     return { success: true }
   } catch (error: any) {

@@ -55,7 +55,9 @@ export default function DashboardPage() {
           setCurrentFinalist({ id: eventState.current_finalist_id })
         }
       } else {
-        if (isInitialLoadRef.current && (res.error === 'Not authenticated' || res.error === 'Team not found')) {
+        if (res?.error?.includes('another device')) {
+          router.push('/login?error=' + encodeURIComponent('Logged in from another device. Only one device is allowed per team account.'))
+        } else if (isInitialLoadRef.current && (res.error === 'Not authenticated' || res.error === 'Team not found')) {
           router.push('/login')
         } else {
           console.warn('Dashboard sync skipped:', res?.error)

@@ -9,33 +9,26 @@ export async function emitLiveEvent(
   const adminClient = createAdminClient()
   const channel = adminClient.channel(EVENT_CHANNEL)
   try {
-    await new Promise<void>((resolve, reject) => {
-      const timeout = setTimeout(() => resolve(), 1500)
-      channel.subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          clearTimeout(timeout)
-          resolve()
-        }
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          clearTimeout(timeout)
-          reject(new Error(status))
-        }
-      })
-    })
-    await channel.send({
-      type: 'broadcast',
-      event,
-      payload,
-    })
-    if (event === LIVE_EVENTS.MATCH_BROADCASTED) {
+    // Broadcast directly over HTTP REST without creating a WebSocket connection
+    if (typeof (channel as any).httpSend === 'function') {
+      await (channel as any).httpSend(event, payload)
+      if (event === LIVE_EVENTS.MATCH_BROADCASTED) {
+        await (channel as any).httpSend('MATCH_BROADCAST', payload)
+      }
+    } else {
       await channel.send({
         type: 'broadcast',
-        event: 'MATCH_BROADCAST',
+        event,
         payload,
       })
+      if (event === LIVE_EVENTS.MATCH_BROADCASTED) {
+        await channel.send({
+          type: 'broadcast',
+          event: 'MATCH_BROADCAST',
+          payload,
+        })
+      }
     }
-    // Allow brief moment for broadcast packet to flush over WebSocket
-    await new Promise((resolve) => setTimeout(resolve, 50))
   } catch (error) {
     console.error('Failed to emit live event', event, error)
   } finally {
