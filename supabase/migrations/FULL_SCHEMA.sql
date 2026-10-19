@@ -149,6 +149,10 @@ CREATE INDEX idx_gambits_investor_team ON gambits(investor_team_id);
 CREATE INDEX idx_gambits_status ON gambits(status);
 CREATE INDEX idx_final_scores_finalist ON final_round_scores(finalist_team_id);
 CREATE INDEX idx_final_scores_investor ON final_round_scores(investor_team_id);
+CREATE INDEX IF NOT EXISTS idx_matches_status_round ON matches(status, round_number DESC);
+CREATE INDEX IF NOT EXISTS idx_team_members_team_id ON team_members(team_id);
+CREATE INDEX IF NOT EXISTS idx_announcements_published_at ON announcements(published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_teams_lower_name ON teams(lower(team_name));
 
 -- Enable Realtime for specific tables
 ALTER PUBLICATION supabase_realtime ADD TABLE event_state;
@@ -334,10 +338,9 @@ DECLARE
     v_blue UUID;
     v_current_balance BIGINT;
     v_gambit_id UUID;
-BEGIN
-    -- Verify match is accepting bets
+    -- Verify match is accepting bets (no FOR UPDATE on shared matches row to eliminate serialization bottleneck)
     SELECT status, red_team_id, blue_team_id INTO v_match_status, v_red, v_blue
-    FROM matches WHERE id = p_match_id FOR UPDATE;
+    FROM matches WHERE id = p_match_id;
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Match not found';
     END IF;

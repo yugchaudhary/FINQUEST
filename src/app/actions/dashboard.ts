@@ -17,7 +17,7 @@ export async function getDashboardData() {
     const [teamRes, membersRes, announcementsRes, eventStateRes, gambitsRes] = await Promise.all([
       adminClient.from('teams').select('*, categories(name)').eq('id', userData.team_id).maybeSingle(),
       adminClient.from('team_members').select('*').eq('team_id', userData.team_id),
-      adminClient.from('announcements').select('*').order('published_at', { ascending: false }),
+      adminClient.from('announcements').select('*').order('published_at', { ascending: false }).limit(10),
       adminClient.from('event_state').select('*').maybeSingle(),
       adminClient.from('gambits').select('amount').eq('investor_team_id', userData.team_id),
     ])

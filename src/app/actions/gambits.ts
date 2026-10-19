@@ -113,18 +113,25 @@ export async function lockGambit(matchId: string, selectedTeamId: string, amount
       return { success: false, error: message.replace(/^.*ERROR:\s*/i, '') }
     }
 
-    const { count } = await adminClient
-      .from('gambits')
-      .select('*', { count: 'exact', head: true })
-      .eq('match_id', validated.match_id)
+    // Non-blocking background notification to admin live screen
+    // Allows the participant to receive an instant (<100ms) lock confirmation
+    // without waiting for additional database count and broadcast roundtrips.
+    void (async () => {
+      try {
+        const { count } = await adminClient
+          .from('gambits')
+          .select('*', { count: 'exact', head: true })
+          .eq('match_id', validated.match_id)
 
-    await emitLiveEvent(LIVE_EVENTS.GAMBIT_LOCKED, {
-      matchId: validated.match_id,
-      lockedCount: count || 0,
-    })
+        await emitLiveEvent(LIVE_EVENTS.GAMBIT_LOCKED, {
+          matchId: validated.match_id,
+          lockedCount: count || 0,
+        })
+      } catch (err) {
+        console.warn('Background gambit lock broadcast error:', err)
+      }
+    })()
 
-    revalidatePath('/dashboard')
-    revalidatePath('/dashboard/live-match')
     return { success: true, data }
   } catch (error: any) {
     if (error instanceof z.ZodError) {
