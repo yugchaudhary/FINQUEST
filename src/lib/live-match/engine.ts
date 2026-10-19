@@ -349,8 +349,9 @@ export class LiveMatchEngine {
       throw new Error('Investments must be closed before entering a result')
     }
 
-    match.status = MATCH_STATUS.PROCESSING_RESULT
-    const listedMultiplier = getMultiplierForResult(redVotes, blueVotes)
+    const winnerVotes = Math.max(redVotes, blueVotes)
+    const loserVotes = Math.min(redVotes, blueVotes)
+    const listedMultiplier = getMultiplierForResult(winnerVotes, loserVotes)
     match.result = `${redVotes}-${blueVotes}`
     match.multiplier = listedMultiplier
 

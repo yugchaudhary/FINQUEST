@@ -29,7 +29,9 @@ export async function submitMatchResult(data: {
     if (!auth.ok) return { success: false, error: auth.error }
     const { adminClient, user } = auth
 
-    const listedMultiplier = getMultiplierForResult(validated.red_votes, validated.blue_votes)
+    const winnerVotes = Math.max(validated.red_votes, validated.blue_votes)
+    const loserVotes = Math.min(validated.red_votes, validated.blue_votes)
+    const listedMultiplier = getMultiplierForResult(winnerVotes, loserVotes)
 
     const { data: match } = await adminClient
       .from('matches')
