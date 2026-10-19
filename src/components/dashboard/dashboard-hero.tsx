@@ -112,10 +112,6 @@ export function DashboardHero({ user, team, eventState }: DashboardHeroProps) {
               <span className="text-[11px] font-black text-slate-500 dark:text-slate-500 tracking-widest font-mono">
                 YOUR TEAM
               </span>
-              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-700 flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-50 border border-emerald-300 dark:border-emerald-300 px-3 py-1 rounded-full font-mono shadow-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                OFFICIAL TEAM
-              </span>
             </div>
 
             <h2 className="text-2xl md:text-3xl font-space-grotesk font-black text-slate-900 dark:text-slate-900 tracking-tight">

@@ -46,13 +46,7 @@ export function TeamOverviewCard({ team }: TeamOverviewProps) {
               </div>
             </div>
 
-            {/* Right: Team Status */}
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-emerald-400 flex items-center gap-2 bg-emerald-400/10 border border-emerald-500/20 px-3.5 py-1.5 rounded-full font-mono">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                OFFICIAL TEAM
-              </span>
-            </div>
+
           </div>
         </CardContent>
       </Card>
